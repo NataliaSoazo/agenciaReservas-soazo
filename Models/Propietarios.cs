@@ -30,10 +30,9 @@ public class Propietario
     public string? Ciudad { get; set; }
     public string? RequestId { get; set; }
 
-    // public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
-
-    private string GetToString()
+    
+      public override string ToString()
     {
-        return (this.Id) + " " + this.Apellido + " " + this.Nombre;
+    return this.Id + " " + this.Apellido + " " + this.Nombre;
     }
 }

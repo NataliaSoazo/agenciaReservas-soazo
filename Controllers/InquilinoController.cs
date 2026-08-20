@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using agenciaReservas_soazo.Models;
 
@@ -39,7 +38,7 @@ public class InquilinoController : Controller
             return View(lista);
         }
     }
-    [Authorize]
+    
     public IActionResult Editar(int id)
     {
         if (id > 0)
@@ -53,7 +52,7 @@ public class InquilinoController : Controller
             return View();
         }
     }
-    [Authorize]
+   
     public IActionResult Guardar(Inquilino inquilino)
     {
         try
@@ -84,7 +83,7 @@ public class InquilinoController : Controller
             return RedirectToAction(nameof(Index));
         }
     }
-    [Authorize(Policy ="Administrador")]
+    
     public IActionResult Eliminar(int id)
     {
         try
@@ -101,7 +100,7 @@ public class InquilinoController : Controller
         }
     }
 
-    [Authorize]
+    
     public IActionResult Detalles(int id)
     {
         RepositorioInquilino rp = new RepositorioInquilino();
