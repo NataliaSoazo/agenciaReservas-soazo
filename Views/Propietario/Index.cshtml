@@ -58,12 +58,11 @@
                 <td>
                     <a asp-action="Detalles" asp-route-id=@item.Id title="Ver Detalles"><i class="fa fa-eye " style="font-size:25px;" id="detalles"></i></a>
                     <a asp-action="Editar" asp-route-id=@item.Id title="Editar item"><i class="fa fa-pencil " style="font-size:25px;" id="edi" ></i></a>
-                    @if (ViewBag.UserRole == "ADMINISTRADOR")
-                    {
-                        <a href="#" onclick="eliminar('@item.Id', '@item.Nombre')" title="Eliminar">
-                            <i class="fa fa-trash" style="font-size:25px;" id="eli"></i>
-                        </a>
-                    }
+                   
+                    <a href="#" onclick="eliminar('@item.Id', '@item.Nombre')" title="Eliminar">
+                        <i class="fa fa-trash" style="font-size:25px;" id="eli"></i>
+                    </a>
+                    
                   
                 </td>
             </tr>

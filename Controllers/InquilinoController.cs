@@ -121,7 +121,7 @@ public class InquilinoController : Controller
         }
     }
     //  [Route("[controller]/Buscar/{q}", Name = "Buscar")]
-    [Authorize]
+    
     public IActionResult BuscarInquilino(string buscar)
     {
         try
