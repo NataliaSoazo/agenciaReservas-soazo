@@ -19,4 +19,8 @@ html {
 
 body {
   margin-bottom: 60px;
+  
+}
+#bodyId{
+  background-color: rgb(235, 136, 190);
 }

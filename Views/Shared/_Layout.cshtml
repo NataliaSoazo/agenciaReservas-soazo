@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="~/lib/select2/select2.min.css" />
 </head>
-<body>
+<body id= "bodyId">
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark  border-bottom box-shadow mb-3" id="table">
             <div class="container-fluid">
@@ -38,10 +38,27 @@
     </header>
     <div class="container">
         <main role="main" class="pb-3">
+            @if(ViewBag.Mensaje != null)
+            {
+                <div class="alert alert-success col-4 "  >
+                    @ViewBag.Mensaje
+                </div>
+            }
+            @if(ViewBag.Error != null)
+            {
+                <div class="alert alert-danger col-4 "  >
+                    @ViewBag.Error
+                </div>
+            }
             @RenderBody()
+          
         </main>
     </div>
-
+    <div class="container center">
+        <main role="main" class="pb-3 justify-content-center" >
+            
+        </main>
+    </div>
     <footer class="border-top footer text-muted">
         <div class="container">
             &copy; 2026 - agenciaReservas_soazo
