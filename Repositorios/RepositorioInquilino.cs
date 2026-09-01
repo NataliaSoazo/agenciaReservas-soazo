@@ -6,7 +6,7 @@ namespace agenciaReservas_soazo.Models;
 
 public class RepositorioInquilino
 {
-    readonly string ConnectionString = "Server=localhost;Database=proyecto-bruno-soazo;User=root;Password=;";
+    readonly string ConnectionString = "Server=localhost;Database=agenciareservas;User=root;Password=;";
 
     public RepositorioInquilino()
     {
