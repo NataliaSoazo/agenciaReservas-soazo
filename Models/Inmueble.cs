@@ -13,10 +13,11 @@ public class Inmueble
     public string? Direccion { get; set; }
     [Required(ErrorMessage = "Campo obligatorio")]
     public string? Tipo { get; set; }
-    [Display(Name = "USO")]
+    
     [Required(ErrorMessage = "Campo obligatorio")]
+    [Display(Name = "USO")]
     public string? Uso { get; set; }
-    [Display(Name = "AMBIENTES")]
+    [Display(Name = "CUPO")]
     [Range(1, 10, ErrorMessage = "El cupo debe ser mayor a 0")]
     [Required(ErrorMessage = "Campo obligatorio")]
     public int Cupo { get; set; }
@@ -46,8 +47,17 @@ public class Inmueble
         public class TipoInmueble{
              [Display(Name = "CÓDIGO")]
             public int Id { get; set; }
-             [Display(Name = "TIPO")]
+            [Required(ErrorMessage = "Campo obligatorio")]
+            [Display(Name = "TIPO")]
             public string Tipo { get; set; }
         }
+        public class UsoInmueble{
+             [Display(Name = "CÓDIGO")]
+            public int Id { get; set; }
+            [Required(ErrorMessage = "Campo obligatorio")]
+            [Display(Name = "USO")]
+            public string Uso { get; set; }
+        }
+
 
     
