@@ -60,6 +60,8 @@ public class InmuebleController : Controller
         ViewBag.Propietarios = repoPropietario.GetPropietarios();
         RepositorioTipoInmueble repoTipo = new RepositorioTipoInmueble();
         ViewBag.TipoInmuebles = repoTipo.ObtenerTipos();
+        RepositorioUsoInmueble repoUso = new RepositorioUsoInmueble();
+        ViewBag.UsoInmuebles = repoUso.ObtenerUsos();
 
 
         if (id > 0)
