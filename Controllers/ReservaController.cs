@@ -78,76 +78,86 @@ public class ReservaController : Controller
         }
 
         // Crear una nueva reserva
-        return View(new Reserva());
+         return View(new Reserva
+        {
+            Fecha = DateTime.Today,
+            FechaDesde = DateTime.Today,
+            FechaHasta = DateTime.Today
+        });
     }
 
     [HttpPost]
-    public IActionResult Guardar(Reserva reserva)
+    [HttpPost]
+public IActionResult Guardar(Reserva reserva)
+{
+    try
     {
-        try
+        RepositorioReserva rr = new RepositorioReserva();
+
+        // Validar que la fecha de inicio sea anterior a la fecha de fin
+        if (reserva.FechaDesde >= reserva.FechaHasta)
         {
-            RepositorioReserva rr = new RepositorioReserva();
+            TempData["Error"] =
+                "La fecha de inicio debe ser anterior a la fecha de culminación.";
 
-            if (reserva.FechaDesde >= reserva.FechaHasta)
-            {
-                TempData["Error"] =
-                    "La fecha de inicio debe ser anterior a la fecha de culminación.";
-
-                // Si Id es 0, vuelve al formulario de alta.
-                // Si Id tiene valor, vuelve a editar esa reserva.
-                return RedirectToAction(
-                    nameof(Editar),
-                    new { id = reserva.Id }
-                );
-            }
-
-            bool disponible = rr.InmuebleDisponible(
-                reserva.IdInmueble,
-                reserva.FechaDesde,
-                reserva.FechaHasta
+            return RedirectToAction(
+                nameof(Editar),
+                new { id = reserva.Id }
             );
-
-            if (!disponible)
-            {
-                TempData["Error"] =
-                    "El inmueble no está disponible para esas fechas.";
-
-                return RedirectToAction(
-                    nameof(Editar),
-                    new { id = reserva.Id }
-                );
-            }
-
-            if (reserva.Id > 0)
-            {
-                rr.ModificarReserva(reserva);
-
-                TempData["Mensaje"] =
-                    "La reserva se modificó correctamente.";
-            }
-            else
-            {
-                reserva.Anulado = false;
-
-                rr.AltaReserva(reserva);
-
-                TempData["Mensaje"] =
-                    "La reserva se creó correctamente.";
-            }
-
-            return RedirectToAction(nameof(Index));
         }
-        catch (Exception ex)
+
+        // IMPORTANTE:
+        // Al editar, excluimos la reserva actual de la búsqueda.
+        bool disponible = rr.InmuebleDisponible(
+            reserva.IdInmueble,
+            reserva.FechaDesde,
+            reserva.FechaHasta,
+            reserva.Id
+        );
+
+        if (!disponible)
         {
-            _logger.LogError(ex, "Error al guardar la reserva");
+            TempData["Error"] =
+                "El inmueble no está disponible para esas fechas.";
 
-            TempData["Error"] = "No se pudo completar la operación.";
-
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(
+                nameof(Editar),
+                new { id = reserva.Id }
+            );
         }
-    }
 
-    public IActionResult Eliminar(int id)
+        // Si tiene Id, estamos modificando.
+        if (reserva.Id > 0)
+        {
+            rr.ModificarReserva(reserva);
+
+            TempData["Mensaje"] =
+                "La reserva se modificó correctamente.";
+        }
+        // Si no tiene Id, estamos creando.
+        else
+        {
+            reserva.Anulado = false;
+
+            rr.AltaReserva(reserva);
+
+            TempData["Mensaje"] =
+                "La reserva se creó correctamente.";
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error al guardar la reserva");
+
+        TempData["Error"] =
+            "No se pudo completar la operación.";
+
+        return RedirectToAction(nameof(Editar), new { id = reserva.Id }
+        );
+    }
+}    public IActionResult Eliminar(int id)
     {
         try
         {

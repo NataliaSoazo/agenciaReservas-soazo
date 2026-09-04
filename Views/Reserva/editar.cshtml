@@ -1,170 +1,121 @@
-@model agenciaReservas_soazo.Models.Reserva;
+@model agenciaReservas_soazo.Models.Reserva
+
 @{
-    ViewData["Title"] = "Inmueble";
-    int id = Model == null? 0: Model.Id;
+    ViewData["Title"] = "Reserva";
+    int id = Model?.Id ?? 0;
     var inmueblesJson = ViewBag.InmueblesJson;
     var contratosJson = ViewBag.ContratosJson;
 }
 
-
-<div class="container text-aligne-center">
+<div class="container text-center">
     <h4>Reserva</h4>
 </div>
 
 <hr />
+
 <div class="row">
-    <div class="col-6">
-         <form asp-action="Guardar" class="row g-3">
+    <div class="col-9">
+
+        <form asp-action="Guardar" method="post" class="row g-3">
+
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="Anulado" />
+
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
             <div class="form-group col-2">
-                <label  class="control-label">CÓDIGO</label>
-                <input name="Id" class="form-control"  value="@id" readonly/>             
+                <label class="control-label">CÓDIGO</label>
+                <input class="form-control" value="@id" readonly />
             </div>
+
             <div class="form-group col-5">
                 <label asp-for="Fecha" class="control-label"></label>
-                <input asp-for="Fecha" class="form-control" id="FechaDesde" />
+                <input asp-for="Fecha" type="date" class="form-control" />
                 <span asp-validation-for="Fecha" class="text-danger"></span>
             </div>
+
             <div class="form-group col-5">
                 <label asp-for="FechaDesde" class="control-label"></label>
-                <input asp-for="FechaDesde" class="form-control" id="FechaDesde" />
+                <input asp-for="FechaDesde" type="date" class="form-control" />
                 <span asp-validation-for="FechaDesde" class="text-danger"></span>
             </div>
+
             <div class="form-group col-5">
                 <label asp-for="FechaHasta" class="control-label"></label>
-                <input asp-for="FechaHasta" class="form-control" id="FechaHasta" />
+                <input asp-for="FechaHasta" type="date" class="form-control" />
                 <span asp-validation-for="FechaHasta" class="text-danger"></span>
             </div>
-            <div class="form-group col-4">
+
+            <div class="form-group col-7">
                 <label asp-for="Monto" class="control-label"></label>
-                <input asp-for="Monto" class="form-control" />
+                <input asp-for="Monto" type="number" step="0.01" class="form-control" />
                 <span asp-validation-for="Monto" class="text-danger"></span>
             </div>
-            <div class="form-group col-4">
+
+            <div class="form-group col-6">
                 <label asp-for="IdInquilino" class="control-label"></label>
-                <select class="form-control"  name="IdInquilino" id = "selectInquilinos">
+
+                <select asp-for="IdInquilino" class="form-control" id="selectInquilinos">
+                    <option value="">Seleccione un inquilino</option>
                     @foreach (var item in (IList<Inquilino>)ViewBag.Inquilinos)
                     {
-                        @:<option @(item.Id == Model?.IdInquilino ? "selected" : "") value="@item.Id">@item.Apellido @item.Nombre</option>
+                        <option value="@item.Id">
+                            @item.Apellido @item.Nombre
+                        </option>
                     }
                 </select>
             </div>
-        <div class="form-group  col-4">
+
+            <div class="form-group col-6">
                 <label asp-for="IdInmueble" class="control-label"></label>
-                <select class="form-control"  name="IdInmueble" id = "selectInmuebles">
-                    
+
+                <select asp-for="IdInmueble" class="form-control" id="selectInmuebles">
+                    <option value="">Seleccione un inmueble</option>
+                    @foreach (var item in (IList<Inmueble>)ViewBag.Inmuebles)
+                    {
+                        <option value="@item.Id">
+                            @item.Direccion
+                        </option>
+                    }
                 </select>
             </div>
-            
-            <div class="form-group">
-                <input type="submit" value="Guardar" class="btn btn-primary" />
+
+            <div class="form-group col-12">
+                <input type="submit" value="Guardar" class="btn btn-success" />
+
+                <a asp-action="Index" class="btn btn-secondary">
+                    Cancelar
+                </a>
             </div>
+
         </form>
     </div>
 </div>
 
-    <a asp-action="Index">Volver al listado</a>
-</div>
-
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="~/lib/select2/select2.min.js"></script>
+
 <script>
     $(document).ready(function () {
-        $('#selectInquilinos').select2();
-        $('#selectInmuebles').select2();
-        var inmuebles = @Html.Raw(inmueblesJson);
-        var contratos = @Html.Raw(contratosJson);
+        $('#selectInquilinos').select2({
+            placeholder: 'Buscar inquilino aqui',
+            allowClear: true,
+            width: '100%'
+        });
+        $('#selectInmuebles').select2({
+            placeholder: 'Buscar inmueble aqui',
+            allowClear: true,
+            width: '100%'
+        });
 
-        function actualizarInmuebles() {
-            var FechaDesde = $('#FechaDesde').val();
-            var FechaHasta = $('#FechaHasta').val();
-            var contratoId = '@(Model?.Id ?? 0)';  // ID del contrato actual (cero si no hay contrato)
-            var inmuebleSeleccionadoId = '@(Model?.IdInmueble ?? 0)'; // ID del inmueble seleccionado (cero si no hay inmueble)
-
-            var FechaDesdeDate = FechaDesde ? new Date(FechaDesde) : null;
-            var FechaHastaDate = FechaHasta ? new Date(FechaHasta) : null;
-
-            var inmueblesFiltrados = inmuebles.filter(function (inmueble) {
-                // Convertir IDs a números para asegurar una comparación precisa
-                var inmuebleId = Number(inmueble.Id);
-                var inmuebleSeleccionado = Number(inmuebleSeleccionadoId);
-
-                // Siempre incluir el inmueble seleccionado si estamos editando o renovando
-                if (inmuebleId === inmuebleSeleccionado) {
-                    return true;
-                }
-
-                // Filtrar por disponibilidad
-                if (inmueble.Disponible === 'NO') {
-                    return false;
-                }
-
-                if (contratos.length === 0) {
-                    return true; // Si no hay contratos, todos los inmuebles están disponibles
-                }
-
-                // Filtrar por fechas de ocupación
-                if (FechaDesdeDate && FechaHastaDate) {
-                    return !contratos.some(function (contrato) {
-                        var FechaDesdeOcupado = new Date(contrato.FechaDesde);
-                        var FechaHastaOcupado = new Date(contrato.FechaHasta);
-
-                        // Excluir inmuebles que están ocupados y cuyos contratos NO estén anulados
-                        return (
-                            contrato.IdInmueble === inmuebleId &&
-                            !contrato.Anulado &&  // Excluir contratos no anulados
-                            (
-                                (FechaDesdeDate >= FechaDesdeOcupado && FechaDesdeDate <= FechaHastaOcupado) ||
-                                (FechaHastaDate >= FechaDesdeOcupado && FechaHastaDate <= FechaHastaOcupado) ||
-                                (FechaDesdeDate <= FechaDesdeOcupado && FechaHastaDate >= FechaHastaOcupado)
-                            )
-                        );
-                    });
-                }
-
-                return true; // Si no hay fechas, el inmueble es elegible
-            });
-
-            var $selectInmuebles = $('#selectInmuebles');
-            $selectInmuebles.empty();
-
-            if (inmueblesFiltrados.length > 0) {
-                inmueblesFiltrados.forEach(function (inmueble) {
-                    var isSelected = inmueble.Id === Number(inmuebleSeleccionadoId) ? "selected" : "";
-                    $selectInmuebles.append('<option value="' + inmueble.Id + '" ' + isSelected + '>' + inmueble.Id + ' - ' + inmueble.Direccion + '</option>');
-                });
-
-                // Seleccionar el inmueble actual en el modo de edición/renovación
-                if (inmuebleSeleccionadoId > 0) {
-                    $selectInmuebles.val(inmuebleSeleccionadoId).trigger('change');
-                }
-            } else {
-                $selectInmuebles.append('<option value="">No hay inmuebles disponibles</option>');
-            }
-        }
-
-        // Inicializar la lista de inmuebles
-        actualizarInmuebles();
-
-        // Actualizar la lista cuando cambien las fechas
-        $('#FechaDesde, #fechaTerm').on('change', function () {
-            actualizarInmuebles();
+        $('#FechaDesde, #FechaHasta').on('change', function () {
+            
         });
     });
 </script>
-<script>
-    // Obtener la fecha de hoy
-    const hoy = new Date();
-    // Formatear la fecha en el formato YYYY-MM-DD
-    const anio = hoy.getFullYear();
-    const mes = String(hoy.getMonth() + 1).padStart(2, '0'); // Sumar 1 porque getMonth() devuelve un índice de 0 a 11
-    const dia = String(hoy.getDate()).padStart(2, '0');
-    const fechaFormateada = `${anio}-${mes}-${dia}`;
 
-    // Establecer la fecha en el campo de entrada
-    document.getElementById('FechaDesde').value = fechaFormateada;
-     document.getElementById('fechaTerm').value = fechaFormateada;
-</script>
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

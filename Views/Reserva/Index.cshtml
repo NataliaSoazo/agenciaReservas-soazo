@@ -73,26 +73,45 @@
     </tbody>
 </table>
 
-<form class="modal" tabindex="-1" asp-action="Eliminar" id="modal_eliminar_Contrato">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Deseas eliminar</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <input type="hidden" name="Id" value="" id="Contrato_eliminar_id">
-        <p><span id="Contrato_eliminar_nombre"></span></p>
-      </div>
-      <div class="modal-footer">
-        <button type="submit" class="btn btn-danger">Eliminar</button>
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Salir</button>
-      </div>
+<div class="modal fade" id="modal_eliminar_Reserva" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    ¿Deseas eliminar la reserva?
+                </h5>
+                    <button type="button"
+                        class="close"
+                        data-dismiss="modal"
+                        aria-label="Cerrar">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+            </div>
+            <form asp-action="Eliminar" method="post">
+                <div class="modal-body">
+                    <input type="hidden"
+                           name="id"
+                           id="Reserva_eliminar_id" />
+                    <p>
+                        Reserva:
+                        <strong id="Reserva_eliminar_nombre"></strong>
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit"
+                            class="btn btn-danger">
+                        Eliminar
+                    </button>
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-dismiss="modal">
+                        Salir
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
-  </div>
-</form>
+</div>
 
 @section Scripts{
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
