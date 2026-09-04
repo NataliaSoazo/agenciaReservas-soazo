@@ -69,24 +69,45 @@
     </tbody>
 </table>
 
+El HTML que tienes funciona si usas Bootstrap 4. Si estás usando Bootstrap 5, Salir y la X no cierran porque cambiaron los atributos: debes usar data-bs-dismiss="modal" y btn-close.
+
+xml
 <form method="post" asp-action="Eliminar" id="form_eliminar">
-    <div class="modal fade" id="modal_eliminar_Inquilino" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal fade" id="modal_eliminar_Inquilino" tabindex="-1"
+         aria-labelledby="tituloEliminarInquilino" aria-hidden="true">
+
         <div class="modal-dialog" role="document">
             <div class="modal-content">
+
                 <div class="modal-header">
-                    <h5 class="modal-title">DESEAS ELIMINAR A:</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                    <h5 class="modal-title" id="tituloEliminarInquilino">
+                        ¿DESEAS ELIMINAR A:
+                        <span id="Inquilino_eliminar_nombre"></span>?
+                    </h5>
+
+                    <!-- X -->
+                    <button type="button" class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Cerrar">
                     </button>
                 </div>
+
                 <div class="modal-body">
-                    <input type="hidden" name="Id" value="" id="Inquilino_eliminar_id">
-                    <p><span id="Inquilino_eliminar_nombre"></span></p>
+                    <input type="hidden" name="Id" id="Inquilino_eliminar_id" />
+                    <p>Esta acción no se puede deshacer.</p>
                 </div>
+
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-danger">Eliminar</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Salir</button>
+                    <button type="button" class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        Salir
+                    </button>
+
+                    <button type="submit" class="btn btn-danger">
+                        Eliminar
+                    </button>
                 </div>
+
             </div>
         </div>
     </div>
