@@ -70,46 +70,25 @@
     </tbody>
 </table>
 
-<form method="post" asp-action="Eliminar" id="form_eliminar_propietario">
-
-    <div class="modal fade" id="modal_eliminar_propietario" tabindex="-1"
-         aria-labelledby="tituloEliminarPropietario" aria-hidden="true">
-
-        <div class="modal-dialog">
-            <div class="modal-content">
-
-                <div class="modal-header">
-                    <h5 class="modal-title" id="tituloEliminarPropietario">
-                        ¿DESEAS ELIMINAR A:
-                        <span id="propietario_eliminar_nombre"></span>?
-                    </h5>
-
-                    <!-- Botón X -->
-                    <button type="button" class="btn-close"
-                            data-bs-dismiss="modal"
-                            aria-label="Cerrar">
-                    </button>
-                </div>
-
-                <div class="modal-body">
-                    <input type="hidden" name="Id" id="propietario_eliminar_id" />
-                    <p>Esta acción no se puede deshacer.</p>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-danger">
-                        Eliminar
-                    </button>
-                    <button type="button" class="btn btn-secondary"
-                            data-bs-dismiss="modal">
-                        Salir
-                    </button>
-                </div>
-
-            </div>
-        </div>
+<form class="modal" tabindex="-1" asp-action="Eliminar" id="modal_eliminar_propietario">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">DESEAS ELIMINAR A:</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" name="Id" value="" id ="propietario_eliminar_id">
+        <p><span id="propietario_eliminar_nombre"></span></p>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-danger">Eliminar</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Salir</button>
+      </div>
     </div>
-
+  </div>
 </form>
 @section Scripts{
     <script>

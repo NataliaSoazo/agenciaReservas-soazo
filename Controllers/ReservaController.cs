@@ -15,8 +15,8 @@ public class ReservaController : Controller
     public IActionResult Index()
     {
         RepositorioReserva rr = new RepositorioReserva();
-
         IList<Reserva> lista = new List<Reserva>();
+
         try
         {
             lista = rr.GetReservas();
@@ -25,7 +25,8 @@ public class ReservaController : Controller
             {
                 ViewBag.Mensaje = TempData["Mensaje"];
             }
-            else if (TempData.ContainsKey("Error"))
+
+            if (TempData.ContainsKey("Error"))
             {
                 ViewBag.Error = TempData["Error"];
             }
@@ -34,116 +35,105 @@ public class ReservaController : Controller
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex,"Error al obtener la lista de reservas");
+            _logger.LogError(ex, "Error al obtener la lista de reservas");
 
-            TempData["Error"] ="Ocurrió un error al obtener la lista de reservas";
-
-            ViewBag.Error = TempData["Error"];
+            ViewBag.Error = "Ocurrió un error al obtener la lista de reservas.";
 
             return View(lista);
         }
     }
 
-
-    
     public IActionResult Editar(int id)
     {
-        RepositorioReserva repoReserva =
-            new RepositorioReserva();
-
-        var reservas = repoReserva.GetReservas();
+        if (TempData.ContainsKey("Error"))
+        {
+            ViewBag.Error = TempData["Error"];
+        }
 
         RepositorioInmueble repoInmueble = new RepositorioInmueble();
-
-        ViewBag.inmuebles = repoInmueble.ObtenerTodos();
-
         RepositorioInquilino repoInquilino = new RepositorioInquilino();
+        RepositorioReserva repoReserva = new RepositorioReserva();
 
+        ViewBag.Inmuebles = repoInmueble.ObtenerTodos();
         ViewBag.Inquilinos = repoInquilino.GetInquilinos();
 
-        // EDITAR
+        // Editar una reserva existente
         if (id > 0)
         {
-            var reserva =
-                repoReserva.GetReserva(id);
+            Reserva? reserva = repoReserva.GetReserva(id);
 
             if (reserva == null)
             {
-                TempData["Error"] =
-                    "Reserva no encontrada.";
-
+                TempData["Error"] = "Reserva no encontrada.";
                 return RedirectToAction(nameof(Index));
             }
 
-            if (reserva.Anulado == true)
+            if (reserva.Anulado)
             {
-                TempData["Error"] =
-                    "No se puede modificar una reserva anulada.";
-
+                TempData["Error"] = "No se puede modificar una reserva anulada.";
                 return RedirectToAction(nameof(Index));
             }
 
             return View(reserva);
         }
 
-
-        // CREAR
-        return View();
+        // Crear una nueva reserva
+        return View(new Reserva());
     }
 
-
-    
     [HttpPost]
-   
     public IActionResult Guardar(Reserva reserva)
     {
         try
         {
-            RepositorioReserva rr =new RepositorioReserva();
+            RepositorioReserva rr = new RepositorioReserva();
 
             if (reserva.FechaDesde >= reserva.FechaHasta)
             {
-                TempData["Error"] ="La fecha de inicio debe ser anterior a la fecha de culminación.";
+                TempData["Error"] =
+                    "La fecha de inicio debe ser anterior a la fecha de culminación.";
 
-                return RedirectToAction(nameof(Editar));
+                // Si Id es 0, vuelve al formulario de alta.
+                // Si Id tiene valor, vuelve a editar esa reserva.
+                return RedirectToAction(
+                    nameof(Editar),
+                    new { id = reserva.Id }
+                );
             }
 
-
-            // VALIDAR DISPONIBILIDAD DEL INMUEBLE
-            bool disponible =
-                rr.InmuebleDisponible(
-                    reserva.IdInmueble,
-                    reserva.FechaDesde,
-                    reserva.FechaHasta
-                );
+            bool disponible = rr.InmuebleDisponible(
+                reserva.IdInmueble,
+                reserva.FechaDesde,
+                reserva.FechaHasta
+            );
 
             if (!disponible)
             {
-                TempData["Error"] ="El inmueble no está disponible para esas fechas.";
+                TempData["Error"] =
+                    "El inmueble no está disponible para esas fechas.";
 
-                return RedirectToAction(nameof(Editar));
+                return RedirectToAction(
+                    nameof(Editar),
+                    new { id = reserva.Id }
+                );
             }
 
-
-            // MODIFICAR
             if (reserva.Id > 0)
             {
                 rr.ModificarReserva(reserva);
 
                 TempData["Mensaje"] =
                     "La reserva se modificó correctamente.";
-
-                return RedirectToAction(nameof(Index));
             }
+            else
+            {
+                reserva.Anulado = false;
 
+                rr.AltaReserva(reserva);
 
-            // ALTA
-            reserva.Anulado = false;
-
-            rr.AltaReserva(reserva);
-
-            TempData["Mensaje"] =
-                "La reserva se creó correctamente.";
+                TempData["Mensaje"] =
+                    "La reserva se creó correctamente.";
+            }
 
             return RedirectToAction(nameof(Index));
         }
@@ -151,7 +141,7 @@ public class ReservaController : Controller
         {
             _logger.LogError(ex, "Error al guardar la reserva");
 
-            TempData["Error"] ="No se pudo completar la operación.";
+            TempData["Error"] = "No se pudo completar la operación.";
 
             return RedirectToAction(nameof(Index));
         }
@@ -163,31 +153,30 @@ public class ReservaController : Controller
         {
             RepositorioReserva rr = new RepositorioReserva();
 
-            var reserva = rr.GetReserva(id);
+            Reserva? reserva = rr.GetReserva(id);
 
             if (reserva == null)
             {
-                TempData["Error"] ="Reserva no encontrada.";
-
+                TempData["Error"] = "Reserva no encontrada.";
                 return RedirectToAction(nameof(Index));
             }
 
             if (reserva.Anulado)
             {
-                TempData["Error"] ="La reserva ya está anulada.";
-
+                TempData["Error"] = "La reserva ya está anulada.";
                 return RedirectToAction(nameof(Index));
             }
 
             rr.AnularReserva(id);
 
-            TempData["Mensaje"] ="La reserva ha sido anulada correctamente.";
+            TempData["Mensaje"] =
+                "La reserva ha sido anulada correctamente.";
 
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex,"Error al anular la reserva");
+            _logger.LogError(ex, "Error al anular la reserva");
 
             TempData["Error"] =
                 "No se pudo completar la anulación.";
@@ -196,54 +185,38 @@ public class ReservaController : Controller
         }
     }
 
-
-   
     public IActionResult Detalles(int id)
     {
-        RepositorioReserva rr =
-            new RepositorioReserva();
+        RepositorioReserva rr = new RepositorioReserva();
 
-        var userRole = User.Claims
+        ViewBag.UserRole = User.Claims
             .FirstOrDefault(c => c.Type == "Rol")?.Value;
 
-        ViewBag.UserRole = userRole;
-
-        var reserva =
-            rr.GetReserva(id);
+        Reserva? reserva = rr.GetReserva(id);
 
         if (reserva == null)
         {
-            TempData["Error"] =
-                "Reserva no encontrada.";
-
+            TempData["Error"] = "Reserva no encontrada.";
             return RedirectToAction(nameof(Index));
         }
 
         return View(reserva);
     }
 
-
     public IActionResult VerVigentes()
     {
-        RepositorioReserva rr =
-            new RepositorioReserva();
+        RepositorioReserva rr = new RepositorioReserva();
+        IList<Reserva> lista = new List<Reserva>();
 
-        IList<Reserva> lista =
-            new List<Reserva>();
-
-        var userRole = User.Claims
+        ViewBag.UserRole = User.Claims
             .FirstOrDefault(c => c.Type == "Rol")?.Value;
-
-        ViewBag.UserRole = userRole;
 
         try
         {
-            lista = rr.GetReservas();
-
-            lista = lista
+            lista = rr.GetReservas()
                 .Where(x =>
                     x.FechaHasta > DateTime.Now &&
-                    x.Anulado == false
+                    !x.Anulado
                 )
                 .ToList();
 
@@ -251,33 +224,23 @@ public class ReservaController : Controller
         }
         catch (Exception ex)
         {
-            _logger.LogError(
-                ex,
-                "Error al obtener las reservas vigentes"
-            );
+            _logger.LogError(ex, "Error al obtener las reservas vigentes");
 
             TempData["Error"] =
-                "Ocurrió un error al obtener las reservas vigentes";
+                "Ocurrió un error al obtener las reservas vigentes.";
 
-            return View(lista);
+            return View("Index", lista);
         }
     }
 
-
-   
     public IActionResult ListarReservasInmueble(int id)
     {
-        RepositorioReserva rr =
-            new RepositorioReserva();
-
-        IList<Reserva> lista =
-            new List<Reserva>();
+        RepositorioReserva rr = new RepositorioReserva();
+        IList<Reserva> lista = new List<Reserva>();
 
         try
         {
-            lista = rr.GetReservas();
-
-            lista = lista
+            lista = rr.GetReservas()
                 .Where(x => x.IdInmueble == id)
                 .ToList();
 
@@ -293,7 +256,10 @@ public class ReservaController : Controller
             TempData["Error"] =
                 "Ocurrió un error al obtener las reservas.";
 
-            return View(lista);
+            return View("Index", lista);
         }
     }
 }
+
+
+

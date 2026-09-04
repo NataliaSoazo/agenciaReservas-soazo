@@ -3,13 +3,13 @@
     ViewData["Title"] = "Index";
 }
 
-<h4> Listado  de contratos</h4>
+<h4> Lista de reservas</h4>
 
 <p>
     <a asp-action="Editar"method = "post">CREAR NUEVO </a>
 </p>
 <p>
-    <a asp-action="VerVigentes">Ver contratos vigentes</a>
+    <a asp-action="VerVigentes">Ver reservas  vigentes</a>
 </p>
 <form asp-action="Index">
     <p>
@@ -58,16 +58,15 @@
             <td>
                 <a asp-action="Detalles" asp-route-id=@item.Id title="Ver Detalles"><i class="fa fa-eye " style="font-size:25px;" id="detalles"></i></a>
                 <a asp-action="Editar" asp-route-id=@item.Id title="Editar item"><i class="fa fa-pencil " style="font-size:25px;" id="edi"></i></a>
-                @if (ViewBag.UserRole == "ADMINISTRADOR")
-                    {
-                        <a href="#" onclick="eliminar('@item.Id')" title="Eliminar">
-                            <i class="fa fa-trash" style="font-size:25px;" id="eli"></i>
-                        </a>
-                    }
-                <a asp-controller="Pago" asp-action="agregarpago" asp-route-id="@item.Id" title="Agregar pago"><i class="fa fa-plus" style="font-size:25px;" id="agregar"></i></a>
+                
+                <a href="#" onclick="eliminar('@item.Id')" title="Eliminar">
+                    <i class="fa fa-trash" style="font-size:25px;" id="eli"></i>
+                </a>
+            
+                <!--<a asp-controller="Pago" asp-action="agregarpago" asp-route-id="@item.Id" title="Agregar pago"><i class="fa fa-plus" style="font-size:25px;" id="agregar"></i></a>
                 <a asp-controller="Pago" asp-action="PagosContrato" asp-route-id="@item.Id" title="Listar Pagos"><i class="fa fa-bars" style="font-size:25px;" id="pagosC"></i></a>
                 <a asp-action="Renovar" asp-route-id=@item.Id title="Renovar contrato"><i class="fa fa-rotate-right" style="font-size:25px;" id="ren"></i></a>
-                <a asp-action="FinalizarContrato" asp-route-id="@item.Id" title="Finalizar contrato"><img src="../ImgSubidas/finally.png" height="25px" width="25px" alt="Finalizar contrato"></a>
+                -->
             </td>
             </tr>
         }

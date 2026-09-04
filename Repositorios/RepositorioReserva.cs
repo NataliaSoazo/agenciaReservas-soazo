@@ -18,18 +18,12 @@ public class RepositorioReserva
 
         using (var connection = new MySqlConnection(ConnectionString))
         {
-            string sql = $@"
-                SELECT 
-                    r.{nameof(Reserva.Id)},
-                    r.{nameof(Reserva.Fecha)},
-                    r.{nameof(Reserva.FechaDesde)},
-                    r.{nameof(Reserva.FechaHasta)},
-                    r.{nameof(Reserva.Monto)},
-                    r.{nameof(Reserva.IdInquilino)},
-                    r.{nameof(Reserva.IdInmueble)},
-                    r.{nameof(Reserva.Anulado)}
-                FROM reservas r
-                ORDER BY r.{nameof(Reserva.Id)} ASC;";
+            string sql = $@"SELECT i.{nameof(Reserva.Id)},{nameof(Reserva.Fecha)}, {nameof(Reserva.FechaDesde)}, {nameof(Reserva.FechaHasta)}, {nameof(Reserva.Monto)}, {nameof(Reserva.IdInquilino)}, {nameof(Reserva.Anulado)},
+                      p.{nameof(Inquilino.Nombre)}, p.{nameof(Inquilino.Apellido)}, {nameof(Reserva.IdInmueble)}, m.{nameof(Inmueble.Direccion)}
+                FROM Reservas i 
+                INNER JOIN Inquilinos p ON i.{nameof(Reserva.IdInquilino)} = p.{nameof(Inquilino.Id)}
+                INNER JOIN Inmuebles m ON i.{nameof(Reserva.IdInmueble)} = m.{nameof(Inmueble.Id)}
+                ORDER BY i.{nameof(Reserva.Id)} ASC;";
 
             using (var command = new MySqlCommand(sql, connection))
             {
@@ -44,15 +38,25 @@ public class RepositorioReserva
                             Id = reader.GetInt32(nameof(Reserva.Id)),
 
                             Fecha = reader.GetDateTime(nameof(Reserva.Fecha)),
-
                             FechaDesde = reader.GetDateTime(nameof(Reserva.FechaDesde)),
                             FechaHasta = reader.GetDateTime(nameof(Reserva.FechaHasta)),
 
                             Monto = reader.GetDouble(nameof(Reserva.Monto)),
 
                             IdInquilino = reader.GetInt32(nameof(Reserva.IdInquilino)),
+                            Arrendatario = new Inquilino
+                            {
+                                Nombre = reader.GetString(nameof(Inquilino.Nombre)),
+                                Apellido = reader.GetString(nameof(Inquilino.Apellido)),
 
+                            },
                             IdInmueble = reader.GetInt32(nameof(Reserva.IdInmueble)),
+                            DatoInmueble = new Inmueble
+                            {
+
+                                Direccion = reader.GetString(nameof(Inmueble.Direccion))
+
+                            },
 
                             Anulado = reader.GetBoolean(nameof(Reserva.Anulado))
                         });
@@ -130,128 +134,102 @@ public class RepositorioReserva
 
 
     public Reserva? GetReserva(int id)
+{
+    Reserva? reserva = null;
+
+    using (var connection = new MySqlConnection(ConnectionString))
     {
-        Reserva? reserva = null;
+        string sql = $@"
+            SELECT 
+                r.{nameof(Reserva.Id)},
+                r.{nameof(Reserva.Fecha)},
+                r.{nameof(Reserva.FechaDesde)},
+                r.{nameof(Reserva.FechaHasta)},
+                r.{nameof(Reserva.Monto)},
+                r.{nameof(Reserva.IdInquilino)},
+                r.{nameof(Reserva.IdInmueble)},
+                r.{nameof(Reserva.Anulado)},
+                p.{nameof(Inquilino.Nombre)},
+                p.{nameof(Inquilino.Apellido)},
+                m.{nameof(Inmueble.Direccion)}
+            FROM reservas r
+            INNER JOIN Inquilinos p 
+                ON r.{nameof(Reserva.IdInquilino)} = p.{nameof(Inquilino.Id)}
+            INNER JOIN Inmuebles m 
+                ON r.{nameof(Reserva.IdInmueble)} = m.{nameof(Inmueble.Id)}
+            WHERE r.{nameof(Reserva.Id)} = @id;";
 
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var command = new MySqlCommand(sql, connection))
         {
-            string sql = $@"
-                SELECT 
-                    r.{nameof(Reserva.Id)},
-                    r.{nameof(Reserva.Fecha)},
-                    r.{nameof(Reserva.FechaDesde)},
-                    r.{nameof(Reserva.FechaHasta)},
-                    r.{nameof(Reserva.Monto)},
-                    r.{nameof(Reserva.IdInquilino)},
-                    r.{nameof(Reserva.IdInmueble)},
-                    r.{nameof(Reserva.Anulado)}
-                FROM reservas r
-                INNER JOIN Inquilinos p ON i.{nameof(Reserva.IdInquilino)} = p.{nameof(Inquilino.Id)}
-                INNER JOIN Inmuebles m ON i.{nameof(Reserva.IdInmueble)} = m.{nameof(Inmueble.Id)}
-                ORDER BY i.{nameof(Reserva.Id)} ASC;";
-            using (var command = new MySqlCommand(sql, connection))
+            command.Parameters.AddWithValue("@id", id);
+
+            connection.Open();
+
+            using (var reader = command.ExecuteReader())
             {
-                command.Parameters.AddWithValue("@id", id);
-
-                connection.Open();
-
-                using (var reader = command.ExecuteReader())
+                if (reader.Read())
                 {
-                    if (reader.Read())
+                    reserva = new Reserva
                     {
-                        reserva = new Reserva
+                        Id = reader.GetInt32(nameof(Reserva.Id)),
+                        Fecha = reader.GetDateTime(nameof(Reserva.Fecha)),
+                        FechaDesde = reader.GetDateTime(nameof(Reserva.FechaDesde)),
+                        FechaHasta = reader.GetDateTime(nameof(Reserva.FechaHasta)),
+                        Monto = reader.GetDouble(nameof(Reserva.Monto)),
+                        IdInquilino = reader.GetInt32(nameof(Reserva.IdInquilino)),
+                        IdInmueble = reader.GetInt32(nameof(Reserva.IdInmueble)),
+                        Anulado = reader.GetBoolean(nameof(Reserva.Anulado)),
+
+                        Arrendatario = new Inquilino
                         {
-                            Id = reader.GetInt32(nameof(Reserva.Id)),
+                            Nombre = reader.GetString(nameof(Inquilino.Nombre)),
+                            Apellido = reader.GetString(nameof(Inquilino.Apellido))
+                        },
 
-                            Fecha = reader.GetDateTime(nameof(Reserva.Fecha)),
-
-                            FechaDesde = reader.GetDateTime(nameof(Reserva.FechaDesde)),
-
-                            FechaHasta = reader.GetDateTime(nameof(Reserva.FechaHasta)),
-
-                            Monto = reader.GetDouble(nameof(Reserva.Monto)),
-
-                            IdInquilino = reader.GetInt32(nameof(Reserva.IdInquilino)),
-                            Arrendatario = new Inquilino
-                            {
-                                Nombre = reader.GetString(nameof(Inquilino.Nombre)),
-                                Apellido = reader.GetString(nameof(Inquilino.Apellido)),
-
-                            },
-
-                            IdInmueble = reader.GetInt32(nameof(Reserva.IdInmueble)),
-                            DatoInmueble = new Inmueble
-                            {
-
-                                Direccion = reader.GetString(nameof(Inmueble.Direccion))
-
-                            },
-
-                            Anulado = reader.GetBoolean(nameof(Reserva.Anulado))
-                        };
-                    }
+                        DatoInmueble = new Inmueble
+                        {
+                            Direccion = reader.GetString(nameof(Inmueble.Direccion))
+                        }
+                    };
                 }
             }
         }
-
-        return reserva;
     }
 
+    return reserva;
+}
 
         public int ModificarReserva(Reserva reserva)
+{
+    using (var connection = new MySqlConnection(ConnectionString))
     {
-        using (var connection = new MySqlConnection(ConnectionString))
+        string sql = @"
+            UPDATE reservas
+            SET
+                Fecha = @Fecha,
+                FechaDesde = @FechaDesde,
+                FechaHasta = @FechaHasta,
+                Monto = @Monto,
+                IdInquilino = @IdInquilino,
+                IdInmueble = @IdInmueble
+            WHERE Id = @Id;";
+
+        using (var command = new MySqlCommand(sql, connection))
         {
-            string sql = $@"
-                UPDATE reservas SET
+            command.Parameters.AddWithValue("@Id", reserva.Id);
+            command.Parameters.AddWithValue("@Fecha", reserva.Fecha);
+            command.Parameters.AddWithValue("@FechaDesde", reserva.FechaDesde);
+            command.Parameters.AddWithValue("@FechaHasta", reserva.FechaHasta);
+            command.Parameters.AddWithValue("@Monto", reserva.Monto);
+            command.Parameters.AddWithValue("@IdInquilino", reserva.IdInquilino);
+            command.Parameters.AddWithValue("@IdInmueble", reserva.IdInmueble);
 
-                    {nameof(Reserva.Fecha)} =@{nameof(Reserva.Fecha)},
+            connection.Open();
 
-                    {nameof(Reserva.FechaDesde)} =@{nameof(Reserva.FechaDesde)},
-
-                    {nameof(Reserva.FechaHasta)} =@{nameof(Reserva.FechaHasta)},
-
-                    {nameof(Reserva.Monto)} =@{nameof(Reserva.Monto)},
-
-                    {nameof(Reserva.IdInquilino)} = @{nameof(Reserva.IdInquilino)},
-
-                    {nameof(Reserva.IdInmueble)} =@{nameof(Reserva.IdInmueble)}
-
-                WHERE {nameof(Reserva.Id)} =@{nameof(Reserva.Id)};";
-
-            using (var command = new MySqlCommand(sql, connection))
-            {
-                command.Parameters.AddWithValue(
-                    $"@{nameof(Reserva.Id)}",reserva.Id);
-
-                command.Parameters.AddWithValue(
-                    $"@{nameof(Reserva.Fecha)}",reserva.Fecha);
-
-                command.Parameters.AddWithValue(
-                    $"@{nameof(Reserva.FechaDesde)}",reserva.FechaDesde);
-
-                command.Parameters.AddWithValue(
-                    $"@{nameof(Reserva.FechaHasta)}",reserva.FechaHasta);
-
-                command.Parameters.AddWithValue(
-                    $"@{nameof(Reserva.Monto)}",reserva.Monto);
-
-                command.Parameters.AddWithValue(
-                    $"@{nameof(Reserva.IdInquilino)}",reserva.IdInquilino);
-
-                command.Parameters.AddWithValue(
-                    $"@{nameof(Reserva.IdInmueble)}",reserva.IdInmueble);
-
-                connection.Open();
-
-                int filasAfectadas = command.ExecuteNonQuery();
-
-                connection.Close();
-
-                return filasAfectadas;
-            }
+            return command.ExecuteNonQuery();
         }
     }
+}
 
     public int AnularReserva(int id)
     {
@@ -289,39 +267,36 @@ public class RepositorioReserva
             return false;
         }
     }
-    public bool InmuebleDisponible(
-        int idInmueble,
-        DateTime fechaDesde,DateTime fechaHasta)
+   public bool InmuebleDisponible(
+    int idInmueble,
+    DateTime fechaDesde,
+    DateTime fechaHasta,
+    int idReserva = 0)
+{
+    using (var connection = new MySqlConnection(ConnectionString))
     {
-        using (var connection = new MySqlConnection(ConnectionString))
+        string sql = @"
+            SELECT COUNT(*)
+            FROM reservas
+            WHERE IdInmueble = @idInmueble
+              AND Anulado = false
+              AND FechaDesde < @fechaHasta
+              AND FechaHasta > @fechaDesde
+              AND Id <> @idReserva;";
+
+        using (var command = new MySqlCommand(sql, connection))
         {
-            string sql = $@"
-                SELECT COUNT(*)
-                FROM reservas
-                WHERE {nameof(Reserva.IdInmueble)} = @idInmueble
+            command.Parameters.AddWithValue("@idInmueble", idInmueble);
+            command.Parameters.AddWithValue("@fechaDesde", fechaDesde);
+            command.Parameters.AddWithValue("@fechaHasta", fechaHasta);
+            command.Parameters.AddWithValue("@idReserva", idReserva);
 
-                AND {nameof(Reserva.Anulado)} = false
+            connection.Open();
 
-                AND @fechaDesde < {nameof(Reserva.FechaHasta)}
+            int cantidad = Convert.ToInt32(command.ExecuteScalar());
 
-                AND @fechaHasta > {nameof(Reserva.FechaDesde)};";
-
-            using (var command = new MySqlCommand(sql, connection))
-            {
-                command.Parameters.AddWithValue("@idInmueble",idInmueble);
-
-                command.Parameters.AddWithValue("@fechaDesde",fechaDesde);
-
-                command.Parameters.AddWithValue("@fechaHasta",fechaHasta);
-
-                connection.Open();
-
-                int cantidad = Convert.ToInt32(
-                    command.ExecuteScalar()
-                );
-
-                return cantidad == 0;
-            }
+            return cantidad == 0;
         }
     }
+}
 }

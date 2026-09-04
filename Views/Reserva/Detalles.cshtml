@@ -1,0 +1,71 @@
+@model agenciaReservas_soazo.Models.Reserva;
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+
+
+<div class="container justify-content-center  col-11" id="table">
+    <h4 class="text-center">Detalles de la reserva </h4>
+    <hr />
+    <dl class="row ">
+        <dt class="col-6 ">
+            @Html.DisplayNameFor(model => model.Id)
+        </dt>
+        <dd class="col-6 ">
+            @Html.DisplayFor(model => model.Id)
+        </dd>
+        <dt class="col-6 ">
+            @Html.DisplayNameFor(model => model.FechaDesde)
+        </dt>
+        <dd class="col-6 ">
+            @Html.DisplayFor(model => model.FechaDesde)
+        </dd>
+        <dt class="col-6 ">
+            @Html.DisplayNameFor(model => model.FechaHasta)
+        </dt>
+        <dd class="col-6 ">
+            @Html.DisplayFor(model => model.FechaHasta)
+        </dd>
+        <dt class="col-6 ">
+            @Html.DisplayNameFor(model => model.Monto)
+        </dt>
+        <dd class="col-6 ">
+            @Html.DisplayFor(model => model.Monto)
+        </dd>
+        <dt class="col-6 ">
+            DATOS DEL INQUILINO
+        </dt>
+        <dd class="col-6">
+            CODIGO @Model.IdInquilino, @Model.Arrendatario.Apellido @Model.Arrendatario.Nombre
+        </dd>
+        <dt class="col-6">
+            DATOS DEL INMUEBLE
+        </dt>
+        <dd class="col-6">
+            CODIGO @Model.IdInmueble, @Model.DatoInmueble.Direccion @Model.DatoInmueble.Uso
+        </dd>
+        @if (ViewBag.UserRole == "ADMINISTRADOR")
+        {
+            <dt class="col-6">
+                CREADO POR
+            </dt>
+            <dd class="col-6">
+               @ViewBag.UsuarioC.Id @ViewBag.UsuarioC.Nombre @ViewBag.UsuarioC.Apellido
+            </dd>
+            @if (Model.Anulado)
+            {
+                <dt class="col-6">
+                    ANULADO
+                </dt>
+                <dd class="col-6">
+                    SI
+                </dd>                
+            }
+        }
+    </dl>
+</div>
+<div>
+    <a asp-action="Index">Volver al listado</a>
+</div>
