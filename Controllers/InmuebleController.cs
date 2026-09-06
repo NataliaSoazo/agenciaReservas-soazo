@@ -102,8 +102,9 @@ public class InmuebleController : Controller
             }
             return RedirectToAction(nameof(Index));
         }
-        catch (System.Exception)
+        catch (Exception ex )
         {
+            _logger.LogError(ex, "error");
             TempData["Error"] = "No se pudo completar la operación.";
             return RedirectToAction(nameof(Index));
 
@@ -119,9 +120,10 @@ public class InmuebleController : Controller
             TempData["Mensaje"] = "El inmueble ha sido eliminado correctamente.";
             return RedirectToAction(nameof(Index));
         }
-        catch
+        catch(Exception ex )
         {
-            TempData["Error"] = "No se pudo completar la eliminación.";
+            _logger.LogError(ex, "error");
+            TempData["Error"] = "No se pudo completar la eliminación. "+ ex.Message;
             return RedirectToAction(nameof(Index));
         }
     }
@@ -136,7 +138,9 @@ public class InmuebleController : Controller
  
     public IActionResult BuscarPropietarios(string buscar)
     {
-        var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
+        try
+        {
+            var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
         ViewBag.UserRole = userRole;
         RepositorioPropietario rp = new RepositorioPropietario();
         RepositorioInmueble ri = new RepositorioInmueble();
@@ -151,5 +155,13 @@ public class InmuebleController : Controller
         }
 
         return View("Index", inmuebles);
-    }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "error");
+            TempData["Error"] = "No se pudo completar la eliminación. "+ ex.Message;
+            return RedirectToAction(nameof(Index));
+            throw;
+          } 
+     }
 }

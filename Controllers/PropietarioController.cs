@@ -89,6 +89,7 @@ public class PropietarioController : Controller
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "error");
             TempData["Error"] = "Ocurrió un error al guardar el propietario";
             return RedirectToAction(nameof(Index));
         }
@@ -106,6 +107,7 @@ public class PropietarioController : Controller
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "error");
             TempData["Error"] = "Ocurrio un error al eliminar el propietario";
             return RedirectToAction(nameof(Index));
         }
@@ -126,7 +128,8 @@ public class PropietarioController : Controller
             return View();
         }
         catch (Exception ex)
-        {//poner breakpoints para detectar errores
+        {
+            _logger.LogError(ex, "error");
             throw;
         }
     }
@@ -142,6 +145,7 @@ public class PropietarioController : Controller
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "error");
             TempData["Error"] = "Ocurrio un error al buscar el propietario";
             return RedirectToAction(nameof(Index));
         }

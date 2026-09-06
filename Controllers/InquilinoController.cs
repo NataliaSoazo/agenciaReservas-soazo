@@ -32,7 +32,6 @@ public class InquilinoController : Controller
         {
             _logger.LogError(ex, "Error al obtener la lista de inquilinos");
             TempData["Error"] = "Ocurrio un error al obtener la lista de inquilinos";
-            ViewBag.Error = TempData["Error"];
             return View(lista);
         }
     }
@@ -77,6 +76,7 @@ public class InquilinoController : Controller
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "error");
             TempData["Error"] = "Ocurrió un error al guardar el inquilino";
             return RedirectToAction(nameof(Index));
         }
@@ -91,9 +91,10 @@ public class InquilinoController : Controller
             TempData["Mensaje"] = "El inquilino ha sido eliminado";
             return RedirectToAction(nameof(Index));
         }
-        catch
+        catch (Exception ex)
         {
-            TempData["Error"] = "Ocurrió un error al eliminar el inquilino";
+            _logger.LogError(ex, "Error al eliminar el inquilino");
+            TempData["Error"] = "Ocurrio un error al intentar eliminar el inquilino";
             return RedirectToAction(nameof(Index));
         }
     }
@@ -114,7 +115,8 @@ public class InquilinoController : Controller
             return View();
         }
         catch (Exception ex)
-        {//poner breakpoints para detectar errores
+        {
+            _logger.LogError(ex, "error");
             throw;
         }
     }
@@ -130,6 +132,7 @@ public class InquilinoController : Controller
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "error");
             TempData["Error"] = "Ocurrio un error al buscar el inquilino";
             return RedirectToAction(nameof(Index));
         }

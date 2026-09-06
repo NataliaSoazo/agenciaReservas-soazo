@@ -47,18 +47,22 @@
     <div class="container">
         <main role="main" class="pb-3">
             @if(ViewBag.Mensaje != null)
-            {
-                <div class="alert alert-success col-4 "  >
-                    @ViewBag.Mensaje
-                </div>
-            }
-            @if(ViewBag.Error != null)
-            {
-                <div class="alert alert-danger col-4 "  >
-                    @ViewBag.Error
-                </div>
-            }
-            @RenderBody()
+    {
+        <div class="alert alert-success col-4">
+            @ViewBag.Mensaje
+        </div>
+    }
+
+    @if(TempData["Error"] != null)
+    {
+        <div class="alert alert-danger col-4">
+            @TempData["Error"]
+        </div>
+    }
+
+    @RenderBody()
+
+</main>
           
         </main>
     </div>
