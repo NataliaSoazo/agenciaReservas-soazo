@@ -21,8 +21,10 @@ public class RepositorioReserva
             string sql = $@"SELECT i.{nameof(Reserva.Id)},{nameof(Reserva.Fecha)}, {nameof(Reserva.FechaDesde)}, {nameof(Reserva.FechaHasta)}, {nameof(Reserva.Monto)}, {nameof(Reserva.IdInquilino)}, {nameof(Reserva.Anulado)},
                       p.{nameof(Inquilino.Nombre)}, p.{nameof(Inquilino.Apellido)}, {nameof(Reserva.IdInmueble)}, m.{nameof(Inmueble.Direccion)}
                 FROM Reservas i 
+                
                 INNER JOIN Inquilinos p ON i.{nameof(Reserva.IdInquilino)} = p.{nameof(Inquilino.Id)}
                 INNER JOIN Inmuebles m ON i.{nameof(Reserva.IdInmueble)} = m.{nameof(Inmueble.Id)}
+                WHERE i.{nameof(Reserva.Anulado)} = 1
                 ORDER BY i.{nameof(Reserva.Id)} ASC;";
 
             using (var command = new MySqlCommand(sql, connection))

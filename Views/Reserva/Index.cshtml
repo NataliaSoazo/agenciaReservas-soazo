@@ -65,7 +65,7 @@
                 </a>
             
                 <!--<a asp-controller="Pago" asp-action="agregarpago" asp-route-id="@item.Id" title="Agregar pago"><i class="fa fa-plus" style="font-size:25px;" id="agregar"></i></a>
-                <a asp-controller="Pago" asp-action="PagosContrato" asp-route-id="@item.Id" title="Listar Pagos"><i class="fa fa-bars" style="font-size:25px;" id="pagosC"></i></a>
+                <a asp-controller="Pago" asp-action="Pagosreserva" asp-route-id="@item.Id" title="Listar Pagos"><i class="fa fa-bars" style="font-size:25px;" id="pagosC"></i></a>
                 <a asp-action="Renovar" asp-route-id=@item.Id title="Renovar contrato"><i class="fa fa-rotate-right" style="font-size:25px;" id="ren"></i></a>
                 -->
             </td>
@@ -74,55 +74,78 @@
     </tbody>
 </table>
 </div>
-<div class="modal fade" id="modal_eliminar_Reserva" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog table-wrapper" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    ¿Deseas eliminar la reserva?
-                </h5>
+<form method="post" asp-action="Eliminar" id="form_eliminar_reserva">
+
+    <div class="modal fade"
+         id="modal_eliminar_Reserva"
+         tabindex="-1"
+         aria-labelledby="tituloEliminarReserva"
+         aria-hidden="true">
+
+        <div class="modal-dialog">
+
+            <div class="modal-content">
+
+                <div class="modal-header">
+
+                    <h5 class="modal-title" id="tituloEliminarReserva">
+                        ¿Deseas eliminar la reserva?
+                    </h5>
+
+                    <!-- X -->
                     <button type="button"
-                        class="close"
-                        data-dismiss="modal"
-                        aria-label="Cerrar">
-                    <span aria-hidden="true">&times;</span>
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Cerrar">
                     </button>
-            </div>
-            <form asp-action="Eliminar" method="post">
+
+                </div>
+
                 <div class="modal-body">
+
                     <input type="hidden"
                            name="id"
                            id="Reserva_eliminar_id" />
+
                     <p>
                         Reserva:
                         <strong id="Reserva_eliminar_nombre"></strong>
                     </p>
+
                 </div>
+
                 <div class="modal-footer">
+
                     <button type="submit"
                             class="btn btn-danger">
                         Eliminar
                     </button>
+
                     <button type="button"
                             class="btn btn-secondary"
-                            data-dismiss="modal">
+                            data-bs-dismiss="modal">
                         Salir
                     </button>
+
                 </div>
-            </form>
+
+            </div>
+
         </div>
+
     </div>
-</div>
+
+</form>
 
 @section Scripts{
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
-        function eliminar(id){
-            document.querySelector("#Contrato_eliminar_id").value = id;
-            document.querySelector("#Contrato_eliminar_nombre").innerHTML = id;
-            $("#modal_eliminar_Contrato").modal("show");
-        }
+        function eliminar(id) {
+    document.querySelector("#Reserva_eliminar_id").value = id;
+    document.querySelector("#Reserva_eliminar_nombre").innerHTML = id;
+    $("#modal_eliminar_Reserva").modal("show");
+}
     </script>
 }
