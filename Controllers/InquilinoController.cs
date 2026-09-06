@@ -19,8 +19,6 @@ public class InquilinoController : Controller
     {
         RepositorioInquilino rp = new RepositorioInquilino();
         IList<Inquilino> lista = new List<Inquilino>();
-        var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
-        ViewBag.UserRole = userRole;
         try
         {
             lista = rp.GetInquilinos();
@@ -79,7 +77,7 @@ public class InquilinoController : Controller
         }
         catch (Exception ex)
         {
-            TempData["Mensaje"] = "Ocurrió un error al guardar el inquilino";
+            TempData["Error"] = "Ocurrió un error al guardar el inquilino";
             return RedirectToAction(nameof(Index));
         }
     }
@@ -95,7 +93,7 @@ public class InquilinoController : Controller
         }
         catch
         {
-            TempData["Mensaje"] = "Ocurrió un error al eliminar el inquilino";
+            TempData["Error"] = "Ocurrió un error al eliminar el inquilino";
             return RedirectToAction(nameof(Index));
         }
     }

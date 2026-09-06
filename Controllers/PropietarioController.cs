@@ -89,7 +89,7 @@ public class PropietarioController : Controller
         }
         catch (Exception ex)
         {
-            TempData["Mensaje"] = "Ocurrió un error al guardar el propietario";
+            TempData["Error"] = "Ocurrió un error al guardar el propietario";
             return RedirectToAction(nameof(Index));
         }
 
@@ -106,7 +106,7 @@ public class PropietarioController : Controller
         }
         catch (Exception ex)
         {
-            TempData["Mensaje"] = "Ocurrio un error al eliminar el propietario";
+            TempData["Error"] = "Ocurrio un error al eliminar el propietario";
             return RedirectToAction(nameof(Index));
         }
     }

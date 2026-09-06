@@ -10,66 +10,67 @@
 <p>
     <a asp-action="Editar" method="post">CREAR NUEVO </a>
 </p>
-
-<table class="table" id="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Id)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Direccion)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Uso)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Disponible)
-            </th>
-            <th>
-                ACCIONES
-            </th>
-        </tr>
-    </thead>
-    <tbody id="table">
-        @foreach (var item in Model)
-        {
+<div class= "table-wrapper">
+    <table class="table" id="table">
+        <thead>
             <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Id)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Direccion)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Uso)
-                </td>
-
-                <td>
-                    @Html.DisplayFor(modelItem => item.Disponible)
-                </td>
-
-
-                <td>
-                    <a asp-action="Detalles" asp-route-id=@item.Id title="Ver Detalles"><i class="fa fa-eye " style="font-size:25px;"
-                            id="detalles"></i></a>
-                    <a asp-action="Editar" asp-route-id=@item.Id title="Editar item"><i class="fa fa-pencil " style="font-size:25px;"
-                            id="edi"></i></a>
-                    
-                    <a href="#" onclick="eliminar('@item.Id', '@item.Direccion')" title="Eliminar">
-                        <i class="fa fa-trash" style="font-size:25px;" id="eli"></i>
-                    </a>
-                    
-                   
-                </td>
+                <th>
+                    @Html.DisplayNameFor(model => model.Id)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Direccion)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Uso)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Disponible)
+                </th>
+                <th>
+                    ACCIONES
+                </th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody id="table">
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Id)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Direccion)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Uso)
+                    </td>
 
-<form method="post" asp-action="Eliminar" id="form_eliminar_domicilio">
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Disponible)
+                    </td>
 
-    <div class="modal fade" id="modal_eliminar_Domicilio" tabindex="-1"
+
+                    <td>
+                        <a asp-action="Detalles" asp-route-id=@item.Id title="Ver Detalles"><i class="fa fa-eye "
+                                                                                                   style="font-size:25px;" id="detalles"></i></a>
+                            <a asp-action="Editar" asp-route-id=@item.Id title="Editar item"><i class="fa fa-pencil "
+                                                                                                    style="font-size:25px;" id="edi"></i></a>
+
+                                <a href="#" onclick="eliminar('@item.Id', '@item.Direccion')" title="Eliminar">
+                                    <i class="fa fa-trash" style="font-size:25px;" id="eli"></i>
+                                </a>
+
+                    
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+<form method="post" asp-action="Eliminar">
+
+    <div class="modal fade " id="modal_eliminar_inmueble" tabindex="-1"
          aria-labelledby="tituloEliminarDomicilio" aria-hidden="true">
 
         <div class="modal-dialog">
@@ -78,7 +79,6 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="tituloEliminarDomicilio">
                         ¿DESEAS ELIMINAR A:
-                        <span id="Domicilio_eliminar_nombre"></span>?
                     </h5>
 
                     <!-- X: cierra sin enviar -->
@@ -89,7 +89,8 @@
                 </div>
 
                 <div class="modal-body">
-                    <input type="hidden" name="Id" id="Domicilio_eliminar_id" />
+                    <input type="hidden" name="id" id="Domicilio_eliminar_id" />
+                    <span id="Domicilio_eliminar_nombre"></span>?
                     <p>Esta acción no se puede deshacer.</p>
                 </div>
 
@@ -110,11 +111,5 @@
 </form>
 
 @section Scripts {
-    <script>
-        function eliminar(id, nombre) {
-            document.querySelector("#Domicilio_eliminar_id").value = id;
-            document.querySelector("#Domicilio_eliminar_nombre").innerHTML = nombre;
-            $("#modal_eliminar_Domicilio").modal("show");
-        }
-    </script>
+    <script src="~/js/inmueble.js"></script>
 }

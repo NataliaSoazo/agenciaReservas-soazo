@@ -1,7 +1,6 @@
 using System.Data;
 using MySql.Data.MySqlClient;
 
-
 namespace agenciaReservas_soazo.Models;
 
 public class RepositorioInquilino
@@ -144,21 +143,23 @@ public class RepositorioInquilino
     }
 
     public int EliminarInquilino(int id)
+{
+    using (var connection = new MySqlConnection(ConnectionString))
     {
-        using (var connection = new MySqlConnection(ConnectionString))
-        {
-            var sql = @$"DELETE from Inquilinos WHERE {nameof(Inquilino.Id)} = @{nameof(Inquilino.Id)}";
-            using (var command = new MySqlCommand(sql, connection))
-            {
-                command.Parameters.AddWithValue($"@{nameof(Inquilino.Id)}", id);
-                connection.Open();
-                command.ExecuteNonQuery();
-                connection.Close();
-            }
-        }
-        return 0;
-    }
+        string sql = "DELETE FROM inquilinos WHERE Id = @Id";
 
+        using (var command = new MySqlCommand(sql, connection))
+        {
+            command.Parameters.Add("@Id", MySqlDbType.Int32).Value = id;
+
+            connection.Open();
+
+            int filasAfectadas = command.ExecuteNonQuery();
+
+            return filasAfectadas;
+        }
+    }
+}
     public IList<Inquilino> BuscarPorNombre(string nombre)
     {
         var res = new List<Inquilino>();

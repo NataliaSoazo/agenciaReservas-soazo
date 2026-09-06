@@ -13,114 +13,122 @@
         Buscar inquilino: <input type="text" name="buscar" class="form-text" />
         <input type="submit" value="Buscar" class="btn btn-dark" />
     </p>
+   
 </form>
-<table class="table" id="table">
-    <thead> 
-        <tr>
-            <th >
-                @Html.DisplayNameFor(model => model.Id)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Nombre)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Apellido)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Telefono)
-            </th>
-             <th>
-               ACCIONES
-            </th>
-        </tr>
-    </thead>
-    <tbody id="table">
-        @foreach (var item in Model)
-        {
+<div class="table-wrapper">
+    <table class="table" id="table">
+        <thead>
             <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Id)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Nombre)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Apellido)
-                </td>
-              
-                <td>
-                    @Html.DisplayFor(modelItem => item.Telefono)
-                </td>
-                
-               
-                <td>
-                    <a asp-action="Detalles" asp-route-id=@item.Id title="Ver Detalle"><i class="fa fa-eye " style="font-size:25px;" id="detalles"></i></a>
-                    <a asp-action="Editar" asp-route-id=@item.Id title="Editar item"><i class="fa fa-pencil " style="font-size:25px;" id="edi"></i></a>
-                
-                    <a href="#" onclick="eliminar('@item.Id', '@item.Nombre')" title="Eliminar">
-                        <i class="fa fa-trash" style="font-size:25px;" id="eli"></i>
-                    </a>
-                    
-                  
-                  
-                </td>
+                <th>
+                    @Html.DisplayNameFor(model => model.Id)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Nombre)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Apellido)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Telefono)
+                </th>
+                <th>
+                    ACCIONES
+                </th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody id="table">
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Id)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Nombre)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Apellido)
+                    </td>
 
-El HTML que tienes funciona si usas Bootstrap 4. Si estás usando Bootstrap 5, Salir y la X no cierran porque cambiaron los atributos: debes usar data-bs-dismiss="modal" y btn-close.
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Telefono)
+                    </td>
 
-xml
-<form method="post" asp-action="Eliminar" id="form_eliminar">
-    <div class="modal fade" id="modal_eliminar_Inquilino" tabindex="-1"
-         aria-labelledby="tituloEliminarInquilino" aria-hidden="true">
+                
+                    <td>
+                        <a asp-action="Detalles" asp-route-id=@item.Id title="Ver Detalle"><i class="fa fa-eye "
+                                                                                                  style="font-size:25px;" id="detalles"></i></a>
+                            <a asp-action="Editar" asp-route-id=@item.Id title="Editar item"><i class="fa fa-pencil "
+                                                                                                    style="font-size:25px;" id="edi"></i></a>
 
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
+                                <a href="#" onclick="eliminar('@item.Id', '@item.Nombre','@item.Apellido')" title="Eliminar">
+                                    <i class="fa fa-trash" style="font-size:25px;" id="eli"></i>
+                                </a>
 
-                <div class="modal-header">
-                    <h5 class="modal-title" id="tituloEliminarInquilino">
-                        ¿DESEAS ELIMINAR A:
-                        <span id="Inquilino_eliminar_nombre"></span>?
-                    </h5>
-
-                    <!-- X -->
-                    <button type="button" class="btn-close"
-                            data-bs-dismiss="modal"
-                            aria-label="Cerrar">
-                    </button>
-                </div>
-
-                <div class="modal-body">
-                    <input type="hidden" name="Id" id="Inquilino_eliminar_id" />
-                    <p>Esta acción no se puede deshacer.</p>
-                </div>
-
-                <div class="modal-footer">
                     
+                  
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+   <div class="table-wrapper">
 
-                    <button type="submit" class="btn btn-danger">
-                        Eliminar
-                    </button>
-                    <button type="button" class="btn btn-secondary"
-                            data-bs-dismiss="modal">
-                        Salir
-                    </button>
+    <form method="post" asp-action="Eliminar">
+        <div class="modal fade"
+             id="modal_eliminar_Inquilino"
+             tabindex="-1"
+             aria-labelledby="tituloEliminarInquilino"
+             aria-hidden="true">
+
+            <div class="modal-dialog">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+
+                        <h5 class="modal-title" id="tituloEliminarInquilino">
+                            ¿DESEAS ELIMINAR A:
+                        </h5>
+
+                        <!-- X -->
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Cerrar">
+                        </button>
+
+                    </div>
+
+                    <div class="modal-body">
+                        
+                        <input type="hidden" name="id" id="Inquilino_eliminar_id" />
+                        <span id="Inquilino_eliminar_nombre"></span>?
+
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <button type="submit"
+                                class="btn btn-danger">
+                            Eliminar
+                        </button>
+
+                        <button type="button"
+                                class="btn btn-secondary"
+                                data-bs-dismiss="modal">
+                            Salir
+                        </button>
+
+                    </div>
+
                 </div>
             </div>
-        </div>
-    </div>
-</form>
 
+        </div>
+
+    </form>
+</div>
 @section Scripts {
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function eliminar(id, nombre) {
-            document.querySelector("#Inquilino_eliminar_id").value = id;
-            document.querySelector("#Inquilino_eliminar_nombre").innerHTML = nombre;
-            $("#modal_eliminar_Inquilino").modal("show");
-        }
-    </script>
+   <script src="~/js/inquilino.js"></script>
 }

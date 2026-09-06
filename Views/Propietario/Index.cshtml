@@ -16,6 +16,7 @@
         <input type="submit" value="Buscar" class="btn btn-dark" />
     </p>
 </form>
+<div class= "table-wrapper">
 <table class="table" id="table">
     <thead> 
         <tr>
@@ -59,7 +60,7 @@
                     <a asp-action="Detalles" asp-route-id=@item.Id title="Ver Detalles"><i class="fa fa-eye " style="font-size:25px;" id="detalles"></i></a>
                     <a asp-action="Editar" asp-route-id=@item.Id title="Editar item"><i class="fa fa-pencil " style="font-size:25px;" id="edi" ></i></a>
                    
-                    <a href="#" onclick="eliminar('@item.Id', '@item.Nombre')" title="Eliminar">
+                    <a href="#" onclick="eliminar('@item.Id', '@item.Nombre', '@item.Apellido')" title="Eliminar">
                         <i class="fa fa-trash" style="font-size:25px;" id="eli"></i>
                     </a>
                     
@@ -69,33 +70,72 @@
         }
     </tbody>
 </table>
+</div>
+<div class="table-wrapper">
 
-<form class="modal" tabindex="-1" asp-action="Eliminar" id="modal_eliminar_propietario">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">DESEAS ELIMINAR A:</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <input type="hidden" name="Id" value="" id ="propietario_eliminar_id">
-        <p><span id="propietario_eliminar_nombre"></span></p>
-      </div>
-      <div class="modal-footer">
-        <button type="submit" class="btn btn-danger">Eliminar</button>
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Salir</button>
-      </div>
-    </div>
-  </div>
-</form>
+    <form method="post" asp-action="Eliminar">
+
+        <div class="modal fade"
+             id="modal_eliminar_propietario"
+             tabindex="-1"
+             aria-labelledby="tituloEliminarPropietario"
+             aria-hidden="true">
+
+            <div class="modal-dialog">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+
+                        <h5 class="modal-title" id="tituloEliminarPropietario">
+                            DESEAS ELIMINAR A:
+                        </h5>
+
+                        <!-- X -->
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Cerrar">
+                        </button>
+
+                    </div>
+
+                    <div class="modal-body">
+
+                        <input type="hidden"
+                               name="id"
+                               value=""
+                               id="propietario_eliminar_id">
+
+                        <p>
+                            <span id="propietario_eliminar_nombre"></span>
+                        </p>
+
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <button type="submit"
+                                class="btn btn-danger">
+                            Eliminar
+                        </button>
+
+                        <!-- Salir -->
+                        <button type="button"
+                                class="btn btn-secondary"
+                                data-bs-dismiss="modal">
+                            Salir
+                        </button>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
 @section Scripts{
-    <script>
-        function eliminar(id, nombre){
-            document.querySelector("#propietario_eliminar_id").value = id;
-            document.querySelector("#propietario_eliminar_nombre").innerHTML = nombre;
-            $("#modal_eliminar_propietario").modal("show");
-        }
-    </script>
+        <script src="~/js/propietario.js"></script>
 }
