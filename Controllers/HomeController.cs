@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using agenciaReservas_soazo.Models;
-namespace agenciaReservas_soazo_agenciareservas_soazo.Controllers;
+namespace agenciareservas_soazo.Controllers;
 
 public class HomeController : Controller
 {

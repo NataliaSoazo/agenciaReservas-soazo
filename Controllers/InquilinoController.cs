@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using agenciaReservas_soazo.Repositorios;
 using agenciaReservas_soazo.Models;
-
-
 namespace agenciaReservas_soazo.Controllers;
-
 public class InquilinoController : Controller
 {
     private readonly ILogger<InquilinoController> _logger;

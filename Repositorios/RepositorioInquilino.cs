@@ -1,7 +1,6 @@
-using System.Data;
 using MySql.Data.MySqlClient;
-
-namespace agenciaReservas_soazo.Models;
+using agenciaReservas_soazo.Models;
+namespace agenciaReservas_soazo.Repositorios;
 
 public class RepositorioInquilino
 {

@@ -1,4 +1,3 @@
-using System.Data;
 using agenciaReservas_soazo.Models;
 using MySql.Data.MySqlClient;
 namespace agenciaReservas_soazo.Repositorios;

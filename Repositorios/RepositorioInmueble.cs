@@ -1,7 +1,7 @@
 using System.Data;
 using MySql.Data.MySqlClient;
-
-namespace agenciaReservas_soazo.Models;
+using agenciaReservas_soazo.Models;
+namespace agenciaReservas_soazo.Repositorios;
 public class RepositorioInmueble
 {
     readonly string ConnectionString = "Server=localhost;Database=agenciareservas;User=root;Password=;";

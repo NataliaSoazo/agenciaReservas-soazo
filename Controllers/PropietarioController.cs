@@ -1,7 +1,4 @@
-using System.Diagnostics;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using agenciaReservas_soazo;
 using agenciaReservas_soazo.Models;
 using agenciaReservas_soazo.Repositorios;
 
