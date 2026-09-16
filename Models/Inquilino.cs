@@ -18,7 +18,7 @@ public class Inquilino
     public string? Apellido { get; set; }
     [Required(ErrorMessage = "Campo obligatorio")]
     [Display(Name = "E-MAIL")]
-    [StringLength(50, MinimumLength = 13, ErrorMessage = "Ingrese un mail válido")]
+    [StringLength(50, MinimumLength = 8, ErrorMessage = "Ingrese un mail válido")]
     public string? Email { get; set; }
     [Required(ErrorMessage = "Campo obligatorio")]
     [StringLength(50, MinimumLength = 7, ErrorMessage = "Ingrese un DNI válido")]

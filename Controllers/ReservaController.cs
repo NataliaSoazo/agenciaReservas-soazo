@@ -51,7 +51,7 @@ public class ReservaController : Controller
         RepositorioReserva repoReserva = new RepositorioReserva();
 
         ViewBag.Inmuebles = repoInmueble.ObtenerTodos();
-        ViewBag.Inquilinos = repoInquilino.GetInquilinos();
+        ViewBag.Inquilinos = repoInquilino.getInquilinos();
 
         // Editar una reserva existente
         if (id > 0)

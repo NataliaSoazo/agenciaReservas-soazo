@@ -1,5 +1,7 @@
+using System.Data;
 using agenciaReservas_soazo.Models;
 using MySql.Data.MySqlClient;
+
 namespace agenciaReservas_soazo.Repositorios;
 
 public class RepositorioPropietario 
@@ -48,6 +50,65 @@ public class RepositorioPropietario
         }
         return propietarios;
     }
+    public IList<Propietario> GetPropietariosPaginados(int pagina, int cantidadPorPagina)
+{
+    var Propietarios = new List<Propietario>();
+
+    int offset = (pagina - 1) * cantidadPorPagina;
+
+    using (var connection = new MySqlConnection(ConnectionString))
+    {
+        string sql = @"
+            SELECT *
+            FROM propietarios
+            ORDER BY Apellido
+            LIMIT @cantidad OFFSET @offset";
+
+        using (var command = new MySqlCommand(sql, connection))
+        {
+            command.Parameters.AddWithValue("@cantidad", cantidadPorPagina);
+            command.Parameters.AddWithValue("@offset", offset);
+
+            connection.Open();
+
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                    {
+                        Propietarios.Add(new Propietario
+                        {
+                            Id = reader.GetInt32(nameof(Propietario.Id)),
+                            Nombre = reader.GetString(nameof(Propietario.Nombre)),
+                            Apellido = reader.GetString(nameof(Propietario.Apellido)),
+                            Dni = reader.GetString(nameof(Propietario.Dni)),
+                            Email = reader.GetString(nameof(Propietario.Email)),
+                            Telefono = reader.GetString(nameof(Propietario.Telefono)),
+                            Domicilio = reader.GetString(nameof(Propietario.Domicilio)),
+                            Ciudad = reader.GetString(nameof(Propietario.Ciudad)),
+
+                        });
+                    }
+                }
+            }
+        }
+    return Propietarios;
+    }
+
+    public int GetCantidadPropietarios()
+{
+    using (var connection = new MySqlConnection(ConnectionString))
+    {
+        string sql = "SELECT COUNT(*) FROM Propietarios";
+
+        using (var command = new MySqlCommand(sql, connection))
+        {
+            connection.Open();
+
+            return Convert.ToInt32(command.ExecuteScalar());
+        }
+    }
+}
+
 
     public int AltaPropietario(Propietario propietario)
     {

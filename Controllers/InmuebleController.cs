@@ -42,6 +42,51 @@ public class InmuebleController : Controller
             return View(lista);
         }
     }
+    public IActionResult Index(int pagina = 1)
+{
+    var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
+        ViewBag.UserRole = userRole;
+    RepositorioInmueble rp = new RepositorioInmueble();
+    IList<Inmueble> lista = new List<Inmueble>();
+    try
+    {
+        int cantidadPorPagina = 10;
+        // Cantidad total de inmuebles
+        int totalInmuebles = rp.GetCantidadInmuebles();
+        // Obtener los inmuebles correspondientes a la página
+        lista = rp.GetInmueblesPaginados(
+            pagina,
+            cantidadPorPagina
+        );
+        // Calcular cantidad de páginas
+        int totalPaginas = (int)Math.Ceiling(
+            (double)totalInmuebles / cantidadPorPagina
+        );
+        ViewBag.PaginaActual = pagina;
+        ViewBag.TotalPaginas = totalPaginas;
+
+        if (TempData.ContainsKey("Mensaje"))
+        {
+            ViewBag.Mensaje = TempData["Mensaje"];
+        }
+        if (TempData.ContainsKey("Error"))
+        {
+            ViewBag.Error = TempData["Error"];
+        }
+        return View(lista);
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(
+            ex,
+            "Error al obtener la lista de inmuebles"
+        );
+        TempData["Error"] =
+            "Ocurrió un error al obtener la lista de inmuebles";
+
+        return View(lista);
+    }
+}
 
    /* public IActionResult DisponiblesPorFechas(DateTime fechaInicio, DateTime fechaFin)
     {

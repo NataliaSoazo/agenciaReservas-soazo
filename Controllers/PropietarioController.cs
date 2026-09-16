@@ -17,7 +17,7 @@ public class PropietarioController : Controller
     }
     
     
-    public IActionResult Index()
+    /*public IActionResult Index()
     {
         RepositorioPropietario rp = new RepositorioPropietario();
         IList<Propietario> lista = new List<Propietario>();
@@ -44,8 +44,49 @@ public class PropietarioController : Controller
             ViewBag.Error = TempData["Error"];
             return View(lista);
         }
+    }*/
+     public IActionResult Index(int pagina = 1)
+{
+    RepositorioPropietario rp = new RepositorioPropietario();
+
+    IList<Propietario> lista = new List<Propietario>();
+
+    try
+    {
+        int cantidadPorPagina = 10;
+        // Cantidad total de registros
+        int totalPropietarios = rp.GetCantidadPropietarios();
+
+        // Obtener solamente los registros de esta página
+        lista = rp.GetPropietariosPaginados(pagina, cantidadPorPagina);
+
+        // Cantidad total de páginas
+        int totalPaginas = (int)Math.Ceiling(
+            (double)totalPropietarios / cantidadPorPagina
+        );
+
+        ViewBag.PaginaActual = pagina;
+        ViewBag.TotalPaginas = totalPaginas;
+
+        if (TempData.ContainsKey("Mensaje"))
+        {
+            ViewBag.Mensaje = TempData["Mensaje"];
+        }
+
+        if (TempData.ContainsKey("Error"))
+        {
+            ViewBag.Error = TempData["Error"];
+        }
+
+        return View(lista);
     }
-    
+    catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error al obtener la lista de Propietarios");
+            TempData["Error"] = "Ocurrio un error al obtener la lista de Propietarios";
+            return View(lista);
+        }
+}
     public IActionResult Editar(int id)
     {
         if (id > 0)
@@ -87,7 +128,7 @@ public class PropietarioController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "error");
-            TempData["Error"] = "Ocurrió un error al guardar el propietario";
+            TempData["Error"] = "Ocurrió un error al guardar el propietario, verifique posibles valores únicos duplicados";
             return RedirectToAction(nameof(Index));
         }
 

@@ -50,6 +50,95 @@ public class RepositorioInmueble
         }
         return inmuebles;
     }
+    public IList<Inmueble> GetInmueblesPaginados(int pagina, int cantidadPorPagina)
+{
+    var inmuebles = new List<Inmueble>();
+
+    int offset = (pagina - 1) * cantidadPorPagina;
+
+    using (var connection = new MySqlConnection(ConnectionString))
+    {
+        string sql = @$"
+            SELECT 
+                i.{nameof(Inmueble.Id)},
+                i.{nameof(Inmueble.Direccion)},
+                i.{nameof(Inmueble.Tipo)},
+                i.{nameof(Inmueble.Uso)},
+                i.{nameof(Inmueble.Cupo)},
+                i.{nameof(Inmueble.Precio)},
+                i.{nameof(Inmueble.Disponible)},
+                i.{nameof(Inmueble.Latitud)},
+                i.{nameof(Inmueble.Longitud)},
+                i.{nameof(Inmueble.PropietarioId)},
+                p.{nameof(Propietario.Id)},
+                p.{nameof(Propietario.Nombre)},
+                p.{nameof(Propietario.Apellido)}
+            FROM Inmuebles i
+            INNER JOIN Propietarios p 
+                ON i.{nameof(Inmueble.PropietarioId)} = p.{nameof(Propietario.Id)}
+            ORDER BY i.{nameof(Inmueble.Disponible)} DESC
+            LIMIT @cantidad OFFSET @offset";
+
+        using (var command = new MySqlCommand(sql, connection))
+        {
+            command.CommandType = CommandType.Text;
+
+            command.Parameters.AddWithValue("@cantidad", cantidadPorPagina);
+            command.Parameters.AddWithValue("@offset", offset);
+
+            connection.Open();
+
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    inmuebles.Add(new Inmueble
+                    {
+                        Id = reader.GetInt32(nameof(Inmueble.Id)),
+                        Direccion = reader.GetString(nameof(Inmueble.Direccion)),
+                        Tipo = reader.GetString(nameof(Inmueble.Tipo)),
+                        Uso = reader.GetString(nameof(Inmueble.Uso)),
+                        Cupo = reader.GetInt32(nameof(Inmueble.Cupo)),
+                        Precio = reader.GetDouble(nameof(Inmueble.Precio)),
+                        Disponible = reader.GetString(nameof(Inmueble.Disponible)),
+                        Latitud = reader.GetString(nameof(Inmueble.Latitud)),
+                        Longitud = reader.GetString(nameof(Inmueble.Longitud)),
+                        PropietarioId = reader.GetInt32(nameof(Inmueble.PropietarioId)),
+
+                        Duenio = new Propietario
+                        {
+                            Id = reader.GetInt32(nameof(Propietario.Id)),
+                            Nombre = reader.GetString(nameof(Propietario.Nombre)),
+                            Apellido = reader.GetString(nameof(Propietario.Apellido))
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+    return inmuebles;
+}
+public int GetCantidadInmuebles()
+{
+    int cantidad = 0;
+
+    using (var connection = new MySqlConnection(ConnectionString))
+    {
+        string sql = "SELECT COUNT(*) FROM Inmuebles";
+
+        using (var command = new MySqlCommand(sql, connection))
+        {
+            command.CommandType = CommandType.Text;
+
+            connection.Open();
+
+            cantidad = Convert.ToInt32(command.ExecuteScalar());
+        }
+    }
+
+    return cantidad;
+}
 
     public int AltaInmueble(Inmueble inmueble)
     {

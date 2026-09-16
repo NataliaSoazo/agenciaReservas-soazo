@@ -38,6 +38,18 @@
                          <li class="nav-item">
                             <a class="nav-link text-light" asp-area="" asp-controller="Reserva" asp-action="Index">Reservas</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-light" asp-area="" asp-controller="Pago" asp-action="Index">Pagos</a>
+                        </li>
+                        
+                            <li class="nav-item">
+                                <a class="nav-link text-light" asp-area="" asp-controller="Usuario" asp-action="Index">Usuarios</a>
+                            </li>
+                        
+                        <li>
+                           <button class="bt btn-warning"><a class="dropdown-item text-light" asp-controller="Usuario" asp-action="Perfil"><i class="lnr lnr-user"></i> Perfil</a></button> 
+							<button class="btn-warning"><a class="dropdown-item text-light" asp-controller="Usuario" asp-action="Logout"><i class="lnr lnr-exit"></i> Salir</a></button>
+                        </li>
                     </ul>
                     
                 </div>

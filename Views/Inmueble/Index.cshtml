@@ -66,6 +66,18 @@
                     }
                 </tbody>
             </table>
+            @for (int i = 1; i <= ViewBag.TotalPaginas; i++)
+{
+    <li class="page-item @(i == ViewBag.PaginaActual ? "active" : "")">
+
+        <a class="page-link"
+           asp-action="Index"
+           asp-route-pagina="@i">
+            @i
+        </a>
+
+    </li>
+}
         </div>
 
 <form method="post" asp-action="Eliminar">

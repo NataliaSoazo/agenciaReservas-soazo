@@ -13,7 +13,7 @@ public class InquilinoController : Controller
         _logger = logger;
     }
     
-    public IActionResult Index()
+ /*   public IActionResult Index()
     {
         RepositorioInquilino rp = new RepositorioInquilino();
         IList<Inquilino> lista = new List<Inquilino>();
@@ -32,8 +32,50 @@ public class InquilinoController : Controller
             TempData["Error"] = "Ocurrio un error al obtener la lista de inquilinos";
             return View(lista);
         }
+    }*/
+public IActionResult Index(int pagina = 1)
+{
+    RepositorioInquilino rp = new RepositorioInquilino();
+
+    IList<Inquilino> lista = new List<Inquilino>();
+
+    try
+    {
+        int cantidadPorPagina = 10;
+
+        // Cantidad total de registros
+        int totalInquilinos = rp.GetCantidadInquilinos();
+
+        // Obtener los registros correspondientes a la página
+        lista = rp.GetInquilinosPaginados(pagina, cantidadPorPagina);
+        // Cantidad total de páginas
+        int totalPaginas = (int)Math.Ceiling(
+            (double)totalInquilinos / cantidadPorPagina
+        );
+
+        ViewBag.PaginaActual = pagina;
+        ViewBag.TotalPaginas = totalPaginas;
+
+        if (TempData.ContainsKey("Mensaje"))
+        {
+            ViewBag.Mensaje = TempData["Mensaje"];
+        }
+
+        if (TempData.ContainsKey("Error"))
+        {
+            ViewBag.Error = TempData["Error"];
+        }
+
+        return View(lista);
     }
-    
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error al obtener la lista de inquilinos");
+        TempData["Error"] = "Ocurrió un error al obtener la lista de inquilinos";
+        return View(lista);
+    }
+}
+
     public IActionResult Editar(int id)
     {
         if (id > 0)
@@ -75,7 +117,7 @@ public class InquilinoController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "error");
-            TempData["Error"] = "Ocurrió un error al guardar el inquilino";
+            TempData["Error"] = "Ocurrió un error al guardar el inquilino, verifique posibles valores únicos duplicados";
             return RedirectToAction(nameof(Index));
         }
     }

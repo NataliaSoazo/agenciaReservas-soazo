@@ -19,15 +19,16 @@
     <table class="table" id="table">
         <thead>
             <tr>
-                <th>
-                    @Html.DisplayNameFor(model => model.Id)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.Nombre)
+                <th class="text center">
+                  @Html.DisplayNameFor(model => model.Dni)
                 </th>
                 <th>
                     @Html.DisplayNameFor(model => model.Apellido)
                 </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Nombre)
+                </th>
+                
                 <th>
                     @Html.DisplayNameFor(model => model.Telefono)
                 </th>
@@ -39,16 +40,15 @@
         <tbody id="table">
             @foreach (var item in Model)
             {
-                <tr>
+                <tr>    
+                    <td class="text center">@item.Dni</td>
                     <td>
-                        @Html.DisplayFor(modelItem => item.Id)
+                        @Html.DisplayFor(modelItem => item.Apellido)
                     </td>
                     <td>
                         @Html.DisplayFor(modelItem => item.Nombre)
                     </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Apellido)
-                    </td>
+                    
 
                     <td>
                         @Html.DisplayFor(modelItem => item.Telefono)
@@ -129,6 +129,49 @@
 
     </form>
 </div>
+<nav aria-label="Paginación">
+
+    <ul class="pagination">
+
+        @if (ViewBag.PaginaActual > 1)
+        {
+            <li class="page-item">
+                <a class="page-link"
+                   asp-action="Index"
+                   asp-route-pagina="@(ViewBag.PaginaActual - 1)">
+                    Anterior
+                </a>
+            </li>
+        }
+
+        @for (int i = 1; i <= ViewBag.TotalPaginas; i++)
+        {
+            <li class="page-item @(i == ViewBag.PaginaActual ? "active" : "")">
+
+                <a class="page-link"
+                   asp-action="Index"
+                   asp-route-pagina="@i">
+                    @i
+                </a>
+
+            </li>
+        }
+
+        @if (ViewBag.PaginaActual < ViewBag.TotalPaginas)
+        {
+            <li class="page-item">
+                <a class="page-link"
+                   asp-action="Index"
+                   asp-route-pagina="@(ViewBag.PaginaActual + 1)">
+                    Siguiente
+                </a>
+            </li>
+        }
+
+    </ul>
+
+</nav>
+
 @section Scripts {
    <script src="~/js/inquilino.js"></script>
 }

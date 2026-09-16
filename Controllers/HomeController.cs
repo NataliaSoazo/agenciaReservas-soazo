@@ -1,7 +1,8 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using agenciaReservas_soazo.Models;
-namespace agenciareservas_soazo.Controllers;
+
+namespace agenciaReservas_soazo.Controllers;
 
 public class HomeController : Controller
 {
@@ -11,9 +12,11 @@ public class HomeController : Controller
     {
         _logger = logger;
     }
-
+  
     public IActionResult Index()
     {
+        var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
+        ViewBag.UserRole = userRole;
         return View();
     }
 
@@ -26,5 +29,10 @@ public class HomeController : Controller
     public IActionResult Error()
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+    }
+
+     public IActionResult Loguin(string returnUrl){
+        return View();
+
     }
 }
