@@ -44,7 +44,12 @@
             @Html.DisplayNameFor(model => model.Anulado)
         </dt>
         <dd class = "col-6 ">
-            @Html.DisplayFor(model => @model.Anulado ? "SÍ" : "NO")
+         @if (Model.Anulado){
+            <span>SI</span>
+         }else{
+             <span>NO</span>
+         }
+          
         </dd>
         <dt class = "col-6 ">
             @Html.DisplayNameFor(model => model.IdReserva)

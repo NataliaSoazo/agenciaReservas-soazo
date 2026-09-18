@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using agenciaReservas_soazo.Models;
 using agenciaReservas_soazo.Repositorios;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace agenciaReservas_soazo.Controllers;
@@ -15,78 +16,51 @@ public class PropietarioController : Controller
 
         _logger = logger;
     }
-    
-    
-    /*public IActionResult Index()
+     [Authorize]
+    public IActionResult Index(int pagina = 1)
+
     {
         RepositorioPropietario rp = new RepositorioPropietario();
+
         IList<Propietario> lista = new List<Propietario>();
-        var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
-        ViewBag.UserRole = userRole;
+
         try
         {
-            lista = rp.GetPropietarios();
-            
+            int cantidadPorPagina = 10;
+            // Cantidad total de registros
+            int totalPropietarios = rp.GetCantidadPropietarios();
+
+            // Obtener solamente los registros de esta página
+            lista = rp.GetPropietariosPaginados(pagina, cantidadPorPagina);
+
+            // Cantidad total de páginas
+            int totalPaginas = (int)Math.Ceiling(
+                (double)totalPropietarios / cantidadPorPagina
+            );
+
+            ViewBag.PaginaActual = pagina;
+            ViewBag.TotalPaginas = totalPaginas;
+
             if (TempData.ContainsKey("Mensaje"))
             {
                 ViewBag.Mensaje = TempData["Mensaje"];
             }
-            else if (TempData.ContainsKey("Error"))
+
+            if (TempData.ContainsKey("Error"))
             {
                 ViewBag.Error = TempData["Error"];
             }
+
             return View(lista);
         }
         catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error al obtener la lista de propietarios");
-            TempData["Error"] = "Ocurrio un error al obtener la lista de propietarios";
-            ViewBag.Error = TempData["Error"];
-            return View(lista);
-        }
-    }*/
-     public IActionResult Index(int pagina = 1)
-{
-    RepositorioPropietario rp = new RepositorioPropietario();
-
-    IList<Propietario> lista = new List<Propietario>();
-
-    try
-    {
-        int cantidadPorPagina = 10;
-        // Cantidad total de registros
-        int totalPropietarios = rp.GetCantidadPropietarios();
-
-        // Obtener solamente los registros de esta página
-        lista = rp.GetPropietariosPaginados(pagina, cantidadPorPagina);
-
-        // Cantidad total de páginas
-        int totalPaginas = (int)Math.Ceiling(
-            (double)totalPropietarios / cantidadPorPagina
-        );
-
-        ViewBag.PaginaActual = pagina;
-        ViewBag.TotalPaginas = totalPaginas;
-
-        if (TempData.ContainsKey("Mensaje"))
-        {
-            ViewBag.Mensaje = TempData["Mensaje"];
-        }
-
-        if (TempData.ContainsKey("Error"))
-        {
-            ViewBag.Error = TempData["Error"];
-        }
-
-        return View(lista);
-    }
-    catch (Exception ex)
         {
             _logger.LogError(ex, "Error al obtener la lista de Propietarios");
             TempData["Error"] = "Ocurrio un error al obtener la lista de Propietarios";
             return View(lista);
         }
-}
+    }
+
     public IActionResult Editar(int id)
     {
         if (id > 0)
@@ -100,7 +74,7 @@ public class PropietarioController : Controller
             return View();
         }
     }
-    
+    [Authorize]
     public IActionResult Guardar(Propietario propietario)
     {
         try
@@ -133,7 +107,7 @@ public class PropietarioController : Controller
         }
 
     }
-    
+    [Authorize(Policy = "Administrador")]
     public IActionResult Eliminar(int id)
     {
         try
@@ -150,14 +124,14 @@ public class PropietarioController : Controller
             return RedirectToAction(nameof(Index));
         }
     }
-    
+    [Authorize]
     public IActionResult Detalles(int id)
     {
         RepositorioPropietario rp = new RepositorioPropietario();
         var propietario = rp.getPropietario(id);
         return View(propietario);
     }
-
+    [Authorize]
     // GET: Propietario/Busqueda
     public IActionResult Busqueda()
     {
@@ -172,7 +146,7 @@ public class PropietarioController : Controller
         }
     }
     //[Route("[controller]/Buscar/{q}", Name = "Buscar")]
-    
+    [Authorize]
     public IActionResult BuscarPropietario(string buscar)
     {
         try

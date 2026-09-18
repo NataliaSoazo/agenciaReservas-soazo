@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using agenciaReservas_soazo.Models;
 using agenciaReservas_soazo.Repositorios;
-
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace agenciaReservas_soazo.Controllers;
@@ -14,34 +14,7 @@ public class InmuebleController : Controller
     {
         _logger = logger;
     }
-    
-/*    public IActionResult Index()
-    {
-        RepositorioInmueble ri = new RepositorioInmueble();
-        IList<Inmueble> lista = new List<Inmueble>();
-        var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
-        ViewBag.UserRole = userRole;
-        try
-        {
-            lista = ri.ObtenerTodos();
-            if (TempData.ContainsKey("Mensaje"))
-            {
-                ViewBag.Mensaje = TempData["Mensaje"];
-            }
-            else if (TempData.ContainsKey("Error"))
-            {
-                ViewBag.Error = TempData["Error"];
-            }
-            return View(lista);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error al obtener la lista de inmuebles");
-            TempData["Error"] = "Ocurrió un error al obtener los inmuebles.";
-            ViewBag.Error = TempData["Error"];
-            return View(lista);
-        }
-    }*/
+    [Authorize]
     public IActionResult Index(int pagina = 1)
 {
     var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
@@ -96,7 +69,7 @@ public class InmuebleController : Controller
         var inmueblesDisponibles = rc.obtenerInmDisp(fechaInicio, fechaFin);
         return View("Index", inmueblesDisponibles);
     }*/
- 
+     [Authorize]
     public IActionResult Editar(int id)
 
     {
@@ -119,7 +92,7 @@ public class InmuebleController : Controller
             return View();
         }
     }
-  
+     [Authorize]
     public IActionResult Guardar(Inmueble inmueble)
     {
         try
@@ -154,7 +127,7 @@ public class InmuebleController : Controller
 
         }
     }
-  
+    [Authorize(Policy = "Administrador")]
     public IActionResult Eliminar(int id)
     {
         try
@@ -171,7 +144,7 @@ public class InmuebleController : Controller
             return RedirectToAction(nameof(Index));
         }
     }
-
+     [Authorize]
     public IActionResult Detalles(int id)
     {
         RepositorioInmueble rp = new RepositorioInmueble();

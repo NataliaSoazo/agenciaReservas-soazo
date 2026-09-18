@@ -41,4 +41,9 @@ public class Reserva
         public Inquilino? Arrendatario { get; set; }
         [Display(Name = "INMUEBLE")]
         public Inmueble? DatoInmueble { get; set; }
+        [Display(Name = "USUARIO QUE CREÓ EL PAGO")]
+        public int IdAlta { get; set; }
+
+        [Display(Name = "USUARIO QUE ANULÓ EL PAGO")]
+        public int? IdBaja { get; set; } 
     }

@@ -96,26 +96,61 @@
 <script src="~/lib/select2/select2.min.js"></script>
 
 <script>
+    // 1. Convertir el JSON proveniente de C# a un objeto JavaScript
+    var listaInmuebles = @Html.Raw(inmueblesJson ?? "[]");
+
     $(document).ready(function () {
         $('#selectInquilinos').select2({
-            placeholder: 'Buscar inquilino aqui',
-            allowClear: true,
-            width: '100%'
-        });
-        $('#selectInmuebles').select2({
-            placeholder: 'Buscar inmueble aqui',
+            placeholder: 'Buscar inquilino aquí',
             allowClear: true,
             width: '100%'
         });
 
-        $('#FechaDesde, #FechaHasta').on('change', function () {
-            
+        $('#selectInmuebles').select2({
+            placeholder: 'Buscar inmueble aquí',
+            allowClear: true,
+            width: '100%'
+        });
+
+        // 2. Escuchar cambios en Inmueble y en las Fechas
+        $('#selectInmuebles, #FechaDesde, #FechaHasta').on('change', function () {
+            calcularMontoReserva();
         });
     });
-</script>
 
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    function calcularMontoReserva() {
+        var inmuebleId = $('#selectInmuebles').val();
+        var fechaDesdeVal = $('#FechaDesde').val();
+        var fechaHastaVal = $('#FechaHasta').val();
+
+        // Verificar que tengamos inmueble y ambas fechas elegidas
+        if (inmuebleId && fechaDesdeVal && fechaHastaVal) {
+            var fDesde = new Date(fechaDesdeVal);
+            var fHasta = new Date(fechaHastaVal);
+
+            if (fHasta > fDesde) {
+                // Calcular días de diferencia
+                var diferenciaTiempo = fHasta.getTime() - fDesde.getTime();
+                var dias = diferenciaTiempo / (1000 * 3600 * 24);
+
+                // Buscar el inmueble seleccionado en el array JSON
+                var inmueble = listaInmuebles.find(i => i.Id == inmuebleId);
+
+                if (inmueble) {
+                    // Reemplaza 'Precio' por el nombre exacto de la propiedad en tu modelo Inmueble (ej. Precio, Valor, Alquiler)
+                    var precioDiario = inmueble.Precio || inmueble.PrecioDiario || 0; 
+                    var costoTotal = dias * precioDiario;
+
+                    // Ajusta el % según lo que pida tu consigna (ejemplo: 50% = 0.50)
+                    var porcentajeReserva = 0.50; 
+                    var montoCalculado = costoTotal * porcentajeReserva;
+
+                    // Asignar el valor al campo input Monto (con 2 decimales)
+                    $('#Monto').val(montoCalculado.toFixed(2));
+                }
+            } else {
+                $('#Monto').val(''); // Fechas inválidas
+            }
+        }
     }
-}
+</script>

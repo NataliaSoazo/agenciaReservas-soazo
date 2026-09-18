@@ -168,12 +168,12 @@ public int GetCantidadReservas()
                     INSERT INTO reservas
                     (
                         {nameof(Reserva.Fecha)},{nameof(Reserva.FechaDesde)},{nameof(Reserva.FechaHasta)},
-                        {nameof(Reserva.Monto)},{nameof(Reserva.IdInquilino)},{nameof(Reserva.IdInmueble)},{nameof(Reserva.Anulado)}
+                        {nameof(Reserva.Monto)},{nameof(Reserva.IdInquilino)},{nameof(Reserva.IdInmueble)},{nameof(Reserva.Anulado)}, {nameof(Reserva.IdAlta)}, {nameof(Pago.IdBaja)}
                     )
                     VALUES
                     (
                         @{nameof(Reserva.Fecha)}, @{nameof(Reserva.FechaDesde)}, @{nameof(Reserva.FechaHasta)},
-                        @{nameof(Reserva.Monto)},@{nameof(Reserva.IdInquilino)},@{nameof(Reserva.IdInmueble)},
+                        @{nameof(Reserva.Monto)},@{nameof(Reserva.IdInquilino)},@{nameof(Reserva.IdInmueble)},@{nameof(Pago.IdAlta)}, @{nameof(Pago.IdBaja)}
                         false
                     );
 
@@ -234,6 +234,8 @@ public int GetCantidadReservas()
                 r.{nameof(Reserva.Monto)},
                 r.{nameof(Reserva.IdInquilino)},
                 r.{nameof(Reserva.IdInmueble)},
+                r.{nameof(Reserva.IdAlta)},
+                r.{nameof(Reserva.IdBaja)},
                 r.{nameof(Reserva.Anulado)},
                 p.{nameof(Inquilino.Nombre)},
                 p.{nameof(Inquilino.Apellido)},
@@ -267,7 +269,8 @@ public int GetCantidadReservas()
                         IdInquilino = reader.GetInt32(nameof(Reserva.IdInquilino)),
                         IdInmueble = reader.GetInt32(nameof(Reserva.IdInmueble)),
                         Anulado = reader.GetBoolean(nameof(Reserva.Anulado)),
-
+                        IdAlta = reader.GetInt32(reader.GetOrdinal(nameof(Pago.IdAlta))),
+                        IdBaja = reader.GetInt32(reader.GetOrdinal(nameof(Pago.IdBaja))),
                         Arrendatario = new Inquilino
                         {
                             Nombre = reader.GetString(nameof(Inquilino.Nombre)),

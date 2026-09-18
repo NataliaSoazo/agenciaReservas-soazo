@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using agenciaReservas_soazo.Models;
 using agenciaReservas_soazo.Repositorios;
-
 namespace agenciaReservas_soazo.Controllers;
 
 public class PagoController : Controller
@@ -14,7 +13,7 @@ public class PagoController : Controller
     {
         _logger = logger;
     }
-    //[Authorize]
+    [Authorize]
     public IActionResult Index(int pagina = 1)
     {
         RepositorioPago rp = new RepositorioPago();
@@ -56,7 +55,7 @@ public class PagoController : Controller
             return View(lista);
         }
     }
-    //[Authorize]
+    [Authorize]
     public IActionResult Editar(int? id, int? IdReserva)
     {   
         RepositorioReserva reserva = new RepositorioReserva();
@@ -88,7 +87,7 @@ public class PagoController : Controller
         return View(pago);
     }
 
-    //[Authorize]
+    [Authorize]
    public IActionResult AgregarPago(int id)
     {   
         if (id ==0){
@@ -111,7 +110,7 @@ public class PagoController : Controller
 
         return View(pago);
     }
- //   [Authorize]
+   [Authorize]
     public IActionResult Guardar(Pago pago, int? IdReserva)
     {
         if (IdReserva.HasValue)
@@ -145,7 +144,7 @@ public class PagoController : Controller
 
         }
     }
-  //  [Authorize(Policy = "Administrador")]
+    [Authorize(Policy = "Administrador")]
     public IActionResult Eliminar(int id) //Es un anulado logico
     {
         try
@@ -163,7 +162,7 @@ public class PagoController : Controller
             return RedirectToAction(nameof(Index));
         }
     }
- //   [Authorize]
+    [Authorize]
     public IActionResult Detalles(int id)
     {
         RepositorioPago rp = new RepositorioPago();

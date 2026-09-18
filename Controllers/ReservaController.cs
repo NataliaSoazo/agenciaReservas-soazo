@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using agenciaReservas_soazo.Models;
 using agenciaReservas_soazo.Repositorios;
-
+using Microsoft.AspNetCore.Authorization;
 namespace agenciaReserva_soazo.Controllers;
 
 public class ReservaController : Controller
@@ -12,73 +12,49 @@ public class ReservaController : Controller
     {
         _logger = logger;
     }
-
- /*   public IActionResult Index()
+    [Authorize]
+    public IActionResult Index(int pagina = 1)
     {
         RepositorioReserva rr = new RepositorioReserva();
         IList<Reserva> lista = new List<Reserva>();
 
         try
         {
-            lista = rr.GetReservas();
+            int cantidadPorPagina = 10;
+
+            // Cantidad total de registros
+            int totalReservas = rr.GetCantidadReservas();
+
+            // Obtener los registros correspondientes a la página
+            lista = rr.GetReservasPaginadas(pagina, cantidadPorPagina);
+            // Cantidad total de páginas
+            int totalPaginas = (int)Math.Ceiling(
+                (double)totalReservas / cantidadPorPagina
+            );
+
+            ViewBag.PaginaActual = pagina;
+            ViewBag.TotalPaginas = totalPaginas;
+
             if (TempData.ContainsKey("Mensaje"))
             {
                 ViewBag.Mensaje = TempData["Mensaje"];
             }
+
             if (TempData.ContainsKey("Error"))
             {
                 ViewBag.Error = TempData["Error"];
             }
+
             return View(lista);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error al obtener la lista de reservas");
-            ViewBag.Error = "Ocurrió un error al obtener la lista de reservas.";
+            TempData["Error"] = "Ocurrió un error al obtener la lista de reservas";
             return View(lista);
         }
-    }*/
-public IActionResult Index(int pagina = 1)
-{
-    RepositorioReserva rr = new RepositorioReserva();
-    IList<Reserva> lista = new List<Reserva>();
-
-    try
-    {
-        int cantidadPorPagina = 10;
-
-        // Cantidad total de registros
-        int totalReservas = rr.GetCantidadReservas();
-
-        // Obtener los registros correspondientes a la página
-        lista = rr.GetReservasPaginadas(pagina, cantidadPorPagina);
-        // Cantidad total de páginas
-        int totalPaginas = (int)Math.Ceiling(
-            (double)totalReservas / cantidadPorPagina
-        );
-
-        ViewBag.PaginaActual = pagina;
-        ViewBag.TotalPaginas = totalPaginas;
-
-        if (TempData.ContainsKey("Mensaje"))
-        {
-            ViewBag.Mensaje = TempData["Mensaje"];
-        }
-
-        if (TempData.ContainsKey("Error"))
-        {
-            ViewBag.Error = TempData["Error"];
-        }
-
-        return View(lista);
     }
-    catch (Exception ex)
-    {
-        _logger.LogError(ex, "Error al obtener la lista de reservas");
-        TempData["Error"] = "Ocurrió un error al obtener la lista de reservas";
-        return View(lista);
-    }
-}
+    [Authorize]
     public IActionResult Editar(int id)
     {
         if (TempData.ContainsKey("Error"))
@@ -113,63 +89,67 @@ public IActionResult Index(int pagina = 1)
         }
 
         // Crear una nueva reserva
-         return View(new Reserva
+        return View(new Reserva
         {
             Fecha = DateTime.Today,
             FechaDesde = DateTime.Today,
             FechaHasta = DateTime.Today
         });
     }
-[HttpPost]
-public IActionResult Guardar(Reserva reserva)
-{
-    try
+    [Authorize]
+    [HttpPost]
+    public IActionResult Guardar(Reserva reserva)
     {
-        RepositorioReserva rr = new RepositorioReserva();
-        if (reserva.FechaDesde >= reserva.FechaHasta)
+        try
         {
-            TempData["Error"] = "La fecha de inicio debe ser anterior a la fecha de culminación.";
+            RepositorioReserva rr = new RepositorioReserva();
+            if (reserva.FechaDesde >= reserva.FechaHasta)
+            {
+                TempData["Error"] = "La fecha de inicio debe ser anterior a la fecha de culminación.";
 
-            return RedirectToAction(nameof(Editar),new { id = reserva.Id }
+                return RedirectToAction(nameof(Editar), new { id = reserva.Id }
+                );
+            }
+            // Al editar, excluimos la reserva actual de la búsqueda.
+            bool disponible = rr.InmuebleDisponible(
+                reserva.IdInmueble,
+                reserva.FechaDesde,
+                reserva.FechaHasta,
+                reserva.Id
+            );
+
+            if (!disponible)
+            {
+                TempData["Error"] = "El inmueble no está disponible para esas fechas.";
+
+                return RedirectToAction(nameof(Editar), new { id = reserva.Id });
+            }
+            if (reserva.Id > 0)
+            {
+                rr.ModificarReserva(reserva);
+                TempData["Mensaje"] =
+                    "La reserva se modificó correctamente.";
+            }
+            else
+            {
+                reserva.Anulado = false;
+                rr.AltaReserva(reserva);
+                TempData["Mensaje"] =
+                    "La reserva se creó correctamente.";
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error al guardar la reserva");
+            TempData["Error"] = "No se pudo completar la operación.";
+            return RedirectToAction(nameof(Editar), new { id = reserva.Id }
             );
         }
-        // Al editar, excluimos la reserva actual de la búsqueda.
-        bool disponible = rr.InmuebleDisponible(
-            reserva.IdInmueble,
-            reserva.FechaDesde,
-            reserva.FechaHasta,
-            reserva.Id
-        );
-
-        if (!disponible)
-        {
-            TempData["Error"] ="El inmueble no está disponible para esas fechas.";
-
-            return RedirectToAction(nameof(Editar),new { id = reserva.Id });
-        }
-        if (reserva.Id > 0)
-        {
-            rr.ModificarReserva(reserva);
-            TempData["Mensaje"] =
-                "La reserva se modificó correctamente.";
-        }
-        else
-        {
-            reserva.Anulado = false;
-            rr.AltaReserva(reserva);
-            TempData["Mensaje"] =
-                "La reserva se creó correctamente.";
-        }
-
-        return RedirectToAction(nameof(Index));
     }
-    catch (Exception ex)
-    {_logger.LogError(ex, "Error al guardar la reserva");
-        TempData["Error"] = "No se pudo completar la operación.";
-        return RedirectToAction(nameof(Editar), new { id = reserva.Id }
-        );
-    }
-}    public IActionResult Eliminar(int id)
+    [Authorize(Policy = "Administrador")]
+    public IActionResult Eliminar(int id)
     {
         try
         {
@@ -196,34 +176,50 @@ public IActionResult Guardar(Reserva reserva)
         {
             _logger.LogError(ex, "Error al anular la reserva");
             TempData["Error"] = "No se pudo completar la anulación.";
-           return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index));
         }
     }
-
+    [Authorize]
     public IActionResult Detalles(int id)
     {
         try
         {
             RepositorioReserva rr = new RepositorioReserva();
-        ViewBag.UserRole = User.Claims
-            .FirstOrDefault(c => c.Type == "Rol")?.Value;
-        Reserva? reserva = rr.GetReserva(id);
-        if (reserva == null)
-        {
-            TempData["Error"] = "Reserva no encontrada.";
-            return RedirectToAction(nameof(Index));
-        }
-        return View(reserva);
-    
+            RepositorioUsuario ru = new RepositorioUsuario();
 
+            ViewBag.UserRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
+
+            // 1. Obtener la reserva primero
+            Reserva? reserva = rr.GetReserva(id);
+
+            // 2. Validar inmediatamente si existe
+            if (reserva == null)
+            {
+                TempData["Error"] = "Reserva no encontrada.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // 3. Buscar el usuario creador de forma segura
+            var usuarioAlta = ru.getUsuario(reserva.IdAlta);
+            ViewBag.UsuarioC = usuarioAlta;
+
+            // 4. Buscar el usuario que dio de baja (si aplica)
+            if (reserva.IdBaja.HasValue && reserva.IdBaja.Value > 0)
+            {
+                var usuarioBaja = ru.getUsuario(reserva.IdBaja.Value);
+                ViewBag.UsuarioT = usuarioBaja;
+            }
+
+            return View(reserva);
         }
         catch (System.Exception ex)
         {
-            _logger.LogError(ex, "Error al obtener la reserva");
-            TempData["Error"] = "Ocurrió un error al obttener los detalles de la reserva reserva";
-            return View();
+            _logger.LogError(ex, "Error al obtener los detalles de la reserva");
+            TempData["Error"] = "Ocurrió un error al obtener los detalles de la reserva";
+            return RedirectToAction(nameof(Index)); // Redirigir en lugar de return View()
         }
     }
+    [Authorize]
     public IActionResult VerVigentes()
     {
         RepositorioReserva rr = new RepositorioReserva();
@@ -244,11 +240,11 @@ public IActionResult Guardar(Reserva reserva)
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error al obtener las reservas vigentes");
-                 TempData["Error"] ="Ocurrió un error al obtener las reservas vigentes.";
-               return View("Index", lista);
+            TempData["Error"] = "Ocurrió un error al obtener las reservas vigentes.";
+            return View("Index", lista);
         }
     }
-
+    [Authorize]
     public IActionResult ListarReservasInmueble(int id)
     {
         RepositorioReserva rr = new RepositorioReserva();

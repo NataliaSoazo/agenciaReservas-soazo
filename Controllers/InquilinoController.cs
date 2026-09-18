@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using agenciaReservas_soazo.Repositorios;
 using agenciaReservas_soazo.Models;
+using Microsoft.AspNetCore.Authorization;
 namespace agenciaReservas_soazo.Controllers;
 public class InquilinoController : Controller
 {
@@ -33,6 +34,7 @@ public class InquilinoController : Controller
             return View(lista);
         }
     }*/
+ [Authorize]
 public IActionResult Index(int pagina = 1)
 {
     RepositorioInquilino rp = new RepositorioInquilino();
@@ -75,8 +77,8 @@ public IActionResult Index(int pagina = 1)
         return View(lista);
     }
 }
-
-    public IActionResult Editar(int id)
+ [Authorize]
+public IActionResult Editar(int id)
     {
         if (id > 0)
         {
@@ -89,8 +91,8 @@ public IActionResult Index(int pagina = 1)
             return View();
         }
     }
-   
-    public IActionResult Guardar(Inquilino inquilino)
+ [Authorize]
+public IActionResult Guardar(Inquilino inquilino)
     {
         try
         {
@@ -121,8 +123,8 @@ public IActionResult Index(int pagina = 1)
             return RedirectToAction(nameof(Index));
         }
     }
-    
-    public IActionResult Eliminar(int id)
+[Authorize(Policy = "Administrador")]    
+public IActionResult Eliminar(int id)
     {
         try
         {
@@ -139,16 +141,16 @@ public IActionResult Index(int pagina = 1)
         }
     }
 
-    
-    public IActionResult Detalles(int id)
+ [Authorize]    
+public IActionResult Detalles(int id)
     {
         RepositorioInquilino rp = new RepositorioInquilino();
         var inquilino = rp.GetInquilino(id);
         return View(inquilino);
     }
-
+ [Authorize]
     // GET: inquilino/Busqueda
-    public IActionResult Busqueda()
+public IActionResult Busqueda()
     {
         try
         {
@@ -161,7 +163,7 @@ public IActionResult Index(int pagina = 1)
         }
     }
     //  [Route("[controller]/Buscar/{q}", Name = "Buscar")]
-    
+ [Authorize]
     public IActionResult BuscarInquilino(string buscar)
     {
         try

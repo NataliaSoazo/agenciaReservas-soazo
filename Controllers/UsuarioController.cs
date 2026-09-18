@@ -37,7 +37,7 @@ public class UsuarioController : Controller
         this.environment = environment;
 
     }
- //   [Authorize(Policy = "Administrador")]
+    [Authorize(Policy = "Administrador")]
     public IActionResult Index()
     {
         RepositorioUsuario repositorio = new RepositorioUsuario();
@@ -65,7 +65,7 @@ public class UsuarioController : Controller
             return View(lista);
         }
     }
-    //[Authorize(Policy = "Administrador")]
+    [Authorize(Policy = "Administrador")]
     public IActionResult Crear()
     {
         RepositorioRol repoRol = new RepositorioRol();
@@ -73,7 +73,7 @@ public class UsuarioController : Controller
         return View();
     }
 
- //   [Authorize(Policy = "Administrador")]
+    [Authorize(Policy = "Administrador")]
     [HttpPost]
     public IActionResult Guardar(Usuario usuario)
     {
@@ -100,7 +100,8 @@ public class UsuarioController : Controller
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
-        {   _logger.LogError(ex, "Error guardar usuario");
+        {
+            _logger.LogError(ex, "Error guardar usuario");
             TempData["Mensaje"] = "Ocurrió un error al guardar el usuario";
             return RedirectToAction(nameof(Index));
         }
@@ -166,7 +167,7 @@ public class UsuarioController : Controller
         }
     }
 
-//    [Authorize]
+    [Authorize]
     [HttpGet]
     public IActionResult Editar(int id)
     {
@@ -207,7 +208,7 @@ public class UsuarioController : Controller
             return RedirectToAction(nameof(Index));
         }
     }
-//    [Authorize]
+    [Authorize]
     [HttpPost]
     public IActionResult Editar(int id, Usuario u)
     {
@@ -238,7 +239,7 @@ public class UsuarioController : Controller
                         GuardarAvatar(usuarioExistente);
                     }
                     ru.EditarDatos(usuarioExistente);
-                     ViewBag.Mensaje = "Datos del usuario actualizados correctamente";
+                    ViewBag.Mensaje = "Datos del usuario actualizados correctamente";
                     return View("Editar", usuarioExistente);
                 }
                 else
@@ -259,7 +260,7 @@ public class UsuarioController : Controller
             return RedirectToAction(nameof(Index));
         }
     }
-//    [Authorize]
+    [Authorize]
     [HttpPost]
     public IActionResult CambiarContraseña(int id, Usuario u)
     {
@@ -271,7 +272,7 @@ public class UsuarioController : Controller
             var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
 
             // Verificar si el usuario actual es el mismo que va a cambiar la contraseña o es un administrador
-            if (user != null&&usuarioActual != null && (usuarioActual.Id == id || userRole == "ADMINISTRADOR"))
+            if (user != null && usuarioActual != null && (usuarioActual.Id == id || userRole == "ADMINISTRADOR"))
             {
                 user.Clave = HashPassword(u.Clave);
                 ru.EditarClave(user);
@@ -290,7 +291,7 @@ public class UsuarioController : Controller
             return RedirectToAction(nameof(Index));
         }
     }
-//    [Authorize(Policy = "Administrador")]
+    [Authorize(Policy = "Administrador")]
     public IActionResult Eliminar(int id)
     {
         try
@@ -306,7 +307,7 @@ public class UsuarioController : Controller
             return RedirectToAction(nameof(Index));
         }
     }
-//    [Authorize]
+    [Authorize]
     public IActionResult EliminarAvatar(int id, Usuario usuario)
     {
         try
@@ -330,7 +331,7 @@ public class UsuarioController : Controller
                         return View("Editar", usuarioExistente);
 
                     }
-                    
+
                 }
                 else
                 {
@@ -347,7 +348,7 @@ public class UsuarioController : Controller
             return RedirectToAction(nameof(Index));
         }
     }
- //   [Authorize]
+    //   [Authorize]
     public IActionResult Detalles(int id)
     {
         RepositorioUsuario repositorio = new RepositorioUsuario();
@@ -417,7 +418,7 @@ public class UsuarioController : Controller
         return View("Loguin");
     }
 
-//    [Authorize]
+    [Authorize]
     public ActionResult Perfil()
 
     {
@@ -429,7 +430,7 @@ public class UsuarioController : Controller
         return View("Editar", u);
     }
 
- //   [Authorize(Policy = "Administrador")]
+    [Authorize(Policy = "Administrador")]
     public IActionResult BuscarUsuario(string buscar)
     {
         try
