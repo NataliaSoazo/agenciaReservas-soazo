@@ -22,10 +22,15 @@ public class Inmueble
     [Required(ErrorMessage = "Campo obligatorio")]
     public int Cupo { get; set; }
     [Required(ErrorMessage = "Campo obligatorio")]
-    [Display(Name = "PRECIO APROX.")]
+    [Display(Name = "PRECIO POR DIA")]
     [Range(1, double.MaxValue, ErrorMessage = "El monto debe ser mayor a 0")]
     [RegularExpression(@"^\d+(\.\d{1,2})?$", ErrorMessage = "El precio debe ser un número válido con hasta dos decimales.")]
-    public double? Precio { get; set; }
+    public decimal? Precio { get; set; }
+    [Required(ErrorMessage = "Campo obligatorio")]
+    [Display(Name = "PORCENTUAL EXIGIDO")]
+    [Range(1, double.MaxValue, ErrorMessage = "El monto debe ser mayor a 0")]
+    [RegularExpression(@"^\d+(\.\d{1,2})?$", ErrorMessage = "El porcentual debe ser un número válido.")]
+    public int? Porcentual { get; set; }
     [Required(ErrorMessage = "Campo obligatorio")]
     [StringLength(20, MinimumLength = 9, ErrorMessage = "Ingrese una latitud válida")]
     [Display(Name = "LATITUD")]

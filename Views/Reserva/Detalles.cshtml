@@ -52,7 +52,14 @@
                 CREADO POR
             </dt>
             <dd class="col-6">
-               @ViewBag.UsuarioC.Id @ViewBag.UsuarioC.Nombre @ViewBag.UsuarioC.Apellido
+               @if (ViewBag.UsuarioC != null)
+                    {
+                        <span>@ViewBag.UsuarioC.Id @ViewBag.UsuarioC.Nombre @ViewBag.UsuarioC.Apellido</span>
+                    }
+                    else
+                    {
+                        <span>Usuario no registrado o no disponible</span>
+                    }
             </dd>
             @if (Model.Anulado)
             {

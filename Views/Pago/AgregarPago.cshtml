@@ -1,0 +1,189 @@
+@model agenciaReservas_soazo.Models.Pago
+
+@{
+ViewData["Title"] = "Agregar Pago";
+
+var reserva = ViewBag.Reserva as agenciaReservas_soazo.Models.Reserva;
+var totalAPagar = ViewBag.TotalAPagar;
+var conceptos = ViewBag.Concepto as List<string>;
+var señaCalculada = ViewBag.PrecioPorcentaje;
+}
+
+<div class="container mt-4">
+<div class="row justify-content-center">
+    <div class="col-md-8">
+
+        <div class="card shadow">
+
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Agregar Pago a la Reserva</h4>
+            </div>
+
+            <div class="card-body">
+
+                @if (reserva != null)
+                {
+                    <div class="alert alert-info">
+                        <h5>Datos de la Reserva</h5>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>ID Reserva:</strong>
+                                @reserva.Id
+                            </div>
+
+                            <div class="col-md-6">
+                                <strong>Inmueble:</strong>
+                                @reserva.IdInmueble  (@reserva.DatoInmueble.Direccion)
+                            </div>
+                        </div>
+
+                        <div class="row mt-2">
+                            <div class="col-md-6">
+                                <strong>Fecha Desde:</strong>
+                                @reserva.FechaDesde.ToString("dd/MM/yyyy")
+                            </div>
+
+                            <div class="col-md-6">
+                                <strong>Fecha Hasta:</strong>
+                                @reserva.FechaHasta.ToString("dd/MM/yyyy")
+                            </div>
+                        </div>
+
+                        <div class="row mt-2">
+                            <div class="col-md-6">
+                                <strong>Precio por día:</strong>
+                                @reserva.DatoInmueble?.Precio
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Porcentaje requerido:</strong>
+                                @reserva.DatoInmueble?.Porcentual %
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Seña Calculada:</strong>
+                                <span class="fw-bold text-success">
+                                   $ @señaCalculada
+                                </span>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Total a pagar:</strong>
+                                <span class="fw-bold text-success">
+                                  $  @totalAPagar
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <form asp-action="Guardar" method="post">
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="text-danger mb-3">
+                    </div>
+
+                    <input type="hidden"
+                           asp-for="IdReserva"
+                           value="@reserva?.Id" />
+
+                    <input type="hidden"
+                           asp-for="Anulado"
+                           value="false" />
+
+                    <div class="mb-3">
+                        <label asp-for="Fecha" class="form-label"></label>
+
+                        <input asp-for="Fecha"
+                               class="form-control"
+                               type="date"
+                               value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+
+                        <span asp-validation-for="Fecha"
+                              class="text-danger">
+                        </span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Modo" class="form-label"></label>
+
+                        <select asp-for="Modo" class="form-select">
+                            <option value="">-- Seleccione un modo de pago --</option>
+                            <option value="EFECTIVO">EFECTIVO</option>
+                            <option value="TRANSFERENCIA">TRANSFERENCIA</option>
+                            <option value="TARJETA">TARJETA</option>
+                        </select>
+
+                        <span asp-validation-for="Modo"
+                              class="text-danger">
+                        </span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Concepto" class="form-label"></label>
+
+                        <select asp-for="Concepto" class="form-select">
+
+                            <option value="">
+                                -- Seleccione un concepto --
+                            </option>
+
+                            @if (conceptos != null)
+                            {
+                                foreach (var concepto in conceptos)
+                                {
+                                    <option value="@concepto">
+                                        @concepto
+                                    </option>
+                                }
+                            }
+
+                        </select>
+
+                        <span asp-validation-for="Concepto"
+                              class="text-danger">
+                        </span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Importe" class="form-label"></label>
+
+                        <input asp-for="Importe"
+                               class="form-control"
+                               type="number"
+                               min="1"
+                               step="0.01"
+                               value="@totalAPagar" />
+
+                        <span asp-validation-for="Importe"
+                              class="text-danger">
+                        </span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+
+                        <a asp-action="Index"
+                           class="btn btn-secondary">
+                            Cancelar
+                        </a>
+
+                        <button type="submit"
+                                class="btn btn-success">
+                            <i class="bi bi-cash"></i>
+                            Registrar Pago
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</div>
+@section Scripts {
+@{
+await Html.RenderPartialAsync("_ValidationScriptsPartial");
+}
+}

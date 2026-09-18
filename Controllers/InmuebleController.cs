@@ -15,7 +15,7 @@ public class InmuebleController : Controller
         _logger = logger;
     }
     
-    public IActionResult Index()
+/*    public IActionResult Index()
     {
         RepositorioInmueble ri = new RepositorioInmueble();
         IList<Inmueble> lista = new List<Inmueble>();
@@ -41,7 +41,7 @@ public class InmuebleController : Controller
             ViewBag.Error = TempData["Error"];
             return View(lista);
         }
-    }
+    }*/
     public IActionResult Index(int pagina = 1)
 {
     var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;

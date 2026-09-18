@@ -13,7 +13,7 @@ public class ReservaController : Controller
         _logger = logger;
     }
 
-    public IActionResult Index()
+ /*   public IActionResult Index()
     {
         RepositorioReserva rr = new RepositorioReserva();
         IList<Reserva> lista = new List<Reserva>();
@@ -37,8 +37,48 @@ public class ReservaController : Controller
             ViewBag.Error = "Ocurrió un error al obtener la lista de reservas.";
             return View(lista);
         }
-    }
+    }*/
+public IActionResult Index(int pagina = 1)
+{
+    RepositorioReserva rr = new RepositorioReserva();
+    IList<Reserva> lista = new List<Reserva>();
 
+    try
+    {
+        int cantidadPorPagina = 10;
+
+        // Cantidad total de registros
+        int totalReservas = rr.GetCantidadReservas();
+
+        // Obtener los registros correspondientes a la página
+        lista = rr.GetReservasPaginadas(pagina, cantidadPorPagina);
+        // Cantidad total de páginas
+        int totalPaginas = (int)Math.Ceiling(
+            (double)totalReservas / cantidadPorPagina
+        );
+
+        ViewBag.PaginaActual = pagina;
+        ViewBag.TotalPaginas = totalPaginas;
+
+        if (TempData.ContainsKey("Mensaje"))
+        {
+            ViewBag.Mensaje = TempData["Mensaje"];
+        }
+
+        if (TempData.ContainsKey("Error"))
+        {
+            ViewBag.Error = TempData["Error"];
+        }
+
+        return View(lista);
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error al obtener la lista de reservas");
+        TempData["Error"] = "Ocurrió un error al obtener la lista de reservas";
+        return View(lista);
+    }
+}
     public IActionResult Editar(int id)
     {
         if (TempData.ContainsKey("Error"))
@@ -162,7 +202,9 @@ public IActionResult Guardar(Reserva reserva)
 
     public IActionResult Detalles(int id)
     {
-        RepositorioReserva rr = new RepositorioReserva();
+        try
+        {
+            RepositorioReserva rr = new RepositorioReserva();
         ViewBag.UserRole = User.Claims
             .FirstOrDefault(c => c.Type == "Rol")?.Value;
         Reserva? reserva = rr.GetReserva(id);
@@ -172,8 +214,16 @@ public IActionResult Guardar(Reserva reserva)
             return RedirectToAction(nameof(Index));
         }
         return View(reserva);
-    }
+    
 
+        }
+        catch (System.Exception ex)
+        {
+            _logger.LogError(ex, "Error al obtener la reserva");
+            TempData["Error"] = "Ocurrió un error al obttener los detalles de la reserva reserva";
+            return View();
+        }
+    }
     public IActionResult VerVigentes()
     {
         RepositorioReserva rr = new RepositorioReserva();

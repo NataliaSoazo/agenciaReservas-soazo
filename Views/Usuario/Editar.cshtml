@@ -9,14 +9,14 @@
     <div class="col-6 " id ="table">    
          <div class="col ">
         <form asp-action="EliminarAvatar" method="post">
-            <input type="hidden" name="id" value="@Model.Id" />
+            <input type="hidden" name="id" value="@id" />
                <div class="form-group p-3" >
                 <input type="submit" value="ELIMINAR AVATAR" class="btn btn-danger" />
             </div>
         </form>
     </div>
         <form asp-action="Editar" enctype="multipart/form-data" method="post">
-            <input type="hidden" name="id" value="@Model.Id" />
+            <input type="hidden" name="id" value="@id" />
              <div class="form-group item-aligne.center">
                 <label asp-for="AvatarURL" class="control-label p-6"></label><br />
                 @if (!string.IsNullOrEmpty(Model.AvatarURL))
@@ -56,7 +56,7 @@
     <div class="col-6"  id ="table">
         <h5 class="text-left">Edita tu contraseña</h5>
         <form asp-action="CambiarContraseña" method="post" class="row g-3">
-             <input type="hidden" name="id" value="@Model.Id" />
+             <input type="hidden" name="id" value="@id" />
             <div class="form-group col-6" >
                 <label asp-for="Clave" class="control-label"></label>
                 <input asp-for="Clave" class="form-control" required/>

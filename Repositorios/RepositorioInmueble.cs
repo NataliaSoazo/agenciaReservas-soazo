@@ -32,7 +32,7 @@ public class RepositorioInmueble
                         Tipo = reader.GetString(nameof(Inmueble.Tipo)),
                         Uso = reader.GetString(nameof(Inmueble.Uso)),
                         Cupo = reader.GetInt32(nameof(Inmueble.Cupo)),
-                        Precio = reader.GetDouble(nameof(Inmueble.Precio)),
+                        Precio = reader.GetDecimal(nameof(Inmueble.Precio)),
                         Disponible = reader.GetString(nameof(Inmueble.Disponible)),
                         Latitud = reader.GetString(nameof(Inmueble.Latitud)),
                         Longitud = reader.GetString(nameof(Inmueble.Longitud)),
@@ -66,6 +66,7 @@ public class RepositorioInmueble
                 i.{nameof(Inmueble.Uso)},
                 i.{nameof(Inmueble.Cupo)},
                 i.{nameof(Inmueble.Precio)},
+                i.{nameof(Inmueble.Porcentual)},
                 i.{nameof(Inmueble.Disponible)},
                 i.{nameof(Inmueble.Latitud)},
                 i.{nameof(Inmueble.Longitud)},
@@ -99,7 +100,8 @@ public class RepositorioInmueble
                         Tipo = reader.GetString(nameof(Inmueble.Tipo)),
                         Uso = reader.GetString(nameof(Inmueble.Uso)),
                         Cupo = reader.GetInt32(nameof(Inmueble.Cupo)),
-                        Precio = reader.GetDouble(nameof(Inmueble.Precio)),
+                        Precio = reader.GetDecimal(nameof(Inmueble.Precio)),
+                        Porcentual = reader.GetInt32(nameof(Inmueble.Porcentual)),
                         Disponible = reader.GetString(nameof(Inmueble.Disponible)),
                         Latitud = reader.GetString(nameof(Inmueble.Latitud)),
                         Longitud = reader.GetString(nameof(Inmueble.Longitud)),
@@ -145,8 +147,8 @@ public int GetCantidadInmuebles()
         int id = 0;
         using (var connection = new MySqlConnection(ConnectionString))
         {
-            var sql = @$"INSERT INTO inmuebles ({nameof(Inmueble.Direccion)}, {nameof(Inmueble.Cupo)}, {nameof(Inmueble.Uso)},  {nameof(Inmueble.Precio)}, {nameof(Inmueble.Disponible)}, {nameof(Inmueble.PropietarioId)}, {nameof(Inmueble.Latitud)}, {nameof(Inmueble.Longitud)}, {nameof(Inmueble.Tipo)})
-                                     VALUES (@{nameof(Inmueble.Direccion)}, @{nameof(Inmueble.Cupo)}, @{nameof(Inmueble.Uso)},  @{nameof(Inmueble.Precio)}, @{nameof(Inmueble.Disponible)}, @{nameof(Inmueble.PropietarioId)}, @{nameof(Inmueble.Latitud)}, @{nameof(Inmueble.Longitud)}, @{nameof(Inmueble.Tipo)});            
+            var sql = @$"INSERT INTO inmuebles ({nameof(Inmueble.Direccion)}, {nameof(Inmueble.Cupo)}, {nameof(Inmueble.Uso)},  {nameof(Inmueble.Precio)},{nameof(Inmueble.Porcentual)}, {nameof(Inmueble.Disponible)}, {nameof(Inmueble.PropietarioId)}, {nameof(Inmueble.Latitud)}, {nameof(Inmueble.Longitud)}, {nameof(Inmueble.Tipo)})
+                                     VALUES (@{nameof(Inmueble.Direccion)}, @{nameof(Inmueble.Cupo)}, @{nameof(Inmueble.Uso)},  @{nameof(Inmueble.Precio)},@{nameof(Inmueble.Porcentual)}, @{nameof(Inmueble.Disponible)}, @{nameof(Inmueble.PropietarioId)}, @{nameof(Inmueble.Latitud)}, @{nameof(Inmueble.Longitud)}, @{nameof(Inmueble.Tipo)});            
              SELECT LAST_INSERT_ID();";
             using (var command = new MySqlCommand(sql, connection))
             {
@@ -155,6 +157,7 @@ public int GetCantidadInmuebles()
                 command.Parameters.AddWithValue($"@{nameof(Inmueble.Uso)}", inmueble.Uso);
                 command.Parameters.AddWithValue($"@{nameof(Inmueble.Cupo)}", inmueble.Cupo);
                 command.Parameters.AddWithValue($"@{nameof(Inmueble.Precio)}", inmueble.Precio);
+                command.Parameters.AddWithValue($"@{nameof(Inmueble.Porcentual)}", inmueble.Porcentual);
                 command.Parameters.AddWithValue($"@{nameof(Inmueble.Latitud)}", inmueble.Latitud);
                 command.Parameters.AddWithValue($"@{nameof(Inmueble.Longitud)}", inmueble.Longitud);
                 command.Parameters.AddWithValue($"@{nameof(Inmueble.Disponible)}", inmueble.Disponible);
@@ -174,7 +177,7 @@ public int GetCantidadInmuebles()
         Inmueble? inmueble = null;
         using (var connection = new MySqlConnection(ConnectionString))
         {
-            string sql = @$"SELECT i.{nameof(Inmueble.Id)},{nameof(Inmueble.Direccion)}, {nameof(Inmueble.Tipo)}, {nameof(Inmueble.Uso)}, {nameof(Inmueble.Cupo)},{nameof(Inmueble.Precio)}, {nameof(Inmueble.Latitud)}, {nameof(Inmueble.Longitud)}, {nameof(Inmueble.Disponible)},{nameof(Inmueble.PropietarioId)},
+            string sql = @$"SELECT i.{nameof(Inmueble.Id)},{nameof(Inmueble.Direccion)}, {nameof(Inmueble.Tipo)}, {nameof(Inmueble.Uso)}, {nameof(Inmueble.Cupo)},{nameof(Inmueble.Precio)},{nameof(Inmueble.Porcentual)}, {nameof(Inmueble.Porcentual)},{nameof(Inmueble.Latitud)}, {nameof(Inmueble.Longitud)}, {nameof(Inmueble.Disponible)},{nameof(Inmueble.PropietarioId)},
 					 p.{nameof(Propietario.Nombre)}, p.{nameof(Propietario.Apellido)}
 					FROM Inmuebles i INNER JOIN Propietarios p ON  {nameof(Inmueble.PropietarioId)} = p. {nameof(Propietario.Id)} 
                WHERE i.{nameof(Inmueble.Id)} = @id";
@@ -193,7 +196,8 @@ public int GetCantidadInmuebles()
                             Tipo = reader.GetString(nameof(Inmueble.Tipo)),
                             Uso = reader.GetString(nameof(Inmueble.Uso)),
                             Cupo = reader.GetInt32(nameof(Inmueble.Cupo)),
-                            Precio = reader.GetDouble(nameof(Inmueble.Precio)),
+                            Precio = reader.GetDecimal(nameof(Inmueble.Precio)),
+                            Porcentual = reader.GetInt32(nameof(Inmueble.Porcentual)),
                             Disponible = reader.GetString(nameof(Inmueble.Disponible)),
                             Latitud = reader.GetString(nameof(Inmueble.Latitud)),
                             Longitud = reader.GetString(nameof(Inmueble.Longitud)),
@@ -223,6 +227,7 @@ public int GetCantidadInmuebles()
                 {nameof(Inmueble.Uso)} = @{nameof(Inmueble.Uso)},
                 {nameof(Inmueble.Cupo)} = @{nameof(Inmueble.Cupo)},
                 {nameof(Inmueble.Precio)} = @{nameof(Inmueble.Precio)},
+                {nameof(Inmueble.Porcentual)} = @{nameof(Inmueble.Porcentual)},
                 {nameof(Inmueble.Latitud)} = @{nameof(Inmueble.Latitud)},
                 {nameof(Inmueble.Longitud)} = @{nameof(Inmueble.Longitud)},
                 {nameof(Inmueble.Disponible)} = @{nameof(Inmueble.Disponible)},
@@ -236,6 +241,7 @@ public int GetCantidadInmuebles()
                 command.Parameters.AddWithValue($"@{nameof(Inmueble.Uso)}", inmueble.Uso);
                 command.Parameters.AddWithValue($"@{nameof(Inmueble.Cupo)}", inmueble.Cupo);
                 command.Parameters.AddWithValue($"@{nameof(Inmueble.Precio)}", inmueble.Precio);
+                command.Parameters.AddWithValue($"@{nameof(Inmueble.Porcentual)}", inmueble.Porcentual);
                 command.Parameters.AddWithValue($"@{nameof(Inmueble.Latitud)}", inmueble.Latitud);
                 command.Parameters.AddWithValue($"@{nameof(Inmueble.Longitud)}", inmueble.Longitud);
                 command.Parameters.AddWithValue($"@{nameof(Inmueble.Disponible)}", inmueble.Disponible);

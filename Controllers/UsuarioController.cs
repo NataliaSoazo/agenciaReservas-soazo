@@ -1,12 +1,25 @@
+using System;
+using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using agenciaReservas_soazo.Models;
 using agenciaReservas_soazo.Repositorios;
+using agenciaReservas_soazo.Models;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
-
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Net.Http.Headers;
+//using Newtonsoft.Json.Serialization;
+using System.Net.WebSockets;
 
 namespace agenciaReservas_soazo.Controllers;
 
@@ -87,7 +100,7 @@ public class UsuarioController : Controller
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
-        {
+        {   _logger.LogError(ex, "Error guardar usuario");
             TempData["Mensaje"] = "Ocurrió un error al guardar el usuario";
             return RedirectToAction(nameof(Index));
         }
@@ -98,6 +111,7 @@ public class UsuarioController : Controller
 
         string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
             password: password,
+            //no olvides configurar el salt en appsettings.json
             salt: System.Text.Encoding.ASCII.GetBytes(configuration["Salt"]),
             prf: KeyDerivationPrf.HMACSHA1,
             iterationCount: 1000,

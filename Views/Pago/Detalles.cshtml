@@ -1,0 +1,90 @@
+@model agenciaReservas_soazo.Models.Pago;
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+
+
+<div class="container justify-content-center  col-6"  id ="table">
+    <h4 class="text-center">Detalles del Pago</h4>
+    <hr />
+     <dl class="row ">
+        <dt class = "col-6 " >
+            @Html.DisplayNameFor(model => model.Id)
+        </dt>
+        <dd class = "col-6 ">
+            @Html.DisplayFor(model => model.Id)
+        </dd>
+        <dt class = "col-6 ">
+            @Html.DisplayNameFor(model => model.Fecha)
+        </dt>
+        <dd class = "col-6 ">
+            @Html.DisplayFor(model => model.Fecha)
+        </dd>
+        <dt class = "col-6 ">
+            @Html.DisplayNameFor(model => model.Modo)
+        </dt>
+        <dd class = "col-6 ">
+            @Html.DisplayFor(model => model.Modo)
+        </dd>
+        <dt class = "col-6 ">
+            @Html.DisplayNameFor(model => model.Concepto)
+        </dt>
+        <dd class = "col-6 ">
+            @Html.DisplayFor(model => model.Concepto)
+        </dd>
+        <dt class = "col-6 ">
+            @Html.DisplayNameFor(model => model.Importe)
+        </dt>
+        <dd class = "col-6 ">
+            @Html.DisplayFor(model => model.Importe)
+        </dd>
+        <dt class = "col-6 ">
+            @Html.DisplayNameFor(model => model.Anulado)
+        </dt>
+        <dd class = "col-6 ">
+            @Html.DisplayFor(model => @model.Anulado ? "SÍ" : "NO")
+        </dd>
+        <dt class = "col-6 ">
+            @Html.DisplayNameFor(model => model.IdReserva)
+        </dt>
+        <dd class = "col-6 ">
+            @Html.DisplayFor(model => model.IdReserva)
+        </dd>
+         @if (ViewBag.UserRole == "ADMINISTRADOR")
+        {
+            <dt class="col-6">
+                CREADO POR
+            </dt>
+            <dd class="col-6">
+               @ViewBag.UsuarioC.Id @ViewBag.UsuarioC.Nombre @ViewBag.UsuarioC.Apellido
+            </dd>
+            @if (Model.IdBaja != null && Model.Anulado == true)
+            {
+                <dt class="col-6">
+                    ANULADO
+                </dt>
+                <dd class="col-6">
+                    SI
+                </dd>
+                <dt class="col-6">
+                    TERMINADO POR
+                </dt>
+                <dd class="col-6">
+                  @if (ViewBag.UsuarioC != null)
+                    {
+                        <span>@ViewBag.UsuarioC.Id @ViewBag.UsuarioC.Nombre @ViewBag.UsuarioC.Apellido</span>
+                    }
+                    else
+                    {
+                        <span>Usuario no registrado o no disponible</span>
+                    }
+                </dd>
+            }
+        }
+    </dl>
+</div>
+<div>
+    <a asp-action="Index">Volver al listado</a>
+</div>

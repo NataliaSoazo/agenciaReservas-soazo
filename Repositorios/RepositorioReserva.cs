@@ -70,7 +70,90 @@ public class RepositorioReserva
 
         return reservas;
     }
+    public IList<Reserva> GetReservasPaginadas(int pagina, int cantidadPorPagina)
+{
+    var reservas = new List<Reserva>();
 
+    int offset = (pagina - 1) * cantidadPorPagina;
+
+    using (var connection = new MySqlConnection(ConnectionString))
+    {
+        string sql = $@"SELECT i.{nameof(Reserva.Id)},{nameof(Reserva.Fecha)}, {nameof(Reserva.FechaDesde)}, {nameof(Reserva.FechaHasta)}, {nameof(Reserva.Monto)}, {nameof(Reserva.IdInquilino)}, {nameof(Reserva.Anulado)},
+                      p.{nameof(Inquilino.Nombre)}, p.{nameof(Inquilino.Apellido)}, {nameof(Reserva.IdInmueble)}, m.{nameof(Inmueble.Direccion)}
+                FROM Reservas i 
+                
+                INNER JOIN Inquilinos p ON i.{nameof(Reserva.IdInquilino)} = p.{nameof(Inquilino.Id)}
+                INNER JOIN Inmuebles m ON i.{nameof(Reserva.IdInmueble)} = m.{nameof(Inmueble.Id)}
+                WHERE i.{nameof(Reserva.Anulado)} = 0
+                ORDER BY i.{nameof(Reserva.FechaDesde)} DESC
+                LIMIT @cantidad OFFSET @offset;";
+
+        using (var command = new MySqlCommand(sql, connection))
+        {
+            command.CommandType = CommandType.Text;
+
+            command.Parameters.AddWithValue("@cantidad", cantidadPorPagina);
+            command.Parameters.AddWithValue("@offset", offset);
+
+            connection.Open();
+
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    reservas.Add(new Reserva
+                        {
+                            Id = reader.GetInt32(nameof(Reserva.Id)),
+
+                            Fecha = reader.GetDateTime(nameof(Reserva.Fecha)),
+                            FechaDesde = reader.GetDateTime(nameof(Reserva.FechaDesde)),
+                            FechaHasta = reader.GetDateTime(nameof(Reserva.FechaHasta)),
+
+                            Monto = reader.GetDouble(nameof(Reserva.Monto)),
+
+                            IdInquilino = reader.GetInt32(nameof(Reserva.IdInquilino)),
+                            Arrendatario = new Inquilino
+                            {
+                                Nombre = reader.GetString(nameof(Inquilino.Nombre)),
+                                Apellido = reader.GetString(nameof(Inquilino.Apellido)),
+
+                            },
+                            IdInmueble = reader.GetInt32(nameof(Reserva.IdInmueble)),
+                            DatoInmueble = new Inmueble
+                            {
+
+                                Direccion = reader.GetString(nameof(Inmueble.Direccion))
+
+                            },
+
+                            Anulado = reader.GetBoolean(nameof(Reserva.Anulado))
+                        });
+                }
+            }
+        }
+    }
+
+    return reservas;
+}
+public int GetCantidadReservas()
+{    int cantidad = 0;
+
+    using (var connection = new MySqlConnection(ConnectionString))
+    {
+        string sql = "SELECT COUNT(*) FROM Reservas";
+
+        using (var command = new MySqlCommand(sql, connection))
+        {
+            command.CommandType = CommandType.Text;
+
+            connection.Open();
+
+            cantidad = Convert.ToInt32(command.ExecuteScalar());
+        }
+    }
+
+    return cantidad;
+}
 
     
     public int AltaReserva(Reserva reserva)
@@ -154,7 +237,9 @@ public class RepositorioReserva
                 r.{nameof(Reserva.Anulado)},
                 p.{nameof(Inquilino.Nombre)},
                 p.{nameof(Inquilino.Apellido)},
-                m.{nameof(Inmueble.Direccion)}
+                m.{nameof(Inmueble.Direccion)},
+                m.{nameof(Inmueble.Precio)},
+                m.{nameof(Inmueble.Porcentual)}
             FROM reservas r
             INNER JOIN Inquilinos p 
                 ON r.{nameof(Reserva.IdInquilino)} = p.{nameof(Inquilino.Id)}
@@ -191,7 +276,9 @@ public class RepositorioReserva
 
                         DatoInmueble = new Inmueble
                         {
-                            Direccion = reader.GetString(nameof(Inmueble.Direccion))
+                            Direccion = reader.GetString(nameof(Inmueble.Direccion)),
+                            Precio = reader.GetDecimal(nameof(Inmueble.Precio)),
+                            Porcentual= reader.GetInt32(nameof(Inmueble.Porcentual))
                         }
                     };
                 }

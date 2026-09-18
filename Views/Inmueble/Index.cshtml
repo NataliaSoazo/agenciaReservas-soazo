@@ -10,7 +10,7 @@
 <p>
     <a asp-action="Editar" method="post">CREAR NUEVO </a>
 </p>
-<div class= "table-wrapper">
+<div class="table-wrapper">
     <table class="table" id="table">
         <thead>
             <tr>
@@ -66,62 +66,84 @@
                     }
                 </tbody>
             </table>
-            @for (int i = 1; i <= ViewBag.TotalPaginas; i++)
-{
-    <li class="page-item @(i == ViewBag.PaginaActual ? "active" : "")">
 
-        <a class="page-link"
-           asp-action="Index"
-           asp-route-pagina="@i">
-            @i
-        </a>
-
-    </li>
-}
+    
         </div>
+        <nav aria-label="Paginación">
 
-<form method="post" asp-action="Eliminar">
+            <ul class="pagination">
 
-    <div class="modal fade " id="modal_eliminar_inmueble" tabindex="-1"
-         aria-labelledby="tituloEliminarDomicilio" aria-hidden="true">
+                @if (ViewBag.PaginaActual > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-action="Index" asp-route-pagina="@(ViewBag.PaginaActual - 1)">
+                            Anterior
+                        </a>
+                    </li>
+                }
 
-        <div class="modal-dialog">
-            <div class="modal-content">
+                @for (int i = 1; i <= ViewBag.TotalPaginas; i++)
+                {
+                    <li class="page-item @(i == ViewBag.PaginaActual ? "active" : "")">
 
-                <div class="modal-header">
-                    <h5 class="modal-title" id="tituloEliminarDomicilio">
-                        ¿DESEAS ELIMINAR A:
-                    </h5>
+                        <a class="page-link" asp-action="Index" asp-route-pagina="@i">
+                            @i
+                        </a>
 
-                    <!-- X: cierra sin enviar -->
-                    <button type="button" class="btn-close"
-                            data-bs-dismiss="modal"
-                            aria-label="Cerrar">
-                    </button>
+                    </li>
+                }
+
+                @if (ViewBag.PaginaActual < ViewBag.TotalPaginas)
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-action="Index" asp-route-pagina="@(ViewBag.PaginaActual + 1)">
+                            Siguiente
+                        </a>
+                    </li>
+                }
+
+            </ul>
+
+        </nav>
+        <form method="post" asp-action="Eliminar">
+
+            <div class="modal fade " id="modal_eliminar_inmueble" tabindex="-1" aria-labelledby="tituloEliminarDomicilio"
+                 aria-hidden="true">
+
+                <div class="modal-dialog">
+                    <div class="modal-content">
+
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="tituloEliminarDomicilio">
+                                ¿DESEAS ELIMINAR A:
+                            </h5>
+
+                            <!-- X: cierra sin enviar -->
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar">
+                            </button>
+                        </div>
+
+                        <div class="modal-body">
+                            <input type="hidden" name="id" id="Domicilio_eliminar_id" />
+                            <span id="Domicilio_eliminar_nombre"></span>?
+                            <p>Esta acción no se puede deshacer.</p>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-danger">
+                                Eliminar
+                            </button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                Salir
+                            </button>
+                        </div>
+
+                    </div>
                 </div>
-
-                <div class="modal-body">
-                    <input type="hidden" name="id" id="Domicilio_eliminar_id" />
-                    <span id="Domicilio_eliminar_nombre"></span>?
-                    <p>Esta acción no se puede deshacer.</p>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-danger">
-                        Eliminar
-                    </button>
-                    <button type="button" class="btn btn-secondary"
-                            data-bs-dismiss="modal">
-                        Salir
-                    </button>
-                </div>
-
             </div>
-        </div>
-    </div>
 
-</form>
+        </form>
 
-@section Scripts {
-    <script src="~/js/inmueble.js"></script>
-}
+        @section Scripts {
+            <script src="~/js/inmueble.js"></script>
+        }
