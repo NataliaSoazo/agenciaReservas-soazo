@@ -133,7 +133,7 @@ public class ReservaController : Controller
             else
             {
                 reserva.Anulado = false;
-                rr.AltaReserva(reserva);
+                var nuevareserva = rr.AltaReserva(reserva);
                 TempData["Mensaje"] =
                     "La reserva se creó correctamente.";
             }
