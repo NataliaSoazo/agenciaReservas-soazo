@@ -2,23 +2,24 @@ using System.Data;
 using agenciaReservas_soazo.Models;
 using MySql.Data.MySqlClient;
 
+
 namespace agenciaReservas_soazo.Repositorios;
 
-public class RepositorioPropietario 
+public class RepositorioPropietario : RepositorioBase
 // ":" externder de una clase, "," implements, "I" delante del repositorio es expresion de Impplements
 //public class RepositorioPropietario : RepositorioBase, IRepositorioPropietario
 {
-    readonly string ConnectionString = "Server=localhost;Database=agenciareservas;User=root;Password=;";
+   // readonly string ConnectionString = "Server=localhost;Database=agenciareservas;User=root;Password=;";
 
-    public RepositorioPropietario()
+     public RepositorioPropietario(IConfiguration configuration)
+        : base(configuration)
     {
-
     }
 
     public IList<Propietario> GetPropietarios()
     {
         var propietarios = new List<Propietario>();
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             var sql = @$"SELECT {nameof(Propietario.Id)}, {nameof(Propietario.Dni)}, 
             {nameof(Propietario.Nombre)}, {nameof(Propietario.Apellido)},  {nameof(Propietario.Email)}, 
@@ -56,7 +57,7 @@ public class RepositorioPropietario
 
     int offset = (pagina - 1) * cantidadPorPagina;
 
-    using (var connection = new MySqlConnection(ConnectionString))
+    using (var connection = new MySqlConnection(connectionString))
     {
         string sql = @"
             SELECT *
@@ -96,7 +97,7 @@ public class RepositorioPropietario
 
     public int GetCantidadPropietarios()
 {
-    using (var connection = new MySqlConnection(ConnectionString))
+    using (var connection = new MySqlConnection(connectionString))
     {
         string sql = "SELECT COUNT(*) FROM Propietarios";
 
@@ -115,7 +116,7 @@ public class RepositorioPropietario
         try
         {
             int id = 0;
-            using (var connection = new MySqlConnection(ConnectionString))
+            using (var connection = new MySqlConnection(connectionString))
             {
                 var sql = @$"INSERT INTO propietarios ({nameof(Propietario.Nombre)},{nameof(Propietario.Apellido)},{nameof(Propietario.Dni)},{nameof(Propietario.Email)},{nameof(Propietario.Telefono)},{nameof(Propietario.Domicilio)},{nameof(Propietario.Ciudad)})
                                             VALUES (@{nameof(Propietario.Nombre)},@{nameof(Propietario.Apellido)},@{nameof(Propietario.Dni)},@{nameof(Propietario.Email)},@{nameof(Propietario.Telefono)},@{nameof(Propietario.Domicilio)},@{nameof(Propietario.Ciudad)});            
@@ -151,7 +152,7 @@ public class RepositorioPropietario
     public Propietario? getPropietario(int id)
     {
         Propietario? propietario = null;
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             var sql = @$"SELECT {nameof(Propietario.Id)},{nameof(Propietario.Nombre)},{nameof(Propietario.Apellido)},{nameof(Propietario.Dni)},{nameof(Propietario.Email)},{nameof(Propietario.Telefono)},{nameof(Propietario.Domicilio)},{nameof(Propietario.Ciudad)} 
             FROM propietarios WHERE {nameof(Propietario.Id)} = @{nameof(Propietario.Id)}";
@@ -184,7 +185,7 @@ public class RepositorioPropietario
 
     public int ModificarPropietario(Propietario propietario)
     {
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             var sql = @$"UPDATE propietarios 
             SET {nameof(Propietario.Nombre)} = @{nameof(Propietario.Nombre)},
@@ -216,7 +217,7 @@ public class RepositorioPropietario
 
     public int EliminarPropietario(int id)
     {
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             var sql = @$"DELETE from propietarios WHERE {nameof(Propietario.Id)} = @{nameof(Propietario.Id)}";
             using (var command = new MySqlCommand(sql, connection))
@@ -240,7 +241,7 @@ public class RepositorioPropietario
         buscar = "%" + buscar + "%";
 
 
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             var sql = @$"SELECT {nameof(Propietario.Id)}, {nameof(Propietario.Nombre)}, {nameof(Propietario.Apellido)}, {nameof(Propietario.Dni)}, {nameof(Propietario.Email)}, {nameof(Propietario.Telefono)}, {nameof(Propietario.Domicilio)}, {nameof(Propietario.Ciudad)} 
                     FROM propietarios

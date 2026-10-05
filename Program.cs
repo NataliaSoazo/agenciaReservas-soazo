@@ -1,5 +1,16 @@
+
 using Microsoft.AspNetCore.Authentication.Cookies;
+using agenciaReservas_soazo.Repositorios;
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddScoped<RepositorioPropietario>();
+builder.Services.AddScoped<RepositorioInquilino>();
+builder.Services.AddScoped<RepositorioInmueble>();
+builder.Services.AddScoped<RepositorioPago>();
+builder.Services.AddScoped<RepositorioReserva>();
+builder.Services.AddScoped<RepositorioUsoInmueble>();
+builder.Services.AddScoped<RepositorioTipoInmueble>();
+builder.Services.AddScoped<RepositorioUsuario>();
+builder.Services.AddScoped<RepositorioRol>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

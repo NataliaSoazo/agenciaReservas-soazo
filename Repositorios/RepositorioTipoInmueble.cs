@@ -4,11 +4,11 @@ using agenciaReservas_soazo.Models;
 
 namespace agenciaReservas_soazo.Repositorios;
 
-public class RepositorioTipoInmueble
+public class RepositorioTipoInmueble: RepositorioBase
 {
-    readonly string ConnectionString = "Server=localhost;Database=agenciareservas;User=root;Password=;";
+    //readonly string connectionString = "Server=localhost;Database=agenciareservas;User=root;Password=;";
 
-    public RepositorioTipoInmueble()
+    public RepositorioTipoInmueble(IConfiguration configuration):base(configuration)
     {
 
     }
@@ -19,7 +19,7 @@ public class RepositorioTipoInmueble
         try
         {
             int id = 0;
-            using (var connection = new MySqlConnection(ConnectionString))
+            using (var connection = new MySqlConnection(connectionString))
             {
                 var sql = @$"INSERT INTO tipoinmuebles ({nameof(TipoInmueble.Tipo)})
                                             VALUES (@{nameof(TipoInmueble.Tipo)});            
@@ -48,7 +48,7 @@ public class RepositorioTipoInmueble
     public TipoInmueble? getTipoInmueble(int id)
     {
         TipoInmueble? tipoinmueble = null;
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             var sql = @$"SELECT {nameof(TipoInmueble.Id)},{nameof(TipoInmueble.Tipo)}
             FROM tipoinmuebles WHERE {nameof(TipoInmueble.Id)} = @{nameof(TipoInmueble.Id)}";
@@ -76,7 +76,7 @@ public class RepositorioTipoInmueble
 
     public int ModificarTipoInmueble(TipoInmueble tipoinmueble)
     {
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             var sql = @$"UPDATE tipoinmuebles 
             SET {nameof(TipoInmueble.Tipo)} = @{nameof(TipoInmueble.Tipo)},
@@ -98,7 +98,7 @@ public class RepositorioTipoInmueble
 
     public int EliminarTipoInmueble(int id)
     {
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             var sql = @$"DELETE from tipoinmuebles WHERE {nameof(TipoInmueble.Id)} = @{nameof(TipoInmueble.Id)}";
             using (var command = new MySqlCommand(sql, connection))
@@ -122,7 +122,7 @@ public class RepositorioTipoInmueble
         buscar = "%" + buscar + "%";
 
 
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             var sql = @$"SELECT {nameof(TipoInmueble.Id)}, {nameof(TipoInmueble.Tipo)}
                     WHERE {nameof(TipoInmueble.Tipo)} LIKE @buscar";
@@ -154,7 +154,7 @@ public class RepositorioTipoInmueble
  public IList<TipoInmueble>ObtenerTipos()
 		{
 			 var tipos = new List<TipoInmueble>();
-			 using (var connection = new MySqlConnection(ConnectionString))
+			 using (var connection = new MySqlConnection(connectionString))
 			{
 				string sql = @$"SELECT {nameof(TipoInmueble.Id)}, {nameof(TipoInmueble.Tipo)}
 					FROM tipoinmuebles ORDER BY tipo ASC ";

@@ -6,12 +6,14 @@ namespace agenciaReservas_soazo.Controllers;
 public class InquilinoController : Controller
 {
     private readonly ILogger<InquilinoController> _logger;
+    private readonly RepositorioInquilino _repositorio;
 
 
-    public InquilinoController(ILogger<InquilinoController> logger)
+    public InquilinoController(ILogger<InquilinoController> logger, RepositorioInquilino repositorio)
     {
 
         _logger = logger;
+        _repositorio = repositorio;
     }
     
  /*   public IActionResult Index()
@@ -37,7 +39,6 @@ public class InquilinoController : Controller
  [Authorize]
 public IActionResult Index(int pagina = 1)
 {
-    RepositorioInquilino rp = new RepositorioInquilino();
 
     IList<Inquilino> lista = new List<Inquilino>();
 
@@ -46,10 +47,10 @@ public IActionResult Index(int pagina = 1)
         int cantidadPorPagina = 10;
 
         // Cantidad total de registros
-        int totalInquilinos = rp.GetCantidadInquilinos();
+        int totalInquilinos = _repositorio.GetCantidadInquilinos();
 
         // Obtener los registros correspondientes a la página
-        lista = rp.GetInquilinosPaginados(pagina, cantidadPorPagina);
+        lista =  _repositorio.GetInquilinosPaginados(pagina, cantidadPorPagina);
         // Cantidad total de páginas
         int totalPaginas = (int)Math.Ceiling(
             (double)totalInquilinos / cantidadPorPagina
@@ -82,8 +83,7 @@ public IActionResult Editar(int id)
     {
         if (id > 0)
         {
-            RepositorioInquilino rp = new RepositorioInquilino();
-            var inquilino = rp.GetInquilino(id);
+            var inquilino =  _repositorio.GetInquilino(id);
             return View(inquilino);
         }
         else
@@ -101,17 +101,16 @@ public IActionResult Guardar(Inquilino inquilino)
             inquilino.Email = inquilino.Email.ToUpper();
             inquilino.Domicilio = inquilino.Domicilio.ToUpper();
             inquilino.Ciudad = inquilino.Ciudad.ToUpper();
-            RepositorioInquilino rp = new RepositorioInquilino();
 
             if (inquilino.Id > 0)
             {
-                rp.ModificarInquilino(inquilino);
+                 _repositorio.ModificarInquilino(inquilino);
                 TempData["Mensaje"] = "El inquilino ha sido modificado";
 
             }
             else
             {
-                rp.AltaInquilino(inquilino);
+                 _repositorio.AltaInquilino(inquilino);
                 TempData["Mensaje"] = "El inquilino ha sido guardado";
             }
             return RedirectToAction(nameof(Index));
@@ -128,8 +127,7 @@ public IActionResult Eliminar(int id)
     {
         try
         {
-            RepositorioInquilino rp = new RepositorioInquilino();
-            rp.EliminarInquilino(id);
+             _repositorio.EliminarInquilino(id);
             TempData["Mensaje"] = "El inquilino ha sido eliminado";
             return RedirectToAction(nameof(Index));
         }
@@ -144,10 +142,20 @@ public IActionResult Eliminar(int id)
  [Authorize]    
 public IActionResult Detalles(int id)
     {
-        RepositorioInquilino rp = new RepositorioInquilino();
-        var inquilino = rp.GetInquilino(id);
+       try
+       {
+         var inquilino =  _repositorio.GetInquilino(id);
         return View(inquilino);
+       }
+       catch (System.Exception ex)
+       {
+         _logger.LogError(ex, "Error al eliminar el inquilino");
+            TempData["Error"] = "Ocurrio un error al intentar eliminar el inquilino";
+            return RedirectToAction(nameof(Index));
+       }
     }
+
+
  [Authorize]
     // GET: inquilino/Busqueda
 public IActionResult Busqueda()
@@ -168,8 +176,7 @@ public IActionResult Busqueda()
     {
         try
         {
-            RepositorioInquilino rp = new RepositorioInquilino();
-            IList<Inquilino> inquilino = rp.BuscarPorNombre(buscar);
+            IList<Inquilino> inquilino = _repositorio.BuscarPorNombre(buscar);
             return View("Index", inquilino);
         }
         catch (Exception ex)

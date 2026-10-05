@@ -3,11 +3,11 @@ using System.Data;
 using MySql.Data.MySqlClient;
 
 namespace agenciaReservas_soazo.Repositorios;
-public class RepositorioRol
+public class RepositorioRol:RepositorioBase
 {
-    readonly string ConnectionString = "Server=localhost;Database=proyecto-bruno-soazo;User=root;Password=;";
+    //readonly string connectionString = "Server=localhost;Database=agenciaReservas;User=root;Password=;";
 
-    public RepositorioRol()
+    public RepositorioRol(IConfiguration configuration):base(configuration)
     {
 
     }
@@ -15,7 +15,7 @@ public class RepositorioRol
  public IList<Rol>ObtenerRoles()
 		{
 			 var roles = new List<Rol>();
-			 using (var connection = new MySqlConnection(ConnectionString))
+			 using (var connection = new MySqlConnection(connectionString))
 			{
 				string sql = @$"SELECT {nameof(Rol.Numero)}, {nameof(Rol.rol)}
 					FROM Roles  ";

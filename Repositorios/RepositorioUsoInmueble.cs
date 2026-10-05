@@ -5,11 +5,11 @@ using agenciaReservas_soazo.Models;
 
 namespace agenciaReservas_soazo.Repositorios;
 
-public class RepositorioUsoInmueble
+public class RepositorioUsoInmueble:RepositorioBase
 {
-    readonly string ConnectionString = "Server=localhost;Database=agenciareservas;User=root;Password=;";
+    //readonly string connectionString = "Server=localhost;Database=agenciareservas;User=root;Password=;";
 
-    public RepositorioUsoInmueble()
+    public RepositorioUsoInmueble(IConfiguration configuration):base(configuration)
     {
 
     }
@@ -20,7 +20,7 @@ public class RepositorioUsoInmueble
         try
         {
             int id = 0;
-            using (var connection = new MySqlConnection(ConnectionString))
+            using (var connection = new MySqlConnection(connectionString))
             {
                 var sql = @$"INSERT INTO Usoinmuebles ({nameof(UsoInmueble.Uso)})
                                             VALUES (@{nameof(UsoInmueble.Uso)});            
@@ -49,7 +49,7 @@ public class RepositorioUsoInmueble
     public UsoInmueble? getUsoInmueble(int id)
     {
         UsoInmueble? Usoinmueble = null;
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             var sql = @$"SELECT {nameof(UsoInmueble.Id)},{nameof(UsoInmueble.Uso)}
             FROM Usoinmuebles WHERE {nameof(UsoInmueble.Id)} = @{nameof(UsoInmueble.Id)}";
@@ -77,7 +77,7 @@ public class RepositorioUsoInmueble
 
     public int ModificarUsoInmueble(UsoInmueble Usoinmueble)
     {
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             var sql = @$"UPDATE Usoinmuebles 
             SET {nameof(UsoInmueble.Uso)} = @{nameof(UsoInmueble.Uso)},
@@ -99,7 +99,7 @@ public class RepositorioUsoInmueble
 
     public int EliminarUsoInmueble(int id)
     {
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             var sql = @$"DELETE from Usoinmuebles WHERE {nameof(UsoInmueble.Id)} = @{nameof(UsoInmueble.Id)}";
             using (var command = new MySqlCommand(sql, connection))
@@ -123,7 +123,7 @@ public class RepositorioUsoInmueble
         buscar = "%" + buscar + "%";
 
 
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             var sql = @$"SELECT {nameof(UsoInmueble.Id)}, {nameof(UsoInmueble.Uso)}
                     WHERE {nameof(UsoInmueble.Uso)} LIKE @buscar";
@@ -155,7 +155,7 @@ public class RepositorioUsoInmueble
  public IList<UsoInmueble>ObtenerUsos()
 		{
 			 var Usos = new List<UsoInmueble>();
-			 using (var connection = new MySqlConnection(ConnectionString))
+			 using (var connection = new MySqlConnection(connectionString))
 			{
 				string sql = @$"SELECT {nameof(UsoInmueble.Id)}, {nameof(UsoInmueble.Uso)}
 					FROM Usoinmuebles ORDER BY Uso ASC ";

@@ -4,19 +4,20 @@ using agenciaReservas_soazo.Models;
 
 namespace agenciaReservas_soazo.Repositorios;
 
-public class RepositorioInquilino
+public class RepositorioInquilino:RepositorioBase
 {
-    readonly string ConnectionString = "Server=localhost;Database=agenciareservas;User=root;Password=;";
+    //readonly string connectionString = "Server=localhost;Database=agenciareservas;User=root;Password=;";
 
-    public RepositorioInquilino()
+     public RepositorioInquilino(IConfiguration configuration) :base(configuration)
     {
-
+       
     }
+
 
     public IList<Inquilino> getInquilinos()
     {
         var inquilinos = new List<Inquilino>();
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             var sql = @$"SELECT {nameof(Inquilino.Id)}, {nameof(Inquilino.Dni)}, 
             {nameof(Inquilino.Nombre)}, {nameof(Inquilino.Apellido)},  {nameof(Inquilino.Email)}, 
@@ -54,7 +55,7 @@ public class RepositorioInquilino
 
         int offset = (pagina - 1) * cantidadPorPagina;
 
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             string sql = @"
             SELECT *
@@ -97,7 +98,7 @@ public class RepositorioInquilino
 
         int offset = (pagina - 1) * cantidadPorPagina;
 
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             string sql = @"
             SELECT *
@@ -137,7 +138,7 @@ public class RepositorioInquilino
 
     public int GetCantidadInquilinos()
     {
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             string sql = "SELECT COUNT(*) FROM Inquilinos";
 
@@ -155,7 +156,7 @@ public class RepositorioInquilino
     public int AltaInquilino(Inquilino inquilino)
     {
         int id = 0;
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             var sql = @$"INSERT INTO inquilinos ({nameof(Inquilino.Nombre)},{nameof(Inquilino.Apellido)},{nameof(Inquilino.Dni)},{nameof(Inquilino.Email)},{nameof(Inquilino.Telefono)},{nameof(Inquilino.Domicilio)},{nameof(Inquilino.Ciudad)})
                                             VALUES (@{nameof(Inquilino.Nombre)},@{nameof(Inquilino.Apellido)},@{nameof(Inquilino.Dni)},@{nameof(Inquilino.Email)},@{nameof(Inquilino.Telefono)},@{nameof(Inquilino.Domicilio)},@{nameof(Inquilino.Ciudad)});            
@@ -183,7 +184,7 @@ public class RepositorioInquilino
     public Inquilino? GetInquilino(int id)
     {
         Inquilino? inquilino = null;
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             var sql = @$"SELECT {nameof(Inquilino.Id)},{nameof(Inquilino.Nombre)},{nameof(Inquilino.Apellido)},{nameof(Inquilino.Dni)},{nameof(Inquilino.Email)},{nameof(Inquilino.Telefono)},{nameof(Inquilino.Domicilio)},{nameof(Inquilino.Ciudad)} 
             FROM inquilinos WHERE {nameof(Inquilino.Id)} = @{nameof(Inquilino.Id)}";
@@ -216,7 +217,7 @@ public class RepositorioInquilino
 
     public int ModificarInquilino(Inquilino inquilino)
     {
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             var sql = @$"UPDATE Inquilinos 
             SET {nameof(Inquilino.Nombre)} = @{nameof(Inquilino.Nombre)},
@@ -248,7 +249,7 @@ public class RepositorioInquilino
 
     public int EliminarInquilino(int id)
     {
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             string sql = "DELETE FROM inquilinos WHERE Id = @Id";
 
@@ -269,7 +270,7 @@ public class RepositorioInquilino
         var res = new List<Inquilino>();
         nombre = "%" + nombre + "%"; // Usar comodines para la búsqueda parcial
 
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             var sql = @$"SELECT {nameof(Inquilino.Id)}, {nameof(Inquilino.Nombre)}, {nameof(Inquilino.Apellido)}, {nameof(Inquilino.Dni)}, {nameof(Inquilino.Email)}, {nameof(Inquilino.Telefono)}, {nameof(Inquilino.Domicilio)}, {nameof(Inquilino.Ciudad)} 
                     FROM inquilinos 

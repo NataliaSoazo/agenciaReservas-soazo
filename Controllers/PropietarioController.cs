@@ -9,18 +9,19 @@ namespace agenciaReservas_soazo.Controllers;
 public class PropietarioController : Controller
 {
     private readonly ILogger<PropietarioController> _logger;
+    private readonly RepositorioPropietario _propietario;
 
 
-    public PropietarioController(ILogger<PropietarioController> logger)
+    public PropietarioController(ILogger<PropietarioController> logger, RepositorioPropietario propietario)
     {
 
         _logger = logger;
+        _propietario = propietario;
     }
      [Authorize]
     public IActionResult Index(int pagina = 1)
 
     {
-        RepositorioPropietario rp = new RepositorioPropietario();
 
         IList<Propietario> lista = new List<Propietario>();
 
@@ -28,10 +29,10 @@ public class PropietarioController : Controller
         {
             int cantidadPorPagina = 10;
             // Cantidad total de registros
-            int totalPropietarios = rp.GetCantidadPropietarios();
+            int totalPropietarios = _propietario.GetCantidadPropietarios();
 
             // Obtener solamente los registros de esta página
-            lista = rp.GetPropietariosPaginados(pagina, cantidadPorPagina);
+            lista = _propietario.GetPropietariosPaginados(pagina, cantidadPorPagina);
 
             // Cantidad total de páginas
             int totalPaginas = (int)Math.Ceiling(
@@ -63,15 +64,24 @@ public class PropietarioController : Controller
 
     public IActionResult Editar(int id)
     {
-        if (id > 0)
+        try
         {
-            RepositorioPropietario rp = new RepositorioPropietario();
-            var propietario = rp.getPropietario(id);
+            if (id > 0)
+        {
+            var propietario = _propietario.getPropietario(id);
             return View(propietario);
         }
         else
         {
             return View();
+        }
+        }
+        catch (System.Exception ex)
+        {
+            
+            _logger.LogError(ex, "error");
+            TempData["Error"] = "Ocurrió un error";
+            return RedirectToAction(nameof(Index));
         }
     }
     [Authorize]
@@ -84,17 +94,16 @@ public class PropietarioController : Controller
             propietario.Email = propietario.Email.ToUpper();
             propietario.Domicilio = propietario.Domicilio.ToUpper();
             propietario.Ciudad = propietario.Ciudad.ToUpper();
-            RepositorioPropietario rp = new RepositorioPropietario();
 
             if (propietario.Id > 0)
             {
-                rp.ModificarPropietario(propietario);
+                _propietario.ModificarPropietario(propietario);
                 TempData["Mensaje"] = "El propietario ha sido modificado";
 
             }
             else
             {
-                rp.AltaPropietario(propietario);
+                _propietario.AltaPropietario(propietario);
                 TempData["Mensaje"] = "El propietario ha sido guardado";
             }
             return RedirectToAction(nameof(Index));
@@ -112,8 +121,7 @@ public class PropietarioController : Controller
     {
         try
         {
-            RepositorioPropietario rp = new RepositorioPropietario();
-            rp.EliminarPropietario(id);
+            _propietario.EliminarPropietario(id);
             TempData["Mensaje"] = "El propietario ha sido eliminado";
             return RedirectToAction(nameof(Index));
         }
@@ -127,8 +135,7 @@ public class PropietarioController : Controller
     [Authorize]
     public IActionResult Detalles(int id)
     {
-        RepositorioPropietario rp = new RepositorioPropietario();
-        var propietario = rp.getPropietario(id);
+        var propietario = _propietario.getPropietario(id);
         return View(propietario);
     }
     [Authorize]
@@ -151,8 +158,7 @@ public class PropietarioController : Controller
     {
         try
         {
-            RepositorioPropietario rp = new RepositorioPropietario();
-            IList<Propietario> p = rp.BuscarPorNombre(buscar);
+            IList<Propietario> p = _propietario.BuscarPorNombre(buscar);
             return View("Index",p );
         }
         catch (Exception ex)

@@ -3,20 +3,26 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using agenciaReservas_soazo.Models;
 using agenciaReservas_soazo.Repositorios;
+using AspNetCoreGeneratedDocument;
 namespace agenciaReservas_soazo.Controllers;
 
 public class PagoController : Controller
 {
     private readonly ILogger<HomeController> _logger;
+    private readonly RepositorioPago _repositorio;
+    private readonly RepositorioReserva _reserva;
+    private readonly RepositorioUsuario _usuario;
 
-    public PagoController(ILogger<HomeController> logger)
+    public PagoController(ILogger<HomeController> logger, RepositorioPago repositorio, RepositorioReserva reserva, RepositorioUsuario usuario)
     {
         _logger = logger;
+       _repositorio = repositorio;
+        _reserva = reserva;
+        _usuario = usuario;
     }
     [Authorize]
     public IActionResult Index(int pagina = 1)
     {
-        RepositorioPago rp = new RepositorioPago();
         IList<Pago> lista = new List<Pago>();
         var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
         ViewBag.UserRole = userRole;
@@ -25,10 +31,10 @@ public class PagoController : Controller
             int cantidadPorPagina = 10;
 
         // Cantidad total de registros
-        int totalReservas = rp.CantidadPagos();
+        int totalReservas = _repositorio.CantidadPagos();
 
         // Obtener los registros correspondientes a la página
-        lista = rp.GetPagosPaginados(pagina, cantidadPorPagina);
+        lista = _repositorio.GetPagosPaginados(pagina, cantidadPorPagina);
         // Cantidad total de páginas
         int totalPaginas = (int)Math.Ceiling(
             (double)totalReservas / cantidadPorPagina
@@ -58,12 +64,11 @@ public class PagoController : Controller
     [Authorize]
     public IActionResult Editar(int? id, int? IdReserva)
     {   
-        RepositorioReserva reserva = new RepositorioReserva();
         List<string> concepto = new List<string>{"RESERVA INICIAL","PAGO TOTAL", "MULTA"};
         ViewBag.Concepto = concepto;    
-        ViewBag.Reserva = reserva;
+        ViewBag.Reserva = _reserva;
     
-        var lista = reserva.GetReservas();
+        var lista = _reserva.GetReservas();
         lista = lista.Where(x =>
                 x.FechaHasta > DateTime.Now &&  // Contratos cuya fecha de término es mayor a la fecha actual
                 x.Anulado == false             // Contratos que NO están anulados
@@ -75,8 +80,8 @@ public class PagoController : Controller
 
         if (id.HasValue && id.Value > 0)
         {
-            RepositorioPago rp = new RepositorioPago();
-            pago = rp.GetPago(id.Value) ?? new Pago();
+
+            pago = _repositorio.GetPago(id.Value) ?? new Pago();
         }
 
         if (IdReserva.HasValue)
@@ -93,8 +98,7 @@ public class PagoController : Controller
         if (id ==0){
             return View();
         }
-        RepositorioReserva repoReserva = new RepositorioReserva();
-        var reserva = repoReserva.GetReserva(id);
+        var reserva = _reserva.GetReserva(id);
         var dias =( reserva.FechaHasta- reserva.FechaDesde).Days;
         var APagar = reserva.DatoInmueble.Precio *dias;
         var porcentual = (APagar * reserva.DatoInmueble.Porcentual)/100;
@@ -117,22 +121,20 @@ public class PagoController : Controller
         {
             pago.IdReserva = IdReserva.Value;
         }
-        RepositorioUsuario ru = new RepositorioUsuario();
-        var usuario = ru.ObtenerPorEmail(User.Identity.Name);
+        var usuario = _usuario.ObtenerPorEmail(User.Identity.Name);
         try
         {
-            RepositorioPago rp = new RepositorioPago();
 
             if (pago.Id > 0)
             {
-                rp.ModificarPago(pago);
+                _repositorio.ModificarPago(pago);
                    return RedirectToAction(nameof(Index));
             }
             else
             {
                 pago.IdAlta = usuario.Id;
                 pago.IdBaja = 0;
-                rp.AltaPago(pago);
+                _repositorio.AltaPago(pago);
                 return RedirectToAction("PagosReserva", pago.Id);
             }
         }
@@ -149,10 +151,8 @@ public class PagoController : Controller
     {
         try
         {
-            RepositorioPago rp = new RepositorioPago();
-            RepositorioUsuario ru = new RepositorioUsuario();
-            var usuario = ru.ObtenerPorEmail(User.Identity.Name);
-            rp.EliminarPago(id, usuario.Id);
+            var usuario = _usuario.ObtenerPorEmail(User.Identity.Name);
+            _repositorio.EliminarPago(id, usuario.Id);
             TempData["Mensaje"] = "El pago ha sido anulado correctamente.";
             return RedirectToAction(nameof(Index));
         }
@@ -165,17 +165,15 @@ public class PagoController : Controller
     [Authorize]
     public IActionResult Detalles(int id)
     {
-        RepositorioPago rp = new RepositorioPago();
-        RepositorioUsuario ru = new RepositorioUsuario();
         var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
         ViewBag.UserRole = userRole;
-        var p = rp.GetPago(id);
-        var usuarioC = ru.getUsuario(p.IdAlta);
+        var p = _repositorio.GetPago(id);
+        var usuarioC = _usuario.getUsuario(p.IdAlta);
         ViewBag.UsuarioC = usuarioC;
         ViewBag.Pago = p;
         if (p.IdBaja.HasValue)
         {
-            var usuarioT = ru.getUsuario(p.IdBaja.Value);
+            var usuarioT = _usuario.getUsuario(p.IdBaja.Value);
             ViewBag.UsuarioT = usuarioT;
         }
         return View(p);
@@ -183,13 +181,12 @@ public class PagoController : Controller
     [Authorize]
     public IActionResult PagosReserva(int id)
     {
-        RepositorioPago rp = new RepositorioPago();
         IList<Pago> lista = new List<Pago>();
         var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
         ViewBag.UserRole = userRole;
         try
         {
-            lista = rp.GetPagos();
+            lista = _repositorio.GetPagos();
             lista = lista.Where(x => x.IdReserva == id).ToList();
             return View("Index", lista);
         }

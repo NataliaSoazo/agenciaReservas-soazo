@@ -4,19 +4,20 @@ using MySql.Data.MySqlClient;
 
 namespace agenciaReservas_soazo.Repositorios;
 
-public class RepositorioPago
+public class RepositorioPago:RepositorioBase
 {
-    readonly string ConnectionString = "Server=localhost;Database=agenciaReservas;User=root;Password=;";
+   // readonly string connectionString = "Server=localhost;Database=agenciaReservas;User=root;Password=;";
 
-    public RepositorioPago()
+     public RepositorioPago(IConfiguration configuration) :base(configuration)
     {
-
+       
     }
+
 
     public IList<Pago> GetPagos1()
     {
         var pagos = new List<Pago>();
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             string sql = $@"SELECT p.{nameof(Pago.Id)}, {nameof(Pago.Fecha)},{nameof(Pago.Modo)}, {nameof(Pago.Concepto)}, {nameof(Pago.Importe)}, {nameof(Pago.Anulado)}, {nameof(Pago.IdReserva)}
                 FROM pagos p";
@@ -48,7 +49,7 @@ public class RepositorioPago
 {
     var pagos = new List<Pago>();
 
-    using (var connection = new MySqlConnection(ConnectionString))
+    using (var connection = new MySqlConnection(connectionString))
     {
         string sql = $@"
             SELECT
@@ -177,7 +178,7 @@ public class RepositorioPago
     public IList<Pago> ObtenerPagosPorReserva(int id)
     {
         var pagos = new List<Pago>();
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             string sql = $@"SELECT p.{nameof(Pago.Id)},  {nameof(Pago.Fecha)}, {nameof(Pago.Modo)},{nameof(Pago.Concepto)}, {nameof(Pago.Importe)}, {nameof(Pago.Anulado)}, {nameof(Pago.IdReserva)}
                 FROM pagos p
@@ -210,7 +211,7 @@ public class RepositorioPago
     public int AltaPago(Pago pago)
     {
         int id = 0;
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             string sql = $@"INSERT INTO pagos ({nameof(Pago.Fecha)},{nameof(Pago.Modo)}, {nameof(Pago.Concepto)}, {nameof(Pago.Importe)}, {nameof(Pago.Anulado)}, {nameof(Pago.IdReserva)}, {nameof(Pago.IdAlta)}, {nameof(Pago.IdBaja)}) 
                         VALUES (@{nameof(Pago.Fecha)},@{nameof(Pago.Modo)}, @{nameof(Pago.Concepto)}, @{nameof(Pago.Importe)}, @{nameof(Pago.Anulado)}, @{nameof(Pago.IdReserva)}, @{nameof(Pago.IdAlta)}, @{nameof(Pago.IdBaja)});           
@@ -238,7 +239,7 @@ public class RepositorioPago
     public Pago? GetPago(int id)
     {
         Pago? pagos = null;
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             string sql = $@"SELECT p.{nameof(Pago.Id)},{nameof(Pago.Fecha)},{nameof(Pago.Modo)}, {nameof(Pago.Concepto)}, {nameof(Pago.Importe)}, {nameof(Pago.Anulado)}, {nameof(Pago.IdReserva)}, {nameof(Pago.IdAlta)}, {nameof(Pago.IdBaja)}
                 FROM pagos p
@@ -273,7 +274,7 @@ public class RepositorioPago
 
     public int ModificarPago(Pago pago)
     {
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             string sql = $@"UPDATE pagos SET 
                             {nameof(Pago.Fecha)} = @{nameof(Pago.Fecha)},
@@ -302,7 +303,7 @@ public class RepositorioPago
 
     public int EliminarPago(int id, int IdBaja) //Es un anulado lógico
     {
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             var sql = @$"UPDATE pagos SET {nameof(Pago.Anulado)} = 'SI', {nameof(Pago.IdBaja)} = @IdBaja WHERE {nameof(Pago.Id)} = @id;";
             using (var command = new MySqlCommand(sql, connection))
@@ -322,7 +323,7 @@ public IList<Pago> GetPagosPaginados(int pagina, int cantidadPorPagina)
 
     int offset = (pagina - 1) * cantidadPorPagina;
 
-    using (var connection = new MySqlConnection(ConnectionString))
+    using (var connection = new MySqlConnection(connectionString))
     {
         string sql = $@"
             SELECT
@@ -465,7 +466,7 @@ public IList<Pago> GetPagosPaginados(int pagina, int cantidadPorPagina)
 }
 public int CantidadPagos()
 {
-    using (var connection = new MySqlConnection(ConnectionString))
+    using (var connection = new MySqlConnection(connectionString))
     {
         string sql = $@"
             SELECT COUNT(*)
@@ -485,7 +486,7 @@ public IList<Reserva> BuscarReservasParaPago(string texto)
 {
     var reservas = new List<Reserva>();
 
-    using (var connection = new MySqlConnection(ConnectionString))
+    using (var connection = new MySqlConnection(connectionString))
     {
         string sql = $@"
             SELECT

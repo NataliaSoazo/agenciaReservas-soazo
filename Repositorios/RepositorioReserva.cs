@@ -1,15 +1,15 @@
 using System.Data;
 using MySql.Data.MySqlClient;
 using agenciaReservas_soazo.Models;
+
 namespace agenciaReservas_soazo.Repositorios;
 
-public class RepositorioReserva
+public class RepositorioReserva:RepositorioBase
 {
-    readonly string ConnectionString = "Server=localhost;Database=agenciareservas;User=root;Password=;";
+    //readonly string connectionString = "Server=localhost;Database=agenciareservas;User=root;Password=;";
 
-    public RepositorioReserva()
+    public RepositorioReserva(IConfiguration configuration): base(configuration)
     {
-
     }
 
 
@@ -17,7 +17,7 @@ public class RepositorioReserva
     {
         var reservas = new List<Reserva>();
 
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             string sql = $@"SELECT i.{nameof(Reserva.Id)},{nameof(Reserva.Fecha)}, {nameof(Reserva.FechaDesde)}, {nameof(Reserva.FechaHasta)}, {nameof(Reserva.Monto)}, {nameof(Reserva.IdInquilino)}, {nameof(Reserva.Anulado)},
                       p.{nameof(Inquilino.Nombre)}, p.{nameof(Inquilino.Apellido)}, {nameof(Reserva.IdInmueble)}, m.{nameof(Inmueble.Direccion)}
@@ -76,7 +76,7 @@ public class RepositorioReserva
 
     int offset = (pagina - 1) * cantidadPorPagina;
 
-    using (var connection = new MySqlConnection(ConnectionString))
+    using (var connection = new MySqlConnection(connectionString))
     {
         string sql = $@"SELECT i.{nameof(Reserva.Id)},{nameof(Reserva.Fecha)}, {nameof(Reserva.FechaDesde)}, {nameof(Reserva.FechaHasta)}, {nameof(Reserva.Monto)}, {nameof(Reserva.IdInquilino)}, {nameof(Reserva.Anulado)},
                       p.{nameof(Inquilino.Nombre)}, p.{nameof(Inquilino.Apellido)}, {nameof(Reserva.IdInmueble)}, m.{nameof(Inmueble.Direccion)}
@@ -138,7 +138,7 @@ public class RepositorioReserva
 public int GetCantidadReservas()
 {    int cantidad = 0;
 
-    using (var connection = new MySqlConnection(ConnectionString))
+    using (var connection = new MySqlConnection(connectionString))
     {
         string sql = "SELECT COUNT(*) FROM Reservas";
 
@@ -162,7 +162,7 @@ public int GetCantidadReservas()
 
         try
         {
-            using (var connection = new MySqlConnection(ConnectionString))
+            using (var connection = new MySqlConnection(connectionString))
             {
                 string sql = $@"
                     INSERT INTO reservas
@@ -223,7 +223,7 @@ public int GetCantidadReservas()
 {
     Reserva? reserva = null;
 
-    using (var connection = new MySqlConnection(ConnectionString))
+    using (var connection = new MySqlConnection(connectionString))
     {
         string sql = $@"
             SELECT 
@@ -294,7 +294,7 @@ public int GetCantidadReservas()
 
         public int ModificarReserva(Reserva reserva)
 {
-    using (var connection = new MySqlConnection(ConnectionString))
+    using (var connection = new MySqlConnection(connectionString))
     {
         string sql = @"
             UPDATE reservas
@@ -326,7 +326,7 @@ public int GetCantidadReservas()
 
     public int AnularReserva(int id)
     {
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             string sql = $@"
                 UPDATE reservas
@@ -366,7 +366,7 @@ public int GetCantidadReservas()
     DateTime fechaHasta,
     int idReserva = 0)
 {
-    using (var connection = new MySqlConnection(ConnectionString))
+    using (var connection = new MySqlConnection(connectionString))
     {
         string sql = @"
             SELECT COUNT(*)

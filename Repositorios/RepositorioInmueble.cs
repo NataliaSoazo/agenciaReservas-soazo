@@ -2,18 +2,19 @@ using System.Data;
 using MySql.Data.MySqlClient;
 using agenciaReservas_soazo.Models;
 namespace agenciaReservas_soazo.Repositorios;
-public class RepositorioInmueble
+
+public class RepositorioInmueble:RepositorioBase
 {
-    readonly string ConnectionString = "Server=localhost;Database=agenciareservas;User=root;Password=;";
+    //readonly string connectionString = "Server=localhost;Database=agenciareservas;User=root;Password=;";
 
-    public RepositorioInmueble()
+    public RepositorioInmueble(IConfiguration configuration) :base(configuration)
     {
-
+       
     }
     public IList<Inmueble> ObtenerTodos()
     {
         var inmuebles = new List<Inmueble>();
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             string sql = @$"SELECT i.{nameof(Inmueble.Id)},{nameof(Inmueble.Direccion)}, {nameof(Inmueble.Tipo)}, {nameof(Inmueble.Uso)}, {nameof(Inmueble.Cupo)}, {nameof(Inmueble.Precio)}, {nameof(Inmueble.Disponible)}, {nameof(Inmueble.Latitud)},{nameof(Inmueble.Longitud)},{nameof(Inmueble.PropietarioId)},
 					 p.{nameof(Propietario.Nombre)}, p.{nameof(Propietario.Apellido)}
@@ -56,7 +57,7 @@ public class RepositorioInmueble
 
     int offset = (pagina - 1) * cantidadPorPagina;
 
-    using (var connection = new MySqlConnection(ConnectionString))
+    using (var connection = new MySqlConnection(connectionString))
     {
         string sql = @$"
             SELECT 
@@ -125,7 +126,7 @@ public int GetCantidadInmuebles()
 {
     int cantidad = 0;
 
-    using (var connection = new MySqlConnection(ConnectionString))
+    using (var connection = new MySqlConnection(connectionString))
     {
         string sql = "SELECT COUNT(*) FROM Inmuebles";
 
@@ -145,7 +146,7 @@ public int GetCantidadInmuebles()
     public int AltaInmueble(Inmueble inmueble)
     {
         int id = 0;
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             var sql = @$"INSERT INTO inmuebles ({nameof(Inmueble.Direccion)}, {nameof(Inmueble.Cupo)}, {nameof(Inmueble.Uso)},  {nameof(Inmueble.Precio)},{nameof(Inmueble.Porcentual)}, {nameof(Inmueble.Disponible)}, {nameof(Inmueble.PropietarioId)}, {nameof(Inmueble.Latitud)}, {nameof(Inmueble.Longitud)}, {nameof(Inmueble.Tipo)})
                                      VALUES (@{nameof(Inmueble.Direccion)}, @{nameof(Inmueble.Cupo)}, @{nameof(Inmueble.Uso)},  @{nameof(Inmueble.Precio)},@{nameof(Inmueble.Porcentual)}, @{nameof(Inmueble.Disponible)}, @{nameof(Inmueble.PropietarioId)}, @{nameof(Inmueble.Latitud)}, @{nameof(Inmueble.Longitud)}, @{nameof(Inmueble.Tipo)});            
@@ -175,7 +176,7 @@ public int GetCantidadInmuebles()
     public Inmueble? GetInmueble(int id)
     {
         Inmueble? inmueble = null;
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             string sql = @$"SELECT i.{nameof(Inmueble.Id)},{nameof(Inmueble.Direccion)}, {nameof(Inmueble.Tipo)}, {nameof(Inmueble.Uso)}, {nameof(Inmueble.Cupo)},{nameof(Inmueble.Precio)},{nameof(Inmueble.Porcentual)}, {nameof(Inmueble.Porcentual)},{nameof(Inmueble.Latitud)}, {nameof(Inmueble.Longitud)}, {nameof(Inmueble.Disponible)},{nameof(Inmueble.PropietarioId)},
 					 p.{nameof(Propietario.Nombre)}, p.{nameof(Propietario.Apellido)}
@@ -219,7 +220,7 @@ public int GetCantidadInmuebles()
     public int ModificarInmueble(Inmueble inmueble)
     {
         int id = 0;
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             string sql = @$"UPDATE inmuebles SET 
 				{nameof(Inmueble.Direccion)} = @{nameof(Inmueble.Direccion)}, 
@@ -258,7 +259,7 @@ public int GetCantidadInmuebles()
 
     public int EliminarInmueble(int id)
     {
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             var sql = @$"DELETE from inmuebles WHERE {nameof(Inmueble.Id)} = @{nameof(Inmueble.Id)}";
             using (var command = new MySqlCommand(sql, connection))
@@ -274,7 +275,7 @@ public int GetCantidadInmuebles()
     public IList<TipoInmueble> ObtenerTipos()
     {
         var tipos = new List<TipoInmueble>();
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             string sql = @$"SELECT {nameof(TipoInmueble.Tipo)}
 					FROM tipoinmuebles DESC ";
@@ -303,7 +304,7 @@ public int GetCantidadInmuebles()
     {
         var res = new List<Inmueble>();
 
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             var sql = @$"SELECT {nameof(Inmueble.Id)}, {nameof(Inmueble.Direccion)}, {nameof(Inmueble.Uso)}, {nameof(Inmueble.Disponible)}, {nameof(Inmueble.PropietarioId)}
                     FROM inmuebles

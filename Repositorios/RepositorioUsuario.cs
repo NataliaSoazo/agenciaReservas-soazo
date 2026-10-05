@@ -4,11 +4,11 @@ using MySql.Data.MySqlClient;
 
 namespace agenciaReservas_soazo.Repositorios;
 
-public class RepositorioUsuario
+public class RepositorioUsuario:RepositorioBase
 {
-    readonly string ConnectionString = "Server=localhost;Database=agenciaReservas;User=root;Password=;";
+    //readonly string connectionString = "Server=localhost;Database=agenciaReservas;User=root;Password=;";
 
-    public RepositorioUsuario()
+    public RepositorioUsuario(IConfiguration configuration):base(configuration)
     {
 
     }
@@ -16,7 +16,7 @@ public class RepositorioUsuario
     public IList<Usuario> GetUsuarios()
     {
         var usuarios = new List<Usuario>();
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             var sql = @$"SELECT {nameof(Usuario.Id)},
             {nameof(Usuario.Nombre)}, {nameof(Usuario.Apellido)},  {nameof(Usuario.Correo)}, 
@@ -52,7 +52,7 @@ public class RepositorioUsuario
         try
         {
             int id = 0;
-            using (var connection = new MySqlConnection(ConnectionString))
+            using (var connection = new MySqlConnection(connectionString))
             {
                 var sql = @$"INSERT INTO usuarios ({nameof(Usuario.Nombre)},{nameof(Usuario.Apellido)},{nameof(Usuario.Correo)},{nameof(Usuario.Clave)},{nameof(Usuario.Rol)})
                                             VALUES (@{nameof(Usuario.Nombre)},@{nameof(Usuario.Apellido)},@{nameof(Usuario.Correo)},@{nameof(Usuario.Clave)},@{nameof(Usuario.Rol)});         
@@ -87,7 +87,7 @@ public class RepositorioUsuario
     public Usuario? getUsuario(int id)
     {
         Usuario? usuario = null;
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             var sql = @$"SELECT u.{nameof(Usuario.Id)}, u.{nameof(Usuario.Nombre)}, u.{nameof(Usuario.Apellido)}, u.{nameof(Usuario.Correo)}, u.{nameof(Usuario.AvatarURL)}, r.{nameof(Rol.rol)}, r.{nameof(Rol.Numero)}  
         FROM usuarios u INNER JOIN roles r ON u.{nameof(Usuario.Rol)} = r.{nameof(Rol.Numero)} WHERE u.{nameof(Usuario.Id)} = @{nameof(Usuario.Id)}";
@@ -122,7 +122,7 @@ public class RepositorioUsuario
 
     public int ModificarUsuario(Usuario usuario)
     {
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             // Construir la consulta SQL con campos opcionales
             var sql = @$"UPDATE Usuarios 
@@ -165,7 +165,7 @@ public class RepositorioUsuario
     }
     public int EditarDatos(Usuario usuario)
     {
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             var sql = @$"UPDATE Usuarios 
             SET {nameof(Usuario.Nombre)} = @{nameof(Usuario.Nombre)},
@@ -187,7 +187,7 @@ public class RepositorioUsuario
     }
     public int EditarAvatar(Usuario usuario)
     {
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             var sql = @$"UPDATE Usuarios 
             SET 
@@ -206,7 +206,7 @@ public class RepositorioUsuario
     }
     public int EditarClave(Usuario usuario)
     {
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             var sql = @$"UPDATE Usuarios 
             SET 
@@ -226,7 +226,7 @@ public class RepositorioUsuario
 
     public int EliminarUsuario(int id)
     {
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             var sql = @$"DELETE from usuarios WHERE {nameof(Usuario.Id)} = @{nameof(Usuario.Id)}";
             using (var command = new MySqlCommand(sql, connection))
@@ -245,7 +245,7 @@ public class RepositorioUsuario
         var res = new List<Usuario>();
         nombre = "%" + nombre + "%";
 
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             var sql = @$"SELECT {nameof(Usuario.Id)},{nameof(Usuario.Nombre)},{nameof(Usuario.Apellido)},{nameof(Usuario.Correo)},{nameof(Usuario.Clave)},{nameof(Usuario.AvatarURL)},{nameof(Usuario.Rol)} FROM usuarios
                       WHERE {nameof(Usuario.Nombre)} LIKE @{nameof(Usuario.Nombre)} OR {nameof(Usuario.Apellido)} LIKE @{nameof(Usuario.Nombre)}";
@@ -283,7 +283,7 @@ public class RepositorioUsuario
     public Usuario? ObtenerPorEmail(string email)
     {
         Usuario? usuario = null;
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             var sql = @$"SELECT u.{nameof(Usuario.Id)}, u.{nameof(Usuario.Nombre)}, u.{nameof(Usuario.Apellido)}, u.{nameof(Usuario.Correo)}, u.{nameof(Usuario.Clave)}, u.{nameof(Usuario.AvatarURL)}, r.{nameof(Rol.rol)}, r.{nameof(Rol.Numero)}  
         FROM usuarios u INNER JOIN roles r ON u.{nameof(Usuario.Rol)} = r.{nameof(Rol.Numero)} WHERE u.{nameof(Usuario.Correo)} = @{nameof(Usuario.Correo)}";
@@ -323,7 +323,7 @@ public class RepositorioUsuario
         var res = new List<Usuario>();
         nombreOCorreo = "%" + nombreOCorreo + "%"; // Usar comodines para la búsqueda parcial
 
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var connection = new MySqlConnection(connectionString))
         {
             var sql = @$"SELECT u.{nameof(Usuario.Id)}, u.{nameof(Usuario.Nombre)}, u.{nameof(Usuario.Apellido)}, 
                             u.{nameof(Usuario.Correo)}, u.{nameof(Usuario.Clave)}, u.{nameof(Usuario.AvatarURL)}, 

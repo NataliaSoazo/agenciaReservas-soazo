@@ -29,24 +29,27 @@ public class UsuarioController : Controller
     private readonly IWebHostEnvironment environment;
 
     private readonly ILogger<UsuarioController> _logger;
+     private readonly RepositorioUsuario _usuario;
+     private readonly RepositorioRol _repoRol;
 
-    public UsuarioController(ILogger<UsuarioController> logger, IConfiguration configuration, IWebHostEnvironment environment)
+    public UsuarioController(ILogger<UsuarioController> logger, IConfiguration configuration, IWebHostEnvironment environment,RepositorioUsuario usuario,RepositorioRol repoRol)
     {
         _logger = logger;
         this.configuration = configuration;
         this.environment = environment;
+         _usuario = usuario;
+         _repoRol = repoRol;
 
     }
     [Authorize(Policy = "Administrador")]
     public IActionResult Index()
     {
-        RepositorioUsuario repositorio = new RepositorioUsuario();
         IList<Usuario> lista = new List<Usuario>();
         var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
         ViewBag.UserRole = userRole;
         try
         {
-            lista = repositorio.GetUsuarios();
+            lista = _usuario.GetUsuarios();
             if (TempData.ContainsKey("Mensaje"))
             {
                 ViewBag.Mensaje = TempData["Mensaje"];
@@ -68,8 +71,7 @@ public class UsuarioController : Controller
     [Authorize(Policy = "Administrador")]
     public IActionResult Crear()
     {
-        RepositorioRol repoRol = new RepositorioRol();
-        ViewBag.Roles = repoRol.ObtenerRoles();
+        ViewBag.Roles = _repoRol.ObtenerRoles();
         return View();
     }
 
@@ -77,7 +79,6 @@ public class UsuarioController : Controller
     [HttpPost]
     public IActionResult Guardar(Usuario usuario)
     {
-        RepositorioUsuario repositorio = new RepositorioUsuario();
         if (!ModelState.IsValid)//valida que el formulario coincida con el modelo
             return View();
         try
@@ -87,7 +88,7 @@ public class UsuarioController : Controller
             usuario.Rol = usuario.Rol;
             usuario.Nombre = usuario.Nombre.ToUpper();
             usuario.Apellido = usuario.Apellido.ToUpper();
-            int res = repositorio.AltaUsuario(usuario);
+            int res = _usuario.AltaUsuario(usuario);
             if (usuario.AvatarFile != null && usuario.Id > 0)
             {
                 GuardarAvatar(usuario); // Método separado para manejo de archivos
@@ -95,7 +96,7 @@ public class UsuarioController : Controller
             else
             {
                 usuario.AvatarURL = Path.Combine("/ImgSubidas", "anonimo.jpg");
-                repositorio.ModificarUsuario(usuario);
+                _usuario.ModificarUsuario(usuario);
             }
             return RedirectToAction(nameof(Index));
         }
@@ -147,8 +148,7 @@ public class UsuarioController : Controller
 
             usuario.AvatarURL = Path.Combine("/ImgSubidas", fileName);
             // Actualizar el usuario en la base de datos
-            RepositorioUsuario repositorio = new RepositorioUsuario();
-            repositorio.EditarAvatar(usuario);
+            _usuario.EditarAvatar(usuario);
         }
         catch (Exception ex)
         {
@@ -176,18 +176,15 @@ public class UsuarioController : Controller
             if (id > 0)
             {
                 // Obtener el usuario actual logueado
-                RepositorioUsuario ru = new RepositorioUsuario();
-                var usuarioActual = ru.ObtenerPorEmail(User.Identity.Name);
+                var usuarioActual = _usuario.ObtenerPorEmail(User.Identity.Name);
                 var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
 
                 // Verificar si el usuario actual puede editar al usuario con el ID dado
                 if (userRole == "ADMINISTRADOR" || (usuarioActual != null && usuarioActual.Id == id))
                 {
-                    RepositorioRol repoRol = new RepositorioRol();
-                    ViewBag.Roles = repoRol.ObtenerRoles();
+                    ViewBag.Roles = _repoRol.ObtenerRoles();
 
-                    RepositorioUsuario repositorio = new RepositorioUsuario();
-                    var usuario = repositorio.getUsuario(id);
+                    var usuario = _usuario.getUsuario(id);
                     return View(usuario);
                 }
                 else
@@ -219,14 +216,13 @@ public class UsuarioController : Controller
                 return View(u); // Retorna con errores de validación
             }
 
-            RepositorioUsuario ru = new RepositorioUsuario();
-            var usuarioActual = ru.ObtenerPorEmail(User.Identity.Name);
+            var usuarioActual = _usuario.ObtenerPorEmail(User.Identity.Name);
             var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
 
             // Verificar si el usuario actual tiene permisos para editar
             if (userRole == "ADMINISTRADOR" || (usuarioActual != null && usuarioActual.Id == id))
             {
-                var usuarioExistente = ru.getUsuario(id);
+                var usuarioExistente = _usuario.getUsuario(id);
 
                 if (usuarioExistente != null)
                 {
@@ -238,7 +234,7 @@ public class UsuarioController : Controller
                         usuarioExistente.AvatarFile = u.AvatarFile;
                         GuardarAvatar(usuarioExistente);
                     }
-                    ru.EditarDatos(usuarioExistente);
+                    _usuario.EditarDatos(usuarioExistente);
                     ViewBag.Mensaje = "Datos del usuario actualizados correctamente";
                     return View("Editar", usuarioExistente);
                 }
@@ -266,16 +262,15 @@ public class UsuarioController : Controller
     {
         try
         {
-            RepositorioUsuario ru = new RepositorioUsuario();
-            var usuarioActual = ru.ObtenerPorEmail(User.Identity.Name);
-            var user = ru.getUsuario(id);
+            var usuarioActual = _usuario.ObtenerPorEmail(User.Identity.Name);
+            var user = _usuario.getUsuario(id);
             var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
 
             // Verificar si el usuario actual es el mismo que va a cambiar la contraseña o es un administrador
             if (user != null && usuarioActual != null && (usuarioActual.Id == id || userRole == "ADMINISTRADOR"))
             {
                 user.Clave = HashPassword(u.Clave);
-                ru.EditarClave(user);
+                _usuario.EditarClave(user);
                 ViewBag.Mensaje = "Clave editada correctamente";
                 return View("Editar", user);
             }
@@ -296,8 +291,7 @@ public class UsuarioController : Controller
     {
         try
         {
-            RepositorioUsuario repositorio = new RepositorioUsuario();
-            repositorio.EliminarUsuario(id);
+             _usuario.EliminarUsuario(id);
             TempData["Mensaje"] = "El usuario ha sido eliminado";
             return RedirectToAction(nameof(Index));
         }
@@ -312,9 +306,8 @@ public class UsuarioController : Controller
     {
         try
         {
-            RepositorioUsuario ru = new RepositorioUsuario();
-            var usuarioActual = ru.ObtenerPorEmail(User.Identity.Name);
-            var usuarioExistente = ru.getUsuario(id);
+            var usuarioActual = _usuario.ObtenerPorEmail(User.Identity.Name);
+            var usuarioExistente = _usuario.getUsuario(id);
             var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
 
             if (usuarioExistente != null)
@@ -326,7 +319,7 @@ public class UsuarioController : Controller
                     {
                         eliminaArchivoAnterior(usuarioExistente);
                         usuarioExistente.AvatarURL = Path.Combine("/ImgSubidas", "anonimo.jpg");
-                        ru.EditarAvatar(usuarioExistente);
+                        _usuario.EditarAvatar(usuarioExistente);
                         ViewBag.Mensaje = "La imagen se eliminó correctamente.";
                         return View("Editar", usuarioExistente);
 
@@ -351,12 +344,11 @@ public class UsuarioController : Controller
     //   [Authorize]
     public IActionResult Detalles(int id)
     {
-        RepositorioUsuario repositorio = new RepositorioUsuario();
-        var usuarioActual = repositorio.ObtenerPorEmail(User.Identity.Name);
+        var usuarioActual = _usuario.ObtenerPorEmail(User.Identity.Name);
         var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
         if (usuarioActual != null && (usuarioActual.Id == id || userRole == "ADMINISTRADOR"))
         {
-            var usuario = repositorio.getUsuario(id);
+            var usuario = _usuario.getUsuario(id);
             return View(usuario);
         }
         else
@@ -374,8 +366,8 @@ public class UsuarioController : Controller
         if (ModelState.IsValid)
         {
             string comprobarHash = HashPassword(login.Clave);
-            RepositorioUsuario repositorio = new RepositorioUsuario();
-            var e = repositorio.ObtenerPorEmail(login.Usuario);
+            
+            var e = _usuario.ObtenerPorEmail(login.Usuario);
             if (e == null || e.Clave != comprobarHash)
             {
                 ViewBag.Error = "Usuario o clave incorrectos";
@@ -422,11 +414,10 @@ public class UsuarioController : Controller
     public ActionResult Perfil()
 
     {
-        RepositorioUsuario ru = new RepositorioUsuario();
         ViewData["Title"] = "Mi perfil";
-        var u = ru.ObtenerPorEmail(User.Identity.Name);
-        RepositorioRol repoRol = new RepositorioRol();
-        ViewBag.Roles = repoRol.ObtenerRoles();
+        var u = _usuario.ObtenerPorEmail(User.Identity.Name);
+
+        ViewBag.Roles = _repoRol.ObtenerRoles();
         return View("Editar", u);
     }
 
@@ -435,8 +426,7 @@ public class UsuarioController : Controller
     {
         try
         {
-            RepositorioUsuario ru = new RepositorioUsuario();
-            IList<Usuario> usuario = ru.ObtenerPorNombreOCorreo(buscar);
+            IList<Usuario> usuario = _usuario.ObtenerPorNombreOCorreo(buscar);
             return View("Index", usuario);
         }
         catch (Exception ex)

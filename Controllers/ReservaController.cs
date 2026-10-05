@@ -2,20 +2,31 @@ using Microsoft.AspNetCore.Mvc;
 using agenciaReservas_soazo.Models;
 using agenciaReservas_soazo.Repositorios;
 using Microsoft.AspNetCore.Authorization;
+using AspNetCoreGeneratedDocument;
 namespace agenciaReserva_soazo.Controllers;
 
 public class ReservaController : Controller
 {
     private readonly ILogger<ReservaController> _logger;
+    private readonly RepositorioReserva _reserva;
+    private readonly RepositorioPago _pago;
+    private readonly RepositorioUsuario _usuario;
+    private readonly RepositorioInquilino _inquilino;
+    private readonly RepositorioInmueble _inmueble;
 
-    public ReservaController(ILogger<ReservaController> logger)
+    public ReservaController(ILogger<ReservaController> logger,RepositorioPago pago, RepositorioReserva reserva, RepositorioUsuario usuario,RepositorioInmueble inmueble, RepositorioInquilino inquilino)
     {
         _logger = logger;
+        _pago = pago;
+        _reserva = reserva;
+        _usuario = usuario;
+        _inmueble = inmueble;
+        _inquilino = inquilino;
+        
     }
     [Authorize]
     public IActionResult Index(int pagina = 1)
     {
-        RepositorioReserva rr = new RepositorioReserva();
         IList<Reserva> lista = new List<Reserva>();
 
         try
@@ -23,10 +34,10 @@ public class ReservaController : Controller
             int cantidadPorPagina = 10;
 
             // Cantidad total de registros
-            int totalReservas = rr.GetCantidadReservas();
+            int totalReservas =  _reserva.GetCantidadReservas();
 
             // Obtener los registros correspondientes a la página
-            lista = rr.GetReservasPaginadas(pagina, cantidadPorPagina);
+            lista =  _reserva.GetReservasPaginadas(pagina, cantidadPorPagina);
             // Cantidad total de páginas
             int totalPaginas = (int)Math.Ceiling(
                 (double)totalReservas / cantidadPorPagina
@@ -62,17 +73,13 @@ public class ReservaController : Controller
             ViewBag.Error = TempData["Error"];
         }
 
-        RepositorioInmueble repoInmueble = new RepositorioInmueble();
-        RepositorioInquilino repoInquilino = new RepositorioInquilino();
-        RepositorioReserva repoReserva = new RepositorioReserva();
-
-        ViewBag.Inmuebles = repoInmueble.ObtenerTodos();
-        ViewBag.Inquilinos = repoInquilino.getInquilinos();
+        ViewBag.Inmuebles = _inmueble.ObtenerTodos();
+        ViewBag.Inquilinos = _inquilino.getInquilinos();
 
         // Editar una reserva existente
         if (id > 0)
         {
-            Reserva? reserva = repoReserva.GetReserva(id);
+            Reserva? reserva = _reserva.GetReserva(id);
 
             if (reserva == null)
             {
@@ -102,7 +109,6 @@ public class ReservaController : Controller
     {
         try
         {
-            RepositorioReserva rr = new RepositorioReserva();
             if (reserva.FechaDesde >= reserva.FechaHasta)
             {
                 TempData["Error"] = "La fecha de inicio debe ser anterior a la fecha de culminación.";
@@ -111,7 +117,7 @@ public class ReservaController : Controller
                 );
             }
             // Al editar, excluimos la reserva actual de la búsqueda.
-            bool disponible = rr.InmuebleDisponible(
+            bool disponible = _reserva.InmuebleDisponible(
                 reserva.IdInmueble,
                 reserva.FechaDesde,
                 reserva.FechaHasta,
@@ -126,14 +132,14 @@ public class ReservaController : Controller
             }
             if (reserva.Id > 0)
             {
-                rr.ModificarReserva(reserva);
+                _reserva.ModificarReserva(reserva);
                 TempData["Mensaje"] =
                     "La reserva se modificó correctamente.";
             }
             else
             {
                 reserva.Anulado = false;
-                var nuevareserva = rr.AltaReserva(reserva);
+                var nuevareserva = _reserva.AltaReserva(reserva);
                 TempData["Mensaje"] =
                     "La reserva se creó correctamente.";
             }
@@ -153,8 +159,7 @@ public class ReservaController : Controller
     {
         try
         {
-            RepositorioReserva rr = new RepositorioReserva();
-            Reserva? reserva = rr.GetReserva(id);
+            Reserva? reserva = _reserva.GetReserva(id);
             if (reserva == null)
             {
                 TempData["Error"] = "Reserva no encontrada.";
@@ -166,7 +171,7 @@ public class ReservaController : Controller
                 return RedirectToAction(nameof(Index));
             }
 
-            rr.AnularReserva(id);
+            _reserva.AnularReserva(id);
 
             TempData["Mensaje"] = "La reserva ha sido anulada correctamente.";
 
@@ -184,13 +189,11 @@ public class ReservaController : Controller
     {
         try
         {
-            RepositorioReserva rr = new RepositorioReserva();
-            RepositorioUsuario ru = new RepositorioUsuario();
 
             ViewBag.UserRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
 
             // 1. Obtener la reserva primero
-            Reserva? reserva = rr.GetReserva(id);
+            Reserva? reserva = _reserva.GetReserva(id);
 
             // 2. Validar inmediatamente si existe
             if (reserva == null)
@@ -200,13 +203,13 @@ public class ReservaController : Controller
             }
 
             // 3. Buscar el usuario creador de forma segura
-            var usuarioAlta = ru.getUsuario(reserva.IdAlta);
+            var usuarioAlta = _usuario.getUsuario(reserva.IdAlta);
             ViewBag.UsuarioC = usuarioAlta;
 
             // 4. Buscar el usuario que dio de baja (si aplica)
             if (reserva.IdBaja.HasValue && reserva.IdBaja.Value > 0)
             {
-                var usuarioBaja = ru.getUsuario(reserva.IdBaja.Value);
+                var usuarioBaja = _usuario.getUsuario(reserva.IdBaja.Value);
                 ViewBag.UsuarioT = usuarioBaja;
             }
 
@@ -222,13 +225,12 @@ public class ReservaController : Controller
     [Authorize]
     public IActionResult VerVigentes()
     {
-        RepositorioReserva rr = new RepositorioReserva();
         IList<Reserva> lista = new List<Reserva>();
         ViewBag.UserRole = User.Claims
             .FirstOrDefault(c => c.Type == "Rol")?.Value;
         try
         {
-            lista = rr.GetReservas()
+            lista = _reserva.GetReservas()
                 .Where(x =>
                     x.FechaHasta > DateTime.Now &&
                     !x.Anulado
@@ -247,11 +249,10 @@ public class ReservaController : Controller
     [Authorize]
     public IActionResult ListarReservasInmueble(int id)
     {
-        RepositorioReserva rr = new RepositorioReserva();
         IList<Reserva> lista = new List<Reserva>();
         try
         {
-            lista = rr.GetReservas()
+            lista = _reserva.GetReservas()
                 .Where(x => x.IdInmueble == id)
                 .ToList();
             return View("Index", lista);
