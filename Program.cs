@@ -11,6 +11,7 @@ builder.Services.AddScoped<RepositorioUsoInmueble>();
 builder.Services.AddScoped<RepositorioTipoInmueble>();
 builder.Services.AddScoped<RepositorioUsuario>();
 builder.Services.AddScoped<RepositorioRol>();
+builder.Services.AddScoped<RepositorioImagenInmueble>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

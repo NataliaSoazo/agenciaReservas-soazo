@@ -337,7 +337,56 @@ public int GetCantidadInmuebles()
         return res;
     }
 
-    
+   public IList<Inmueble> ObtenerDisponibles()
+{
+    var inmuebles = new List<Inmueble>();
+
+    using (var connection = new MySqlConnection(connectionString))
+    {
+        string sql = $@"
+            SELECT
+                i.{nameof(Inmueble.Id)},
+                i.{nameof(Inmueble.Direccion)},            
+                i.{nameof(Inmueble.Precio)},
+                i.{nameof(Inmueble.PropietarioId)},
+                p.{nameof(Propietario.Id)},
+                p.{nameof(Propietario.Nombre)},
+                p.{nameof(Propietario.Apellido)}
+            FROM Inmuebles i
+            INNER JOIN Propietarios p
+                ON i.{nameof(Inmueble.PropietarioId)} = p.{nameof(Propietario.Id)}
+            WHERE i.Disponible = 'SI'
+            ORDER BY i.Id DESC";
+
+        using (var command = new MySqlCommand(sql, connection))
+        {
+            command.CommandType = CommandType.Text;
+            command.Parameters.AddWithValue("@Disponible", "SI");
+            connection.Open();
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    inmuebles.Add(new Inmueble
+                    {
+                        Id = reader.GetInt32(nameof(Inmueble.Id)),
+                        Direccion = reader.GetString(nameof(Inmueble.Direccion)),
+                        Precio = reader.GetDecimal(nameof(Inmueble.Precio)),
+                        PropietarioId = reader.GetInt32(nameof(Inmueble.PropietarioId)),
+                        Duenio = new Propietario
+                        {
+                            Id = reader.GetInt32(nameof(Propietario.Id)),
+                            Nombre = reader.GetString(nameof(Propietario.Nombre)),
+                            Apellido = reader.GetString(nameof(Propietario.Apellido))
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+    return inmuebles;
+}
 
 
 }

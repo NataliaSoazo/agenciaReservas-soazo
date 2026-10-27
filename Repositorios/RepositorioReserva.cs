@@ -168,13 +168,12 @@ public int GetCantidadReservas()
                     INSERT INTO reservas
                     (
                         {nameof(Reserva.Fecha)},{nameof(Reserva.FechaDesde)},{nameof(Reserva.FechaHasta)},
-                        {nameof(Reserva.Monto)},{nameof(Reserva.IdInquilino)},{nameof(Reserva.IdInmueble)},{nameof(Reserva.Anulado)}, {nameof(Reserva.IdAlta)}, {nameof(Pago.IdBaja)}
+                        {nameof(Reserva.Monto)},{nameof(Reserva.IdInquilino)},{nameof(Reserva.IdInmueble)},{nameof(Reserva.Anulado)}, {nameof(Reserva.IdAlta)},{nameof(Reserva.IdBaja)}
                     )
                     VALUES
                     (
                         @{nameof(Reserva.Fecha)}, @{nameof(Reserva.FechaDesde)}, @{nameof(Reserva.FechaHasta)},
-                        @{nameof(Reserva.Monto)},@{nameof(Reserva.IdInquilino)},@{nameof(Reserva.IdInmueble)},@{nameof(Pago.IdAlta)}, @{nameof(Pago.IdBaja)}
-                        false
+                        @{nameof(Reserva.Monto)},@{nameof(Reserva.IdInquilino)},@{nameof(Reserva.IdInmueble)}, false, @{nameof(Reserva.IdAlta)},0
                     );
 
                     SELECT LAST_INSERT_ID();";
@@ -197,6 +196,8 @@ public int GetCantidadReservas()
 
                     command.Parameters.AddWithValue(
                         $"@{nameof(Reserva.IdInmueble)}",reserva.IdInmueble);
+                    command.Parameters.AddWithValue(
+                        $"@{nameof(Reserva.IdAlta)}",reserva.IdAlta);
 
                     connection.Open();
 

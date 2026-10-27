@@ -27,7 +27,7 @@ public class Inmueble
     [RegularExpression(@"^\d+(\.\d{1,2})?$", ErrorMessage = "El precio debe ser un número válido con hasta dos decimales.")]
     public decimal? Precio { get; set; }
     [Required(ErrorMessage = "Campo obligatorio")]
-    [Display(Name = "PORCENTUAL EXIGIDO")]
+    [Display(Name = "PORCENTUAL DE SEÑA MINIMA")]
     [Range(1, double.MaxValue, ErrorMessage = "El monto debe ser mayor a 0")]
     [RegularExpression(@"^\d+(\.\d{1,2})?$", ErrorMessage = "El porcentual debe ser un número válido.")]
     public int? Porcentual { get; set; }

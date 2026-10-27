@@ -14,7 +14,7 @@ public class ReservaController : Controller
     private readonly RepositorioInquilino _inquilino;
     private readonly RepositorioInmueble _inmueble;
 
-    public ReservaController(ILogger<ReservaController> logger,RepositorioPago pago, RepositorioReserva reserva, RepositorioUsuario usuario,RepositorioInmueble inmueble, RepositorioInquilino inquilino)
+    public ReservaController(ILogger<ReservaController> logger,RepositorioPago pago, RepositorioReserva reserva, RepositorioUsuario usuario, RepositorioInmueble inmueble, RepositorioInquilino inquilino)
     {
         _logger = logger;
         _pago = pago;
@@ -72,8 +72,7 @@ public class ReservaController : Controller
         {
             ViewBag.Error = TempData["Error"];
         }
-
-        ViewBag.Inmuebles = _inmueble.ObtenerTodos();
+        ViewBag.Inmuebles = _inmueble.ObtenerDisponibles();
         ViewBag.Inquilinos = _inquilino.getInquilinos();
 
         // Editar una reserva existente
@@ -138,7 +137,10 @@ public class ReservaController : Controller
             }
             else
             {
+                var usuario = _usuario.ObtenerPorEmail(User.Identity.Name);
+                reserva.IdAlta = usuario.Id;
                 reserva.Anulado = false;
+
                 var nuevareserva = _reserva.AltaReserva(reserva);
                 TempData["Mensaje"] =
                     "La reserva se creó correctamente.";
