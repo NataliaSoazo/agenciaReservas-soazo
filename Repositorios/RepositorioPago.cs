@@ -277,19 +277,12 @@ public class RepositorioPago:RepositorioBase
         using (var connection = new MySqlConnection(connectionString))
         {
             string sql = $@"UPDATE pagos SET 
-                            {nameof(Pago.Fecha)} = @{nameof(Pago.Fecha)},
-                            {nameof(Pago.Modo)}= @{nameof(Pago.Modo)},
-                            {nameof(Pago.Concepto)} = @{nameof(Pago.Concepto)},
-                            {nameof(Pago.Importe)} = @{nameof(Pago.Importe)},
-                            {nameof(Pago.IdReserva)} = @{nameof(Pago.IdReserva)}
+                            {nameof(Pago.Concepto)} = @{nameof(Pago.Concepto)}
                         WHERE {nameof(Pago.Id)} = @{nameof(Pago.Id)};";
 
             using (var command = new MySqlCommand(sql, connection))
             {
-                command.Parameters.AddWithValue($"@{nameof(Pago.Fecha)}", pago.Fecha);
                 command.Parameters.AddWithValue($"@{nameof(Pago.Concepto)}", pago.Concepto);
-                command.Parameters.AddWithValue($"@{nameof(Pago.Importe)}", pago.Importe);
-                command.Parameters.AddWithValue($"@{nameof(Pago.IdReserva)}", pago.IdReserva);
                 command.Parameters.AddWithValue($"@{nameof(Pago.Id)}", pago.Id);
 
                 connection.Open();
@@ -305,10 +298,11 @@ public class RepositorioPago:RepositorioBase
     {
         using (var connection = new MySqlConnection(connectionString))
         {
-            var sql = @$"UPDATE pagos SET {nameof(Pago.Anulado)} = 'SI', {nameof(Pago.IdBaja)} = @IdBaja WHERE {nameof(Pago.Id)} = @id;";
+            var sql = @$"UPDATE pagos SET {nameof(Pago.Anulado)} = true, {nameof(Pago.IdBaja)} = @IdBaja WHERE {nameof(Pago.Id)} = @id;";
             using (var command = new MySqlCommand(sql, connection))
             {
                 command.Parameters.AddWithValue($"@{nameof(Pago.Id)}", id);
+                command.Parameters.AddWithValue($"@{nameof(Pago.Anulado)}", true);
                 command.Parameters.AddWithValue($"@IdBaja", IdBaja); 
                 connection.Open();
                 command.ExecuteNonQuery();

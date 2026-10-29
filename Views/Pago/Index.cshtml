@@ -5,13 +5,14 @@
 
 <h4> Listado de pagos</h4>
 
-
+<h5>Los nuevos pagos se cargan desde su respectiva reserva</h5>
 <form asp-action="Index">
     <p>
         Buscar: <input type="text" name="buscar" class="form-text" />
         <input type="submit" value="buscar" class="btn btn-dark">
     </p>
 </form>
+<div class="col-8 table-wrapper">
 <table class="table" id="table">
     <thead>
         <tr>
@@ -58,7 +59,7 @@
                 <td>
                     <a asp-action="Detalles" asp-route-id=@item.Id title="Ver Detalle"><i class="fa fa-eye " style="font-size:25px;"
                             id="detalles"></i></a>
-                    <a asp-action="Editar" asp-route-id=@item.Id title="Editar"><i class="fa fa-pencil " style="font-size:25px;"
+                    <a href="#" onclick="editarPago('@item.Id','@item.Concepto')" title="Editar el concepto de pago"><i class="fa fa-pencil " style="font-size:25px;"
                             id="edi"></i></a>
                     @if (ViewBag.UserRole == "ADMINISTRADOR")
                     {
@@ -113,28 +114,131 @@
     </ul>
 
 </nav>
+</div>
+<div class="modal fade"
+     id="modal_eliminar_Pago"
+     tabindex="-1"
+     aria-labelledby="tituloAnularPago"
+     aria-hidden="true">
 
-<form class="modal" tabindex="-1" asp-action="Eliminar" id="modal_eliminar_Pago">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">DESEAS ANULAR A:</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" name="Id" value="" id="Pago_eliminar_id">
-                <p><span id="Pago_eliminar_id"></span></p>
-            </div>
-            <div class="modal-footer">
-                <button type="submit" class="btn btn-danger">Anular</button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Salir</button>
-            </div>
+
+            <form asp-action="Eliminar" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="tituloAnularPago">
+                        Confirmar anulación
+                    </h5>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Cerrar">
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden" name="Id" id="Pago_eliminar_id" />
+
+                    <p>
+                        ¿Estás seguro de que deseas anular el pago
+                        <strong id="Pago_eliminar_texto"></strong>?
+                    </p>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-danger">
+                        Confirmar anulación
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+
         </div>
     </div>
-</form>
+</div>
+<div class="table-wrapper">
 
+    <form method="post" asp-action="EditarPago">
+        @Html.AntiForgeryToken()
+
+        <div class="modal fade"
+             id="modal_editar_pago"
+             tabindex="-1"
+             aria-labelledby="tituloEditarPago"
+             aria-hidden="true">
+
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="tituloEditarPago">
+                            Editar modo de pago
+                        </h5>
+
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Cerrar">
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+
+                        <input type="hidden"
+                               name="id"
+                               id="Pago_editar_id" />
+
+                        <div class="mb-3">
+                            <label for="Pago_editar_concepto"
+                                   class="form-label">
+                                Concepto de pago
+                            </label>
+
+                            <select name="Concepto"
+                                    id="Pago_editar_concepto"
+                                    class="form-select"
+                                    required>
+
+                                <option value="">
+                                    -- Seleccione el concepto a cambiar --
+                                </option>
+
+                                <option value="RESERVA INICIAL">RESERVA INICIAL</option>
+                                <option value="PAGO TOTAL">PAGO TOTAL</option>
+                                <option value="MULTA">MULTA</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <button type="submit" class="btn btn-success">
+                            Guardar cambios
+                        </button>
+
+                        <button type="button"
+                                class="btn btn-secondary"
+                                data-bs-dismiss="modal">
+                            Cancelar
+                        </button>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </form>
+
+</div>
 @section Scripts {
     <script>
         function eliminar(id) {
@@ -143,4 +247,13 @@
             $("#modal_eliminar_Pago").modal("show");
         }
     </script>
+    <script>
+        function editarPago(id, concepto) {
+            document.getElementById("Pago_editar_id").value = id;
+            document.getElementById("Pago_editar_concepto").value = concepto;
+            const modalElemento = document.getElementById("modal_editar_pago");
+            const modal = bootstrap.Modal.getOrCreateInstance(modalElemento);
+            modal.show();
+    }
+</script>
 }

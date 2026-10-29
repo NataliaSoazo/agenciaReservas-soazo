@@ -325,19 +325,20 @@ public int GetCantidadReservas()
     }
 }
 
-    public int AnularReserva(int id)
+    public int AnularReserva(int id ,int idUsuario)
     {
         using (var connection = new MySqlConnection(connectionString))
         {
             string sql = $@"
                 UPDATE reservas
                 SET {nameof(Reserva.Anulado)} = true
+                {nameof(Reserva.IdBaja)} = @idUsuario;
                 WHERE {nameof(Reserva.Id)} = @id;";
 
             using (var command = new MySqlCommand(sql, connection))
             {
                 command.Parameters.AddWithValue("@id", id);
-
+                command.Parameters.AddWithValue($"@IdBaja", idUsuario); 
                 connection.Open();
 
                 int filasAfectadas = command.ExecuteNonQuery();

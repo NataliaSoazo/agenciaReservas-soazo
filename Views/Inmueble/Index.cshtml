@@ -6,7 +6,20 @@
 }
 
 <h4> Listado de Inmuebles</h4>
-
+<div class="col-4">
+    <p>Buscar inmuebles disponibles entre  fechas</p>
+    <form asp-action="DisponiblesPorFechas" method="get">
+    <div class="form-group">
+        <label for="fechaInicio">Fecha Inicio:</label>
+        <input type="date" name="fechaInicio" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label for="fechaFin">Fecha Fin:</label>
+        <input type="date" name="fechaFin" class="form-control" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Buscar Disponibles</button>
+</form>
+</div>
 <p>
     <a asp-action="Editar" method="post">CREAR NUEVO </a>
 </p>

@@ -62,34 +62,19 @@ public class PagoController : Controller
         }
     }
     [Authorize]
-    public IActionResult Editar(int? id, int? IdReserva)
+    public IActionResult Editar(int id)
     {   
-        List<string> concepto = new List<string>{"RESERVA INICIAL","PAGO TOTAL", "MULTA"};
-        ViewBag.Concepto = concepto;    
-        ViewBag.Reserva = _reserva;
-    
-        var lista = _reserva.GetReservas();
-        lista = lista.Where(x =>
-                x.FechaHasta > DateTime.Now &&  // Contratos cuya fecha de término es mayor a la fecha actual
-                x.Anulado == false             // Contratos que NO están anulados
-            ).ToList();
-
-        ViewBag.Contratos = lista;
-
-        var pago = new Pago();
-
-        if (id.HasValue && id.Value > 0)
-        {
-
-            pago = _repositorio.GetPago(id.Value) ?? new Pago();
-        }
-
-        if (IdReserva.HasValue)
-        {
-            pago.IdReserva = IdReserva.Value;
-        }
-
-        return View(pago);
+       try
+       {
+        var pago = _repositorio.GetPago(id);
+         return RedirectToAction("Editar", pago);
+       }
+       catch (System.Exception ex)
+       {
+        _logger.LogError(ex, "Error al cargar pago");
+            TempData["Error"] = "No se pudo completar la operación.";
+            return RedirectToAction(nameof(Index));
+       }
     }
 
     [Authorize]
@@ -102,14 +87,15 @@ public class PagoController : Controller
         var dias =( reserva.FechaHasta- reserva.FechaDesde).Days;
         var APagar = reserva.DatoInmueble.Precio *dias;
         var porcentual = (APagar * reserva.DatoInmueble.Porcentual)/100;
-        /*RepositorioInmueble inm =  new RepositorioInmueble();
-        var inmueble = inm.GetInmueble(reserva.IdInmueble);
-        var toralPagar = inmueble.Precio *dias;*/
         List<string> concepto = new List<string>{"RESERVA INICIAL","PAGO TOTAL", "MULTA"};
+        IList<Pago> lista = new List<Pago>();
+        lista = _repositorio.GetPagos();
+            lista = lista.Where(x => x.IdReserva == id).ToList();
         ViewBag.Concepto = concepto;    
         ViewBag.Reserva = reserva;
         ViewBag.TotalAPagar= APagar;
         ViewBag.PrecioPorcentaje = porcentual;
+        ViewBag.Pagos = lista;
         var pago = new Pago();
 
         return View(pago);
@@ -128,14 +114,16 @@ public class PagoController : Controller
             if (pago.Id > 0)
             {
                 _repositorio.ModificarPago(pago);
-                   return RedirectToAction(nameof(Index));
+                   return RedirectToAction(nameof(AgregarPago), pago.IdReserva);
             }
             else
             {
                 pago.IdAlta = usuario.Id;
                 pago.IdBaja = 0;
                 _repositorio.AltaPago(pago);
-                return RedirectToAction("PagosReserva", pago.Id);
+                TempData["Mensaje"] = "Pago cargado correctamente.";
+                return RedirectToAction(nameof(AgregarPago),new { id = pago.IdReserva }
+        );
             }
         }
         catch (System.Exception ex)
@@ -146,15 +134,46 @@ public class PagoController : Controller
 
         }
     }
+     [Authorize]
+    public IActionResult EditarPago(int id, string Concepto)
+    {
+        try
+        {
+            var pago = _repositorio.GetPago(id);
+        if (pago == null)
+        {
+            TempData["Error"] = "Pago no encontrado.";
+            return NotFound();
+        }
+        pago.Concepto = Concepto;
+        _repositorio.ModificarPago(pago);
+        TempData["Mensaje"] = "Concepto modificado.";
+        return RedirectToAction(nameof(AgregarPago),new { id = pago.IdReserva });
+        }
+        catch (System.Exception ex)
+        {
+             _logger.LogError(ex, "Error al cargar pago");
+            TempData["Error"] = "No se pudo completar la operación.";
+            return RedirectToAction(nameof(Index));
+            
+        }
+    }
+
     [Authorize(Policy = "Administrador")]
     public IActionResult Eliminar(int id) //Es un anulado logico
     {
         try
         {
             var usuario = _usuario.ObtenerPorEmail(User.Identity.Name);
-            _repositorio.EliminarPago(id, usuario.Id);
-            TempData["Mensaje"] = "El pago ha sido anulado correctamente.";
+             var pago = _repositorio.GetPago(id);
+            if(pago.Anulado== true)
+            {
+            TempData["Mensaje"] = "Pago anulado previamente.";
             return RedirectToAction(nameof(Index));
+            }
+            _repositorio.EliminarPago(id, usuario.Id);        
+            TempData["Mensaje"] = "El pago ha sido anulado correctamente.";
+            return RedirectToAction(nameof(AgregarPago),new { id = pago.IdReserva });
         }
         catch
         {

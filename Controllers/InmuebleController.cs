@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using agenciaReservas_soazo.Models;
 using agenciaReservas_soazo.Repositorios;
 using Microsoft.AspNetCore.Authorization;
+using AspNetCoreGeneratedDocument;
 
 namespace agenciaReservas_soazo.Controllers;
 
@@ -204,5 +205,14 @@ public class InmuebleController : Controller
 
             return RedirectToAction(nameof(Index));
         }
+    }
+
+[Authorize]
+public IActionResult DisponiblesPorFechas(DateTime fechaInicio, DateTime fechaFin)
+    {
+        var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
+        ViewBag.UserRole = userRole;
+        var inmueblesDisponibles  = _repoInmueble.obtenerDisponiblesPorFecha(fechaInicio, fechaFin);
+        return View("Index", inmueblesDisponibles);
     }
 }

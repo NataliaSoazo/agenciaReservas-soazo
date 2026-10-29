@@ -46,4 +46,7 @@ public class Reserva
 
         [Display(Name = "USUARIO QUE ANULÓ EL PAGO")]
         public int? IdBaja { get; set; } 
+        [DataType(DataType.Date)]
+        [Display(Name = " FECHA CULMINACIÓN")]
+        public DateTime FechaCancelación { get; set; }
     }

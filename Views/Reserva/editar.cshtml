@@ -134,5 +134,45 @@
         )
     );
 </script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const fechaDesde = document.getElementById("FechaDesde");
+        const fechaHasta = document.getElementById("FechaHasta");
 
+        // Obtener la fecha de hoy en formato yyyy-MM-dd.
+        const hoy = new Date();
+        const anio = hoy.getFullYear();
+        const mes = String(hoy.getMonth() + 1).padStart(2, "0");
+        const dia = String(hoy.getDate()).padStart(2, "0");
+        const fechaActual = `${anio}-${mes}-${dia}`;
+
+        // La fecha de inicio no puede ser anterior a hoy.
+        fechaDesde.min = fechaActual;
+
+        function actualizarFechaMinima() {
+            // La finalización debe ser posterior al inicio.
+            if (fechaDesde.value) {
+                const inicio = new Date(fechaDesde.value + "T00:00:00");
+                inicio.setDate(inicio.getDate() + 1);
+
+                const anioMin = inicio.getFullYear();
+                const mesMin = String(inicio.getMonth() + 1).padStart(2, "0");
+                const diaMin = String(inicio.getDate()).padStart(2, "0");
+
+                fechaHasta.min = `${anioMin}-${mesMin}-${diaMin}`;
+            } else {
+                fechaHasta.min = fechaActual;
+            }
+
+            // Si la fecha final quedó inválida, limpiarla.
+            if (fechaHasta.value && fechaHasta.value < fechaHasta.min) {
+                fechaHasta.value = "";
+            }
+        }
+
+        fechaDesde.addEventListener("change", actualizarFechaMinima);
+
+        actualizarFechaMinima();
+    });
+</script>
 <script src="~/js/reservas.js" asp-append-version="true"></script>

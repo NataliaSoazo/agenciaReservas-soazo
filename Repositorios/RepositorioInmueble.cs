@@ -1,16 +1,21 @@
 using System.Data;
 using MySql.Data.MySqlClient;
 using agenciaReservas_soazo.Models;
+using agenciaReservas_soazo.Repositorios;
 namespace agenciaReservas_soazo.Repositorios;
 
 public class RepositorioInmueble:RepositorioBase
 {
     //readonly string connectionString = "Server=localhost;Database=agenciareservas;User=root;Password=;";
+    private readonly RepositorioReserva _repoReserva;
 
-    public RepositorioInmueble(IConfiguration configuration) :base(configuration)
-    {
-       
-    }
+        public RepositorioInmueble(
+            IConfiguration configuration,
+            RepositorioReserva repoReserva
+        ) : base(configuration)
+        {
+            _repoReserva = repoReserva;
+        }
     public IList<Inmueble> ObtenerTodos()
     {
         var inmuebles = new List<Inmueble>();
@@ -388,5 +393,36 @@ public int GetCantidadInmuebles()
     return inmuebles;
 }
 
+    public List<Inmueble> obtenerDisponiblesPorFecha(
+    DateTime fechaInicio,
+    DateTime fechaFin)
+{
+    // Obtener todas las reservas existentes.
+    var reservas = _repoReserva.GetReservas();
 
+    // Obtener todos los inmuebles.
+    var inmuebles = ObtenerTodos();
+
+    // Obtener los IDs de los inmuebles ocupados
+    // por reservas activas que se superponen con el período.
+    var inmueblesOcupadosIds = reservas
+        .Where(reserva =>
+            !reserva.Anulado &&
+            fechaInicio.Date < reserva.FechaHasta.Date &&
+            fechaFin.Date > reserva.FechaDesde.Date
+        )
+        .Select(reserva => reserva.IdInmueble)
+        .Distinct()
+        .ToList();
+
+    // Devolver solamente los inmuebles disponibles
+    // y que no estén ocupados durante esas fechas.
+    var inmueblesDisponibles = inmuebles
+        .Where(inmueble =>
+            inmueble.Disponible == "SI" &&
+            !inmueblesOcupadosIds.Contains(inmueble.Id))
+        .ToList();
+
+    return inmueblesDisponibles;
+}
 }

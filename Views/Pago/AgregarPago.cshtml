@@ -7,8 +7,103 @@ var reserva = ViewBag.Reserva as agenciaReservas_soazo.Models.Reserva;
 var totalAPagar = ViewBag.TotalAPagar;
 var conceptos = ViewBag.Concepto as List<string>;
 var señaCalculada = ViewBag.PrecioPorcentaje;
-}
 
+var pagos = ViewBag.Pagos as List<agenciaReservas_soazo.Models.Pago>
+                ?? new List<agenciaReservas_soazo.Models.Pago>();
+}
+<div class="card shadow mt-4">
+    <div class="card-header bg-secondary text-white">
+        <h5 class="mb-0">Historial de pagos de la reserva</h5>
+    </div>
+
+    <div class="card-body">
+
+        @if (pagos.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Concepto</th>
+                            <th>Modo de pago</th>
+                            <th>Importe</th>
+                            <th>Anulado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var item in pagos)
+                        {
+                            <tr>
+                                <td>
+                                    @item.Fecha.ToString("dd/MM/yyyy")
+                                </td>
+
+                                <td>
+                                    @item.Concepto
+                                </td>
+
+                                <td>
+                                    @item.Modo
+                                </td>
+
+                                <td class="text-end">
+                                    $ @item.Importe
+                                </td>
+
+                                <td>
+                                    @if (item.Anulado)
+                                    {
+                                        <span class="badge bg-danger">
+                                            Sí
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">
+                                            No
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    <a asp-action="Detalles" asp-route-id=@item.Id title="Ver Detalle"><i class="fa fa-eye " style="font-size:25px;"
+                                            id="detalles"></i></a>
+                                    <a href="#" onclick="editarPago('@item.Id','@item.Concepto')" title="Editar el concepto de pago"><i class="fa fa-pencil " style="font-size:25px;"
+                                        id="edi"></i></a>
+                                    @if (ViewBag.UserRole == "ADMINISTRADOR")
+                                        {
+                                            <a href="#" onclick="eliminar('@item.Id')" title="Anular">
+                                                <i class="fa fa-trash" style="font-size:25px;" id="eli"></i>
+                                            </a>
+                                        }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+
+                    <tfoot>
+                        <tr class="table-light">
+                            <th colspan="3">Total de pagos registrados</th>
+                            <th class="text-end">
+                                $ @(pagos.Where(p => !p.Anulado).Sum(p => p.Importe))
+                            </th>
+                            <th></th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info mb-0">
+                Esta reserva todavía no tiene pagos registrados.
+            </div>
+        }
+
+    </div>
+</div>
 <div class="container mt-4">
 <div class="row justify-content-center">
     <div class="col-md-8">
@@ -182,8 +277,93 @@ var señaCalculada = ViewBag.PrecioPorcentaje;
 </div>
 
 </div>
+<div class="table-wrapper">
+
+    <form method="post" asp-action="EditarPago">
+        @Html.AntiForgeryToken()
+
+        <div class="modal fade"
+             id="modal_editar_pago"
+             tabindex="-1"
+             aria-labelledby="tituloEditarPago"
+             aria-hidden="true">
+
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="tituloEditarPago">
+                            Editar modo de pago
+                        </h5>
+
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Cerrar">
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+
+                        <input type="hidden"
+                               name="id"
+                               id="Pago_editar_id" />
+
+                        <div class="mb-3">
+                            <label for="Pago_editar_concepto"
+                                   class="form-label">
+                                Concepto de pago
+                            </label>
+
+                            <select name="Concepto"
+                                    id="Pago_editar_concepto"
+                                    class="form-select"
+                                    required>
+
+                                <option value="">
+                                    -- Seleccione el concepto a cambiar --
+                                </option>
+
+                                <option value="RESERVA INICIAL">RESERVA INICIAL</option>
+                                <option value="PAGO TOTAL">PAGO TOTAL</option>
+                                <option value="MULTA">MULTA</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <button type="submit" class="btn btn-success">
+                            Guardar cambios
+                        </button>
+
+                        <button type="button"
+                                class="btn btn-secondary"
+                                data-bs-dismiss="modal">
+                            Cancelar
+                        </button>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </form>
+
+</div>
 @section Scripts {
+    
 @{
 await Html.RenderPartialAsync("_ValidationScriptsPartial");
 }
+<script>
+        function editarPago(id, concepto) {
+            document.getElementById("Pago_editar_id").value = id;
+            document.getElementById("Pago_editar_concepto").value = concepto;
+            const modalElemento = document.getElementById("modal_editar_pago");
+            const modal = bootstrap.Modal.getOrCreateInstance(modalElemento);
+            modal.show();
+    }
+</script>
 }

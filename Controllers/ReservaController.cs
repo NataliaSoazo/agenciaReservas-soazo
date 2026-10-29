@@ -98,8 +98,6 @@ public class ReservaController : Controller
         return View(new Reserva
         {
             Fecha = DateTime.Today,
-            FechaDesde = DateTime.Today,
-            FechaHasta = DateTime.Today
         });
     }
     [Authorize]
@@ -142,8 +140,8 @@ public class ReservaController : Controller
                 reserva.Anulado = false;
 
                 var nuevareserva = _reserva.AltaReserva(reserva);
-                TempData["Mensaje"] =
-                    "La reserva se creó correctamente.";
+                TempData["Mensaje"] = "La reserva se creó correctamente.";
+                return RedirectToAction("AgregarPago", "Pago", new { id = reserva.Id });
             }
 
             return RedirectToAction(nameof(Index));
@@ -172,8 +170,8 @@ public class ReservaController : Controller
                 TempData["Error"] = "La reserva ya está anulada.";
                 return RedirectToAction(nameof(Index));
             }
-
-            _reserva.AnularReserva(id);
+            var usuario = _usuario.ObtenerPorEmail(User.Identity.Name);
+            _reserva.AnularReserva(id, usuario.Id);
 
             TempData["Mensaje"] = "La reserva ha sido anulada correctamente.";
 
@@ -266,6 +264,32 @@ public class ReservaController : Controller
             return View("Index", lista);
         }
     }
+
+    public IActionResult Renovar(int id)
+{
+    try
+    {
+        ViewBag.Inmuebles = _inmueble.ObtenerDisponibles();
+        ViewBag.Inquilinos = _inquilino.getInquilinos();
+        var reserva = _reserva.GetReserva(id);
+
+        // Crear una nueva reserva
+        return View(new Reserva
+        {   Id = 0,
+            Fecha = DateTime.Today,
+            FechaDesde = reserva.FechaHasta,
+            IdInquilino = reserva.IdInquilino,
+            IdInmueble = reserva.IdInmueble,
+            DatoInmueble = reserva.DatoInmueble,
+            Arrendatario = reserva.Arrendatario
+        });
+    }
+    catch (Exception)
+    {
+         TempData["Error"] ="No se pudo renovar la reserva.";
+        return RedirectToAction(nameof(Index));
+    }
+}
 }
 
 
