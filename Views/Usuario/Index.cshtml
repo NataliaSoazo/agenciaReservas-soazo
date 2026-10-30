@@ -15,82 +15,143 @@
         Buscar: <input type="text" name="buscar" class="form-text" />
         <input type="submit" value="buscar" class="btn btn-dark" >
     </p>
-</form>
-<table class="table" id="table">
-    <thead> 
-        <tr>
-            <th >
-                @Html.DisplayNameFor(model => model.Id)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Nombre)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Apellido)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.AvatarFile)
-            </th>
-             <th>
-               ACCIONES
-            </th>
-        </tr>
-    </thead>
-    <tbody id="table">
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Id)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Nombre)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Apellido)
-                </td>
-              
-                <td>
-                   	<img width="40" height="40" src="@item.AvatarURL" id="configImg" />
-                </td>
-                
-               
-                <td>
-                    <a asp-action="Detalles" asp-route-id=@item.Id><i class="fa fa-eye " title = "Ver detalles" style="font-size:25px;" id="detalles"></i></a>
-                    <a asp-action="Editar" asp-route-id=@item.Id><i class="fa fa-pencil "  title="Editar"style="font-size:25px;" id="edi"></i></a>
-                    <a href="#"onclick="eliminar('@item.Id', '@item.Nombre')" ><i class="fa fa-trash " title="eliminar" style="font-size:25px;"id="eli"></i></a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+</form> 
+<div class= "table-wrapper">
+    <table class="table" id="table">
+            <thead> 
+                <tr>
+                    <th >
+                        @Html.DisplayNameFor(model => model.Id)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Nombre)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Apellido)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.AvatarFile)
+                    </th>
+                     <th>
+                       ACCIONES
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="table">
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Id)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Nombre)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Apellido)
+                        </td>
 
-<form class="modal" tabindex="-1" asp-action="Eliminar" id="modal_eliminar_Domicilio">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">DESEAS ELIMINAR A:</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
+                        <td>
+                           	<img width="40" height="40" src="@item.AvatarURL" id="configImg" />
+                        </td>
+
+
+                        <td>
+                            <a asp-action="Detalles" asp-route-id=@item.Id><i class="fa fa-eye " title = "Ver detalles" style="font-size:25px;" id="detalles"></i></a>
+                            <a asp-action="Editar" asp-route-id=@item.Id><i class="fa fa-pencil "  title="Editar"style="font-size:25px;" id="edi"></i></a>
+                            <a href="#"onclick="eliminar('@item.Id', '@item.Nombre','@item.Apellido')" ><i class="fa fa-trash " title="eliminar" style="font-size:25px;"id="eli"></i></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+    </table>
+</div>
+            <nav aria-label="Paginación">
+
+                <ul class="pagination">
+
+                    @if (ViewBag.PaginaActual > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" asp-action="Index" asp-route-pagina="@(ViewBag.PaginaActual - 1)">
+                                Anterior
+                            </a>
+                        </li>
+                    }
+                    @for (int i = 1; i <= ViewBag.TotalPaginas; i++)
+                    {
+                        <li class="page-item @(i == ViewBag.PaginaActual ? "active" : "")">
+
+                            <a class="page-link" asp-action="Index" asp-route-pagina="@i">
+                                @i
+                            </a>
+
+                        </li>
+                    }
+                    @if (ViewBag.PaginaActual < ViewBag.TotalPaginas)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" asp-action="Index" asp-route-pagina="@(ViewBag.PaginaActual + 1)">
+                                Siguiente
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        <div class= "container  col-2">
+            <button type="button" class="btn btn-secondary"
+        onclick="history.back()">
+             <i class="bi bi-arrow-left"></i> Volver
         </button>
-      </div>
-      <div class="modal-body">
-        <input type="hidden" name="Id" value="" id ="Domicilio_eliminar_id">
-        <p><span id="Domicilio_eliminar_nombre"></span></p>
-      </div>
-      <div class="modal-footer">
-        <button type="submit" class="btn btn-danger" >Eliminar</button>
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Salir</button>
-      </div>
+        </div>
+
+<div class="modal fade" tabindex="-1" id="modal_eliminar_Domicilio">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">¿DESEAS ELIMINAR A:</h5>
+
+                <button type="button" class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Cerrar">
+                </button>
+            </div>
+
+            <form asp-action="Eliminar" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="Id"
+                           value="" id="Domicilio_eliminar_id">
+
+                    <p>
+                        <span id="Domicilio_eliminar_nombre"></span>
+                        <span id="Domicilio_eliminar_apellido"></span>
+                    </p>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-danger">
+                        Eliminar
+                    </button>
+
+                    <button type="button" class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+
+        </div>
     </div>
-  </div>
-</form>
+</div>
+
 
 @section Scripts{
     <script>
-        function eliminar(id, nombre){
+        function eliminar(id, nombre, apellido){
             document.querySelector("#Domicilio_eliminar_id").value = id;
             document.querySelector("#Domicilio_eliminar_nombre").innerHTML = nombre;
+            document.querySelector("#Domicilio_eliminar_apellido").innerHTML = apellido;
             $("#modal_eliminar_Domicilio").modal("show");
         }
     </script>

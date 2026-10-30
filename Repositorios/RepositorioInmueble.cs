@@ -127,7 +127,7 @@ public class RepositorioInmueble:RepositorioBase
 
     return inmuebles;
 }
-public int GetCantidadInmuebles()
+    public int GetCantidadInmuebles()
 {
     int cantidad = 0;
 
@@ -277,6 +277,7 @@ public int GetCantidadInmuebles()
         }
         return 0;
     }
+    //obtiene los tipos de inmueble
     public IList<TipoInmueble> ObtenerTipos()
     {
         var tipos = new List<TipoInmueble>();
@@ -304,44 +305,73 @@ public int GetCantidadInmuebles()
         }
         return tipos;
     }
-
+    //Busca los inmuebles que le corresponden a un propietario
     public IList<Inmueble> ObtenerPorPropietario(int propietarioId)
+{
+    var res = new List<Inmueble>();
+
+    using (var connection = new MySqlConnection(connectionString))
     {
-        var res = new List<Inmueble>();
+        var sql = @$"
+            SELECT
+                i.{nameof(Inmueble.Id)},
+                i.{nameof(Inmueble.Direccion)},
+                i.{nameof(Inmueble.Uso)},
+                i.{nameof(Inmueble.Disponible)},
+                i.{nameof(Inmueble.PropietarioId)},
+                p.{nameof(Propietario.Id)} AS PropietarioIdResultado,
+                p.{nameof(Propietario.Nombre)},
+                p.{nameof(Propietario.Apellido)}
 
-        using (var connection = new MySqlConnection(connectionString))
+            FROM Inmuebles i
+
+            INNER JOIN Propietarios p
+                ON i.{nameof(Inmueble.PropietarioId)} = p.{nameof(Propietario.Id)}
+
+            WHERE i.{nameof(Inmueble.PropietarioId)} = @propietarioId";
+
+        using (var command = new MySqlCommand(sql, connection))
         {
-            var sql = @$"SELECT {nameof(Inmueble.Id)}, {nameof(Inmueble.Direccion)}, {nameof(Inmueble.Uso)}, {nameof(Inmueble.Disponible)}, {nameof(Inmueble.PropietarioId)}
-                    FROM inmuebles
-                    WHERE {nameof(Inmueble.PropietarioId)} = @propietarioId";
+            command.CommandType = CommandType.Text;
 
-            using (var command = new MySqlCommand(sql, connection))
-            {
-                command.Parameters.Add(new MySqlParameter("propietarioId", MySqlDbType.Int32) { Value = propietarioId });
-                command.CommandType = CommandType.Text;
-                connection.Open();
-
-                using (var reader = command.ExecuteReader())
+            command.Parameters.Add(
+                new MySqlParameter("@propietarioId", MySqlDbType.Int32)
                 {
-                    while (reader.Read())
+                    Value = propietarioId
+                });
+
+            connection.Open();
+
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    var inmueble = new Inmueble
                     {
-                        var inmueble = new Inmueble
+                        Id = reader.GetInt32(nameof(Inmueble.Id)),
+                        Direccion = reader.GetString(nameof(Inmueble.Direccion)),
+                        Uso = reader.GetString(nameof(Inmueble.Uso)),
+                        Disponible = reader.GetString(nameof(Inmueble.Disponible)),
+                        PropietarioId = reader.GetInt32(nameof(Inmueble.PropietarioId)),
+
+                        Duenio = new Propietario
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal(nameof(Inmueble.Id))),
-                            Direccion = reader.GetString(reader.GetOrdinal(nameof(Inmueble.Direccion))),
-                            Uso = reader.GetString(reader.GetOrdinal(nameof(Inmueble.Uso))),
-                            Disponible = reader.GetString(reader.GetOrdinal(nameof(Inmueble.Disponible))),
-                            PropietarioId = reader.GetInt32(reader.GetOrdinal(nameof(Inmueble.PropietarioId)))
-                        };
-                        res.Add(inmueble);
-                    }
+                            Id = reader.GetInt32("PropietarioIdResultado"),
+                            Nombre = reader.GetString(nameof(Propietario.Nombre)),
+                            Apellido = reader.GetString(nameof(Propietario.Apellido))
+                        }
+                    };
+
+                    res.Add(inmueble);
                 }
             }
         }
-
-        return res;
     }
 
+    return res;
+}
+    
+    // obtiene los inmuebles cuyos propietarios habilitan su comercialización 
    public IList<Inmueble> ObtenerDisponibles()
 {
     var inmuebles = new List<Inmueble>();
@@ -393,36 +423,251 @@ public int GetCantidadInmuebles()
     return inmuebles;
 }
 
-    public List<Inmueble> obtenerDisponiblesPorFecha(
-    DateTime fechaInicio,
-    DateTime fechaFin)
+    /*Solamente inmuebles con Disponible = "SI".
+    Excluye reservas anuladas.
+    Detecta reservas que se superponen con el período solicitado.
+    Devuelve únicamente inmuebles que no tienen reservas que se superpongan.*/
+    public List<Inmueble> obtenerDisponiblesPorFecha(DateTime fechaInicio, DateTime fechaFin)
+    {
+        var inmuebles = new List<Inmueble>();
+
+        using (var connection = new MySqlConnection(connectionString))
+        {
+            string sql = @$"
+            SELECT
+                i.{nameof(Inmueble.Id)},
+                i.{nameof(Inmueble.Direccion)},
+                i.{nameof(Inmueble.Tipo)},
+                i.{nameof(Inmueble.Uso)},
+                i.{nameof(Inmueble.Cupo)},
+                i.{nameof(Inmueble.Precio)},
+                i.{nameof(Inmueble.Disponible)},
+                i.{nameof(Inmueble.Latitud)},
+                i.{nameof(Inmueble.Longitud)},
+                i.{nameof(Inmueble.PropietarioId)},
+                p.{nameof(Propietario.Id)} AS PropietarioIdResultado,
+                p.{nameof(Propietario.Nombre)},
+                p.{nameof(Propietario.Apellido)}
+
+            FROM Inmuebles i
+
+            INNER JOIN Propietarios p
+                ON i.{nameof(Inmueble.PropietarioId)} = p.{nameof(Propietario.Id)}
+
+            WHERE
+                i.{nameof(Inmueble.Disponible)} = 'SI'
+
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM Reservas r
+                    WHERE
+                        r.{nameof(Reserva.IdInmueble)} = i.{nameof(Inmueble.Id)}
+                        AND r.{nameof(Reserva.Anulado)} = 0
+                        AND @FechaInicio < DATE(r.{nameof(Reserva.FechaHasta)})
+                        AND @FechaFin > DATE(r.{nameof(Reserva.FechaDesde)})
+                )
+
+            ORDER BY i.{nameof(Inmueble.Id)};";
+
+            using (var command = new MySqlCommand(sql, connection))
+            {
+                command.CommandType = CommandType.Text;
+
+                command.Parameters.AddWithValue("@FechaInicio", fechaInicio.Date);
+                command.Parameters.AddWithValue("@FechaFin", fechaFin.Date);
+
+                connection.Open();
+
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        inmuebles.Add(new Inmueble
+                        {
+                            Id = reader.GetInt32(nameof(Inmueble.Id)),
+                            Direccion = reader.GetString(nameof(Inmueble.Direccion)),
+                            Tipo = reader.GetString(nameof(Inmueble.Tipo)),
+                            Uso = reader.GetString(nameof(Inmueble.Uso)),
+                            Cupo = reader.GetInt32(nameof(Inmueble.Cupo)),
+                            Precio = reader.GetDecimal(nameof(Inmueble.Precio)),
+                            Disponible = reader.GetString(nameof(Inmueble.Disponible)),
+                            Latitud = reader.GetString(nameof(Inmueble.Latitud)),
+                            Longitud = reader.GetString(nameof(Inmueble.Longitud)),
+                            PropietarioId = reader.GetInt32(nameof(Inmueble.PropietarioId)),
+
+                            Duenio = new Propietario
+                            {
+                                Id = reader.GetInt32("PropietarioIdResultado"),
+                                Nombre = reader.GetString(nameof(Propietario.Nombre)),
+                                Apellido = reader.GetString(nameof(Propietario.Apellido))
+                            }
+                        });
+                    }
+                }
+            }
+        }
+
+        return inmuebles;
+    }
+
+
+    //obtiene los inmuebles mas reservados en los ultimos 365 dias, de forma  desc
+public IList<Inmueble> MasReservados365(DateTime fechaDesde, DateTime fechaHasta)
 {
-    // Obtener todas las reservas existentes.
-    var reservas = _repoReserva.GetReservas();
+    var inmuebles = new List<Inmueble>();
 
-    // Obtener todos los inmuebles.
-    var inmuebles = ObtenerTodos();
+    using (var connection = new MySqlConnection(connectionString))
+    {
+        string sql = @$"
+            SELECT
+                i.{nameof(Inmueble.Id)},
+                i.{nameof(Inmueble.Direccion)},
+                i.{nameof(Inmueble.Tipo)},
+                i.{nameof(Inmueble.Uso)},
+                i.{nameof(Inmueble.Cupo)},
+                i.{nameof(Inmueble.Precio)},
+                i.{nameof(Inmueble.Disponible)},
+                i.{nameof(Inmueble.Latitud)},
+                i.{nameof(Inmueble.Longitud)},
+                i.{nameof(Inmueble.PropietarioId)},
 
-    // Obtener los IDs de los inmuebles ocupados
-    // por reservas activas que se superponen con el período.
-    var inmueblesOcupadosIds = reservas
-        .Where(reserva =>
-            !reserva.Anulado &&
-            fechaInicio.Date < reserva.FechaHasta.Date &&
-            fechaFin.Date > reserva.FechaDesde.Date
-        )
-        .Select(reserva => reserva.IdInmueble)
-        .Distinct()
-        .ToList();
+                p.{nameof(Propietario.Id)} AS PropietarioIdResultado,
+                p.{nameof(Propietario.Nombre)},
+                p.{nameof(Propietario.Apellido)},
 
-    // Devolver solamente los inmuebles disponibles
-    // y que no estén ocupados durante esas fechas.
-    var inmueblesDisponibles = inmuebles
-        .Where(inmueble =>
-            inmueble.Disponible == "SI" &&
-            !inmueblesOcupadosIds.Contains(inmueble.Id))
-        .ToList();
+                COUNT(r.{nameof(Reserva.IdInmueble)}) AS CantidadReservas
 
-    return inmueblesDisponibles;
+            FROM Inmuebles i
+
+            INNER JOIN Propietarios p
+                ON i.{nameof(Inmueble.PropietarioId)} = p.{nameof(Propietario.Id)}
+
+            INNER JOIN Reservas r
+                ON i.{nameof(Inmueble.Id)} = r.{nameof(Reserva.IdInmueble)}
+
+            WHERE
+                r.{nameof(Reserva.Anulado)} = 0
+                AND r.{nameof(Reserva.FechaDesde)} >= @FechaDesde
+                AND r.{nameof(Reserva.FechaDesde)} <= @FechaHasta
+
+            GROUP BY
+                i.{nameof(Inmueble.Id)},
+                p.{nameof(Propietario.Id)},
+                p.{nameof(Propietario.Nombre)},
+                p.{nameof(Propietario.Apellido)}
+
+            ORDER BY
+                CantidadReservas DESC
+
+            LIMIT 20 OFFSET 0;";
+
+        using (var command = new MySqlCommand(sql, connection))
+        {
+            command.CommandType = CommandType.Text;
+
+            command.Parameters.AddWithValue("@FechaDesde", fechaDesde);
+            command.Parameters.AddWithValue("@FechaHasta", fechaHasta);
+
+            connection.Open();
+
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    inmuebles.Add(new Inmueble
+                    {
+                        Id = reader.GetInt32(nameof(Inmueble.Id)),
+                        Direccion = reader.GetString(nameof(Inmueble.Direccion)),
+                        Tipo = reader.GetString(nameof(Inmueble.Tipo)),
+                        Uso = reader.GetString(nameof(Inmueble.Uso)),
+                        Cupo = reader.GetInt32(nameof(Inmueble.Cupo)),
+                        Precio = reader.GetDecimal(nameof(Inmueble.Precio)),
+                        Disponible = reader.GetString(nameof(Inmueble.Disponible)),
+                        Latitud = reader.GetString(nameof(Inmueble.Latitud)),
+                        Longitud = reader.GetString(nameof(Inmueble.Longitud)),
+                        PropietarioId = reader.GetInt32(nameof(Inmueble.PropietarioId)),
+
+                        Duenio = new Propietario
+                        {
+                            Id = reader.GetInt32("PropietarioIdResultado"),
+                            Nombre = reader.GetString(nameof(Propietario.Nombre)),
+                            Apellido = reader.GetString(nameof(Propietario.Apellido))
+                        }
+                    });
+                }
+            }
+        }
+    }
+    return inmuebles;
+}
+
+    public IList<Inmueble> SinReservasXdias(DateTime fechaDesde, DateTime fechaHasta)
+{
+    var inmuebles = new List<Inmueble>();
+
+    using (var connection = new MySqlConnection(connectionString))
+    {
+        string sql = $@"
+            SELECT
+                i.*,
+                p.{nameof(Propietario.Id)} AS PropietarioIdResultado,
+                p.{nameof(Propietario.Nombre)},
+                p.{nameof(Propietario.Apellido)}
+            FROM Inmuebles i
+
+            LEFT JOIN Propietarios p
+                ON i.{nameof(Inmueble.PropietarioId)} = p.{nameof(Propietario.Id)}
+
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM Reservas r
+                WHERE
+                    r.{nameof(Reserva.IdInmueble)} = i.{nameof(Inmueble.Id)}
+                    AND r.{nameof(Reserva.Anulado)} = 0
+                    AND r.{nameof(Reserva.FechaDesde)} >= @FechaDesde
+                    AND r.{nameof(Reserva.FechaDesde)} <= @FechaHasta
+            )
+
+            ORDER BY i.{nameof(Inmueble.Id)};";
+
+        using (var command = new MySqlCommand(sql, connection))
+        {
+            command.CommandType = CommandType.Text;
+
+            command.Parameters.AddWithValue("@FechaDesde", fechaDesde);
+            command.Parameters.AddWithValue("@FechaHasta", fechaHasta);
+
+            connection.Open();
+
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    inmuebles.Add(new Inmueble
+                    {
+                        Id = reader.GetInt32(nameof(Inmueble.Id)),
+                        Direccion = reader.GetString(nameof(Inmueble.Direccion)),
+                        Tipo = reader.GetString(nameof(Inmueble.Tipo)),
+                        Uso = reader.GetString(nameof(Inmueble.Uso)),
+                        Cupo = reader.GetInt32(nameof(Inmueble.Cupo)),
+                        Precio = reader.GetDecimal(nameof(Inmueble.Precio)),
+                        Disponible = reader.GetString(nameof(Inmueble.Disponible)),
+                        Latitud = reader.GetString(nameof(Inmueble.Latitud)),
+                        Longitud = reader.GetString(nameof(Inmueble.Longitud)),
+                        PropietarioId = reader.GetInt32(nameof(Inmueble.PropietarioId)),
+
+                        Duenio = new Propietario
+                        {
+                            Id = reader.GetInt32("PropietarioIdResultado"),
+                            Nombre = reader.GetString(nameof(Propietario.Nombre)),
+                            Apellido = reader.GetString(nameof(Propietario.Apellido))
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+    return inmuebles;
 }
 }

@@ -42,29 +42,59 @@ public class UsuarioController : Controller
 
     }
     [Authorize(Policy = "Administrador")]
-    public IActionResult Index()
+    public IActionResult Index(int pagina = 1)
     {
         IList<Usuario> lista = new List<Usuario>();
-        var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
+
+        var userRole = User.Claims
+            .FirstOrDefault(c => c.Type == "Rol")?.Value;
+
         ViewBag.UserRole = userRole;
+
         try
         {
-            lista = _usuario.GetUsuarios();
+            int cantidadPorPagina = 10;
+
+            // Evitar páginas menores a 1
+            if (pagina < 1)
+                pagina = 1;
+
+            // Cantidad total de usuarios
+            int totalUsuarios = _usuario.GetCantidadUsuarios();
+
+            // Obtener usuarios correspondientes a la página
+            lista = _usuario.GetUsuariosPaginados(pagina, cantidadPorPagina);
+
+            // Calcular cantidad total de páginas
+            int totalPaginas = (int)Math.Ceiling(
+                (double)totalUsuarios / cantidadPorPagina
+            );
+
+            ViewBag.PaginaActual = pagina;
+            ViewBag.TotalPaginas = totalPaginas;
+
             if (TempData.ContainsKey("Mensaje"))
             {
                 ViewBag.Mensaje = TempData["Mensaje"];
             }
-            else if (TempData.ContainsKey("Error"))
+
+            if (TempData.ContainsKey("Error"))
             {
                 ViewBag.Error = TempData["Error"];
             }
+
             return View(lista);
         }
         catch (Exception ex)
         {
-            //_logger.LogError(ex, "Error al obtener la lista de usuarios");
-            TempData["Error"] = "Ocurrio un error al obtener la lista de usuarios";
+            _logger.LogError(ex, "Error al obtener la lista de usuarios");
+
+            TempData["Error"] = "Ocurrió un error al obtener la lista de usuarios";
             ViewBag.Error = TempData["Error"];
+
+            ViewBag.PaginaActual = pagina;
+            ViewBag.TotalPaginas = 0;
+
             return View(lista);
         }
     }

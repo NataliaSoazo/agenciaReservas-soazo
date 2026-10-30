@@ -13,19 +13,23 @@ public class InmuebleController : Controller
     private readonly RepositorioPropietario _repoPropietario;
     private readonly RepositorioTipoInmueble _repoTipo;
     private readonly RepositorioUsoInmueble _repoUso;
+    private readonly RepositorioReserva _reserva;
+
 
     public InmuebleController(
         ILogger<InmuebleController> logger,
         RepositorioInmueble repoInmueble,
         RepositorioPropietario repoPropietario,
         RepositorioTipoInmueble repoTipo,
-        RepositorioUsoInmueble repoUso)
+        RepositorioUsoInmueble repoUso,
+        RepositorioReserva reserva)
     {
         _logger = logger;
         _repoInmueble = repoInmueble;
         _repoPropietario = repoPropietario;
         _repoTipo = repoTipo;
         _repoUso = repoUso;
+        _reserva = reserva;
     }
 
     [Authorize]
@@ -172,7 +176,8 @@ public class InmuebleController : Controller
         return View(i);
     }
 
-    public IActionResult BuscarPropietarios(string buscar)
+    [Authorize]   
+     public IActionResult BuscarPropietarios(string buscar)
     {
         try
         {
@@ -207,12 +212,94 @@ public class InmuebleController : Controller
         }
     }
 
-[Authorize]
-public IActionResult DisponiblesPorFechas(DateTime fechaInicio, DateTime fechaFin)
+    [Authorize]
+    public IActionResult DisponiblesPorFechas(DateTime fechaInicio, DateTime fechaFin)
     {
         var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
         ViewBag.UserRole = userRole;
         var inmueblesDisponibles  = _repoInmueble.obtenerDisponiblesPorFecha(fechaInicio, fechaFin);
         return View("Index", inmueblesDisponibles);
+    }
+    
+    [Authorize]
+    public IActionResult sinReservasXdias(int cantidadDias)
+    {
+    ViewBag.UserRole = User.Claims
+        .FirstOrDefault(c => c.Type == "Rol")?.Value;
+
+    try
+    {
+        if (cantidadDias < 1)
+        {
+            TempData["Error"] = "La cantidad de días debe ser mayor que cero.";
+            return RedirectToAction("Index");
+        }
+
+        DateTime fechaDesde = DateTime.Today.AddDays(-cantidadDias);
+        DateTime fechaHasta = DateTime.Now;
+
+        var inmueblesSinReservas = _repoInmueble.SinReservasXdias(
+            fechaDesde,
+            fechaHasta
+        );
+
+        TempData["Mensaje"] = "Búsqueda exitosa.";
+
+        return View("Index", inmueblesSinReservas);
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error al buscar inmuebles sin reservas");
+
+        TempData["Error"] =
+            "Ocurrió un error al buscar los inmuebles sin reservas.";
+
+        return RedirectToAction("Index");
+    }
+    }
+
+    [Authorize]   
+    public IActionResult MasReservados365()
+    {
+    ViewBag.UserRole = User.Claims
+        .FirstOrDefault(c => c.Type == "Rol")?.Value;
+
+    try
+    {
+        DateTime fechaDesde = DateTime.Today.AddDays(-365);
+        DateTime fechaHasta = DateTime.Now;
+
+        var resultado = _repoInmueble.MasReservados365(fechaDesde,fechaHasta);
+        return View("Index", resultado);
+        }
+        catch (Exception ex)
+       {
+        _logger.LogError(ex, "Error al obtener los inmuebles más reservados");
+
+        TempData["Error"] = "Ocurrió un error al obtener los inmuebles más reservados.";
+
+        return RedirectToAction("Index");
+    }
+}
+
+public IActionResult DispuestosxDueño()
+    {
+       ViewBag.UserRole = User.Claims
+        .FirstOrDefault(c => c.Type == "Rol")?.Value;
+
+    try
+    {
+
+        var resultado = _repoInmueble.ObtenerDisponibles();
+        return View("Index", resultado);
+        }
+        catch (Exception ex)
+       {
+        _logger.LogError(ex, "Error al obtener los inmuebles dispuestos por sus propietarios");
+
+        TempData["Error"] = "Ocurrió un error al obtener los inmuebles dispuestos por sus propietarios.";
+
+        return RedirectToAction("Index");
+    }
     }
 }

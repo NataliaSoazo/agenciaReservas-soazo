@@ -4,22 +4,41 @@
 }
 
 <h4> Lista de reservas</h4>
-
+<h4> Listado de Inmuebles</h4>
+<div class="row">
+    <div class="col-4">
+        <p>Buscar Reservas  vigentes  entre  fechas</p>
+        <form asp-action="VerVigentes" method="get">
+            <div class="form-group">
+                <label for="fechaDesde">Desde:</label>
+                <input type="date" name="fechaDesde" class="form-control" required />
+            </div>
+            <div class="form-group">
+                <label for="fechaHasta">Hasta:</label>
+                <input type="date" name="fechaHasta" class="form-control" required />
+            </div>
+            <button type="submit" class="btn btn-primary">Buscar en este rango</button>
+        </form>
+    </div>
+        <div class="col-4">
+            <form asp-action="TerminanEnXdias" method="get">
+                        <p>
+                            Reservas que terminen  en ... dias:
+                            <div>
+                                <input type="Date" name="fecha" class="form-text" required />
+                                <input type="submit" value="Buscar " class="btn btn-secondary" />
+                            </div>
+                        </p>
+                </form>
+        </div>
+</div>
 <p>
     <a asp-action="Editar"method = "post">CREAR NUEVO </a>
 </p>
-<p>
-    <a asp-action="VerVigentes">Ver reservas  vigentes</a>
-</p>
-<form asp-action="Index">
-    <p>
-        Buscar: <input type="text" name="buscar" class="form-text" />
-        <input type="submit" value="buscar" class="btn btn-dark" >
-    </p>
-</form>
+
 <div class = "table-wrapper">
 <table class="table" id="table">
-      <thead>
+      <thead>>
         <tr>
             <th>
                 @Html.DisplayNameFor(model => model.Id)
@@ -70,7 +89,7 @@
                 </a>
             
                 <a asp-controller="Pago" asp-action="agregarpago" asp-route-id="@item.Id" title="Agregar pago"><i class="fa fa-plus" style="font-size:25px;" id="agregar"></i></a>
-                <a asp-controller="Pago" asp-action="Pagosreserva" asp-route-id="@item.Id" title="Listar Pagos"><i class="fa fa-bars" style="font-size:25px;" id="pagosC"></i></a>
+                <a asp-controller="Pago" asp-action="agregarPago" asp-route-id="@item.Id" title="Listar Pagos"><i class="fa fa-bars" style="font-size:25px;" id="pagosC"></i></a>
                 <a asp-action="Renovar" asp-route-id=@item.Id title="Renovar contrato"><i class="fa fa-rotate-right" style="font-size:25px;" id="ren"></i></a>
                 
             </td>
@@ -79,6 +98,55 @@
     </tbody>
 </table>
 </div>
+
+<nav aria-label="Paginación">
+
+    <ul class="pagination">
+
+        @if (ViewBag.PaginaActual > 1)
+        {
+            <li class="page-item">
+                <a class="page-link"
+                   asp-action="Index"
+                   asp-route-pagina="@(ViewBag.PaginaActual - 1)">
+                    Anterior
+                </a>
+            </li>
+        }
+
+        @for (int i = 1; i <= ViewBag.TotalPaginas; i++)
+        {
+            <li class="page-item @(i == ViewBag.PaginaActual ? "active" : "")">
+
+                <a class="page-link"
+                   asp-action="Index"
+                   asp-route-pagina="@i">
+                    @i
+                </a>
+
+            </li>
+        }
+
+        @if (ViewBag.PaginaActual < ViewBag.TotalPaginas)
+        {
+            <li class="page-item">
+                <a class="page-link"
+                   asp-action="Index"
+                   asp-route-pagina="@(ViewBag.PaginaActual + 1)">
+                    Siguiente
+                </a>
+            </li>
+        }
+
+    </ul>
+
+</nav>
+    <div class= "container  col-2">
+            <button type="button" class="btn btn-secondary"
+        onclick="history.back()">
+             <i class="bi bi-arrow-left"></i> Volver
+        </button>
+    </div>
 <form method="post" asp-action="Eliminar" id="form_eliminar_reserva">
 
     <div class="modal fade"
@@ -141,48 +209,6 @@
     </div>
 
 </form>
-<nav aria-label="Paginación">
-
-    <ul class="pagination">
-
-        @if (ViewBag.PaginaActual > 1)
-        {
-            <li class="page-item">
-                <a class="page-link"
-                   asp-action="Index"
-                   asp-route-pagina="@(ViewBag.PaginaActual - 1)">
-                    Anterior
-                </a>
-            </li>
-        }
-
-        @for (int i = 1; i <= ViewBag.TotalPaginas; i++)
-        {
-            <li class="page-item @(i == ViewBag.PaginaActual ? "active" : "")">
-
-                <a class="page-link"
-                   asp-action="Index"
-                   asp-route-pagina="@i">
-                    @i
-                </a>
-
-            </li>
-        }
-
-        @if (ViewBag.PaginaActual < ViewBag.TotalPaginas)
-        {
-            <li class="page-item">
-                <a class="page-link"
-                   asp-action="Index"
-                   asp-route-pagina="@(ViewBag.PaginaActual + 1)">
-                    Siguiente
-                </a>
-            </li>
-        }
-
-    </ul>
-
-</nav>
 @section Scripts{
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

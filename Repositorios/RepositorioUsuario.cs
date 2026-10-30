@@ -13,6 +13,72 @@ public class RepositorioUsuario:RepositorioBase
 
     }
 
+    public IList<Usuario> GetUsuariosPaginados(int pagina, int cantidadPorPagina)
+        {
+            var usuarios = new List<Usuario>();
+
+            int offset = (pagina - 1) * cantidadPorPagina;
+
+            using (var connection = new MySqlConnection(connectionString))
+            {
+                string sql = @$"
+                    SELECT
+                        {nameof(Usuario.Id)},
+                        {nameof(Usuario.Nombre)},
+                        {nameof(Usuario.Apellido)},
+                        {nameof(Usuario.Correo)},
+                        {nameof(Usuario.AvatarURL)},
+                        {nameof(Usuario.Rol)}
+                    FROM Usuarios
+                    ORDER BY Apellido
+                    LIMIT @CantidadPorPagina OFFSET @Offset;";
+
+                using (var command = new MySqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@CantidadPorPagina", cantidadPorPagina);
+                    command.Parameters.AddWithValue("@Offset", offset);
+
+                    connection.Open();
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            usuarios.Add(new Usuario
+                            {
+                                Id = reader.GetInt32(nameof(Usuario.Id)),
+                                Nombre = reader.GetString(nameof(Usuario.Nombre)),
+                                Apellido = reader.GetString(nameof(Usuario.Apellido)),
+                                Correo = reader.GetString(nameof(Usuario.Correo)),
+                                AvatarURL = reader.GetString(nameof(Usuario.AvatarURL)),
+                                Rol = reader.GetInt32(nameof(Usuario.Rol))
+                            });
+                        }
+                    }
+                }
+            }
+
+            return usuarios;
+        }
+
+    public int GetCantidadUsuarios()
+        {
+            int cantidad = 0;
+
+            using (var connection = new MySqlConnection(connectionString))
+            {
+                string sql = "SELECT COUNT(*) FROM Usuarios;";
+
+                using (var command = new MySqlCommand(sql, connection))
+                {
+                    connection.Open();
+                    cantidad = Convert.ToInt32(command.ExecuteScalar());
+                }
+            }
+
+            return cantidad;
+        }
+
     public IList<Usuario> GetUsuarios()
     {
         var usuarios = new List<Usuario>();

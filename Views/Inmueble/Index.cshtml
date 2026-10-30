@@ -5,21 +5,64 @@
     ViewData["Title"] = "Index";
 }
 
-<h4> Listado de Inmuebles</h4>
-<div class="col-4">
-    <p>Buscar inmuebles disponibles entre  fechas</p>
-    <form asp-action="DisponiblesPorFechas" method="get">
-    <div class="form-group">
-        <label for="fechaInicio">Fecha Inicio:</label>
-        <input type="date" name="fechaInicio" class="form-control" required />
+<h3> Consultas sobre inmuebles</h3>
+
+<div class="row">
+    <div class="col-4 border">
+        <form asp-action="DisponiblesPorFechas" method="get">
+            <div class="form-group col-6">
+                <label for="fechaInicio">Fecha Desde:</label>
+                <input type="date" name="fechaInicio" class="form-control" required />
+            </div>
+            <div class="form-group col-6">
+                <label for="fechaFin">Fecha Hasta:</label>
+                <input type="date" name="fechaFin" class="form-control" required />
+            </div>
+            <div>
+                <input type="submit" value="Disponibles entre fechas " class="btn btn-secondary m-2" />
+            </div>
+        </form>
     </div>
-    <div class="form-group">
-        <label for="fechaFin">Fecha Fin:</label>
-        <input type="date" name="fechaFin" class="form-control" required />
+    <div class="col-4 border">
+        <form asp-action="BuscarPropietarios" method="get">
+            <p>
+                Buscar inmuebles por propietario:
+                <input type="text" name="buscar" class="form-text" required/>
+                <input type="submit" value="Buscar" class="btn btn-secondary" />
+            </p>
+        </form>
+        <form asp-action="sinReservasXdias" method="get">
+                <p>
+                    Buscar no reservados en ... dias:
+                    <div>
+                        <input type="number" name="cantidadDias" class="form-text" required min="1" />
+                        <input type="submit" value="Buscar " class="btn btn-secondary" />
+                    </div>
+                </p>
+        </form>
     </div>
-    <button type="submit" class="btn btn-primary">Buscar Disponibles</button>
-</form>
-</div>
+    <div class="col-4 border">
+        <div>
+            
+            <div>
+                <p>Lista los inmuebles más reservados en el ultimo año</p>
+                <form asp-action="MasReservados365" method="get">
+                    <div class="form-group">
+                        <input type="submit" value="Buscar en rango de un año " class="btn btn-secondary" />
+                    </form>
+                </div>
+            </div>
+            <div>
+                <p>Lista los inmuebles dispuestos por sus propietarios</p>
+                <form asp-action="DispuestosxDueño" method="get">
+                    <div class="form-group">
+                        <input type="submit" value="Inmuebles disponibles " class="btn btn-secondary" />
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+<h3> Listado de  inmuebles</h3>
 <p>
     <a asp-action="Editar" method="post">CREAR NUEVO </a>
 </p>
@@ -32,6 +75,9 @@
                 </th>
                 <th>
                     @Html.DisplayNameFor(model => model.Direccion)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Duenio)
                 </th>
                 <th>
                     @Html.DisplayNameFor(model => model.Uso)
@@ -48,35 +94,35 @@
             @foreach (var item in Model)
             {
                 <tr>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Id)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Direccion)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Uso)
-                    </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Id)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Direccion)
+                        </td>
+                        <td>
+                            @item.Duenio.Apellido, @item.Duenio.Nombre
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Uso)
+                        </td>
 
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Disponible)
-                    </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Disponible)
+                        </td>
 
 
-                    <td>
-                        <a asp-action="Detalles" asp-route-id=@item.Id title="Ver Detalles"><i class="fa fa-eye "
-                                                                                                   style="font-size:25px;" id="detalles"></i></a>
+                        <td>
+                            <a asp-action="Detalles" asp-route-id=@item.Id title="Ver Detalles"><i class="fa fa-eye "
+                                style="font-size:25px;" id="detalles"></i></a>
                             <a asp-action="Editar" asp-route-id=@item.Id title="Editar item"><i class="fa fa-pencil "
-                                                                                                    style="font-size:25px;" id="edi"></i></a>
+                                style="font-size:25px;" id="edi"></i></a>
+                            <a href="#" onclick="eliminar('@item.Id', '@item.Direccion')" title="Eliminar">                                
+                            <i class="fa fa-trash" style="font-size:25px;" id="eli"></i>                           </a>
 
-                                <a href="#" onclick="eliminar('@item.Id', '@item.Direccion')" title="Eliminar">
-                                    <i class="fa fa-trash" style="font-size:25px;" id="eli"></i>
-                                </a>
-
-                    
-                            </td>
-                        </tr>
-                    }
+                        </td>
+                </tr>
+             }
                 </tbody>
             </table>
 
@@ -118,6 +164,12 @@
             </ul>
 
         </nav>
+        <div class= "container  col-2">
+            <button type="button" class="btn btn-secondary"
+        onclick="history.back()">
+             <i class="bi bi-arrow-left"></i> Volver
+        </button>
+        </div>
         <form method="post" asp-action="Eliminar">
 
             <div class="modal fade " id="modal_eliminar_inmueble" tabindex="-1" aria-labelledby="tituloEliminarDomicilio"

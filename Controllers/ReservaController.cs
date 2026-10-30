@@ -223,29 +223,28 @@ public class ReservaController : Controller
         }
     }
     [Authorize]
-    public IActionResult VerVigentes()
-    {
-        IList<Reserva> lista = new List<Reserva>();
-        ViewBag.UserRole = User.Claims
-            .FirstOrDefault(c => c.Type == "Rol")?.Value;
-        try
-        {
-            lista = _reserva.GetReservas()
-                .Where(x =>
-                    x.FechaHasta > DateTime.Now &&
-                    !x.Anulado
-                )
-                .ToList();
+    public IActionResult VerVigentes(DateTime fechaDesde, DateTime fechaHasta)
+{
+    IList<Reserva> lista = new List<Reserva>();
 
-            return View("Index", lista);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error al obtener las reservas vigentes");
-            TempData["Error"] = "Ocurrió un error al obtener las reservas vigentes.";
-            return View("Index", lista);
-        }
+    ViewBag.UserRole = User.Claims
+        .FirstOrDefault(c => c.Type == "Rol")?.Value;
+
+    try
+    {
+        lista = _reserva.GetReservasVigentes(fechaDesde, fechaHasta);
+
+        return View("Index", lista);
     }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error al obtener las reservas vigentes");
+
+        TempData["Error"] = "Ocurrió un error al obtener las reservas vigentes.";
+
+        return View("Index", lista);
+    }
+}
     [Authorize]
     public IActionResult ListarReservasInmueble(int id)
     {
@@ -290,6 +289,30 @@ public class ReservaController : Controller
         return RedirectToAction(nameof(Index));
     }
 }
+
+
+    public IActionResult TerminanEnXdias(DateTime fecha)
+    {
+    IList<Reserva> lista = new List<Reserva>();
+
+    ViewBag.UserRole = User.Claims
+        .FirstOrDefault(c => c.Type == "Rol")?.Value;
+
+    try
+    {
+        lista = _reserva.TerminanEnXdias(fecha);
+
+        return View("Index", lista);
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error al obtener las reservas que terminan en esa fecha");
+
+        TempData["Error"] = "Ocurrió un error al obtener las reservas.";
+
+        return View("Index", lista);
+    }
+    }
 }
 
 

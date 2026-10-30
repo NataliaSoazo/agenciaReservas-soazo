@@ -9,10 +9,10 @@
 <form asp-action="Index">
     <p>
         Buscar: <input type="text" name="buscar" class="form-text" />
-        <input type="submit" value="buscar" class="btn btn-dark">
+        <input type="submit" value="buscar" class="btn btn-secondary">
     </p>
 </form>
-<div class="col-8 table-wrapper">
+<div class="col-8 container table-wrapper">
 <table class="table" id="table">
     <thead>
         <tr>
@@ -57,6 +57,7 @@
                     @Html.DisplayFor(model => item.IdReserva)
                 </th>
                 <td>
+                    <a asp-controller="Pago" asp-action="agregarpago" asp-route-id="@item.IdReserva" title="Agregar pago a la reserva con código @item.IdReserva "><i class="fa fa-plus" style="font-size:25px;" id="agregar"></i></a>
                     <a asp-action="Detalles" asp-route-id=@item.Id title="Ver Detalle"><i class="fa fa-eye " style="font-size:25px;"
                             id="detalles"></i></a>
                     <a href="#" onclick="editarPago('@item.Id','@item.Concepto')" title="Editar el concepto de pago"><i class="fa fa-pencil " style="font-size:25px;"
@@ -114,7 +115,12 @@
     </ul>
 
 </nav>
-</div>
+        <div class= "container  col-2">
+            <button type="button" class="btn btn-secondary"
+        onclick="history.back()">
+             <i class="bi bi-arrow-left"></i> Volver
+        </button>
+        </div>
 <div class="modal fade"
      id="modal_eliminar_Pago"
      tabindex="-1"

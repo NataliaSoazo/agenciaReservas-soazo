@@ -293,7 +293,7 @@ public int GetCantidadReservas()
     return reserva;
 }
 
-        public int ModificarReserva(Reserva reserva)
+     public int ModificarReserva(Reserva reserva)
 {
     using (var connection = new MySqlConnection(connectionString))
     {
@@ -362,11 +362,11 @@ public int GetCantidadReservas()
             return false;
         }
     }
-   public bool InmuebleDisponible(
-    int idInmueble,
-    DateTime fechaDesde,
-    DateTime fechaHasta,
-    int idReserva = 0)
+        public bool InmuebleDisponible(
+         int idInmueble,
+         DateTime fechaDesde,
+         DateTime fechaHasta,
+         int idReserva = 0)
 {
     using (var connection = new MySqlConnection(connectionString))
     {
@@ -393,5 +393,166 @@ public int GetCantidadReservas()
             return cantidad == 0;
         }
     }
+}
+    // esta consulta se asegura que las reservas entre esas fechas se encuentre vigentes
+    // no es una consulta de comienzo y fin de  la reserva
+    public IList<Reserva> GetReservasVigentes(DateTime fechaDesde, DateTime fechaHasta)
+{
+    var reservas = new List<Reserva>();
+
+    using (var connection = new MySqlConnection(connectionString))
+    {
+        string sql = $@"
+            SELECT
+                i.{nameof(Reserva.Id)},
+                i.{nameof(Reserva.Fecha)},
+                i.{nameof(Reserva.FechaDesde)},
+                i.{nameof(Reserva.FechaHasta)},
+                i.{nameof(Reserva.Monto)},
+                i.{nameof(Reserva.IdInquilino)},
+                p.{nameof(Inquilino.Nombre)},
+                p.{nameof(Inquilino.Apellido)},
+                i.{nameof(Reserva.IdInmueble)},
+                m.{nameof(Inmueble.Direccion)},
+                i.{nameof(Reserva.Anulado)}
+
+            FROM Reservas i
+
+            INNER JOIN Inquilinos p
+                ON i.{nameof(Reserva.IdInquilino)} = p.{nameof(Inquilino.Id)}
+
+            INNER JOIN Inmuebles m
+                ON i.{nameof(Reserva.IdInmueble)} = m.{nameof(Inmueble.Id)}
+
+            WHERE
+                i.{nameof(Reserva.FechaDesde)} <= @FechaHasta
+                AND i.{nameof(Reserva.FechaHasta)} >= @FechaDesde
+                AND i.{nameof(Reserva.Anulado)} = 0
+
+            ORDER BY i.{nameof(Reserva.Id)} ASC;";
+
+        using (var command = new MySqlCommand(sql, connection))
+        {
+            command.CommandType = CommandType.Text;
+
+            command.Parameters.AddWithValue("@FechaDesde", fechaDesde);
+            command.Parameters.AddWithValue("@FechaHasta", fechaHasta);
+
+            connection.Open();
+
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    reservas.Add(new Reserva
+                    {
+                        Id = reader.GetInt32(nameof(Reserva.Id)),
+
+                        Fecha = reader.GetDateTime(nameof(Reserva.Fecha)),
+                        FechaDesde = reader.GetDateTime(nameof(Reserva.FechaDesde)),
+                        FechaHasta = reader.GetDateTime(nameof(Reserva.FechaHasta)),
+
+                        Monto = reader.GetDouble(nameof(Reserva.Monto)),
+
+                        IdInquilino = reader.GetInt32(nameof(Reserva.IdInquilino)),
+
+                        Arrendatario = new Inquilino
+                        {
+                            Nombre = reader.GetString(nameof(Inquilino.Nombre)),
+                            Apellido = reader.GetString(nameof(Inquilino.Apellido))
+                        },
+
+                        IdInmueble = reader.GetInt32(nameof(Reserva.IdInmueble)),
+
+                        DatoInmueble = new Inmueble
+                        {
+                            Direccion = reader.GetString(nameof(Inmueble.Direccion))
+                        },
+
+                        Anulado = reader.GetBoolean(nameof(Reserva.Anulado))
+                    });
+                }
+            }
+        }
+    }
+
+    return reservas;
+}
+
+public IList<Reserva> TerminanEnXdias(DateTime fecha)
+{
+    var reservas = new List<Reserva>();
+
+    using (var connection = new MySqlConnection(connectionString))
+    {
+        string sql = $@"
+            SELECT
+                i.{nameof(Reserva.Id)},
+                i.{nameof(Reserva.Fecha)},
+                i.{nameof(Reserva.FechaDesde)},
+                i.{nameof(Reserva.FechaHasta)},
+                i.{nameof(Reserva.Monto)},
+                i.{nameof(Reserva.IdInquilino)},
+                p.{nameof(Inquilino.Nombre)},
+                p.{nameof(Inquilino.Apellido)},
+                i.{nameof(Reserva.IdInmueble)},
+                m.{nameof(Inmueble.Direccion)},
+                i.{nameof(Reserva.Anulado)}
+
+            FROM Reservas i
+
+            INNER JOIN Inquilinos p
+                ON i.{nameof(Reserva.IdInquilino)} = p.{nameof(Inquilino.Id)}
+
+            INNER JOIN Inmuebles m
+                ON i.{nameof(Reserva.IdInmueble)} = m.{nameof(Inmueble.Id)}
+
+            WHERE
+                i.{nameof(Reserva.FechaHasta)} >= @Fecha
+                AND i.{nameof(Reserva.FechaHasta)} < DATE_ADD(@Fecha, INTERVAL 1 DAY)
+                AND i.{nameof(Reserva.Anulado)} = 0
+
+            ORDER BY i.{nameof(Reserva.Id)} ASC;";
+
+        using (var command = new MySqlCommand(sql, connection))
+        {
+            command.Parameters.AddWithValue("@Fecha", fecha.Date);
+
+            connection.Open();
+
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    reservas.Add(new Reserva
+                    {
+                        Id = reader.GetInt32(nameof(Reserva.Id)),
+                        Fecha = reader.GetDateTime(nameof(Reserva.Fecha)),
+                        FechaDesde = reader.GetDateTime(nameof(Reserva.FechaDesde)),
+                        FechaHasta = reader.GetDateTime(nameof(Reserva.FechaHasta)),
+                        Monto = reader.GetDouble(nameof(Reserva.Monto)),
+                        IdInquilino = reader.GetInt32(nameof(Reserva.IdInquilino)),
+
+                        Arrendatario = new Inquilino
+                        {
+                            Nombre = reader.GetString(nameof(Inquilino.Nombre)),
+                            Apellido = reader.GetString(nameof(Inquilino.Apellido))
+                        },
+
+                        IdInmueble = reader.GetInt32(nameof(Reserva.IdInmueble)),
+
+                        DatoInmueble = new Inmueble
+                        {
+                            Direccion = reader.GetString(nameof(Inmueble.Direccion))
+                        },
+
+                        Anulado = reader.GetBoolean(nameof(Reserva.Anulado))
+                    });
+                }
+            }
+        }
+    }
+
+    return reservas;
 }
 }
