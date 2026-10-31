@@ -313,6 +313,62 @@ public class ReservaController : Controller
         return View("Index", lista);
     }
     }
+
+
+    [HttpPost]
+    public IActionResult SolicitarCancelacion(int id, DateTime fechaCulminacion)
+        {
+        try
+        {
+            var reserva =  _reserva.GetReserva(id);
+
+
+        if (reserva == null)
+            {return NotFound();}
+
+        if (reserva.Anulado)
+            {
+            TempData["Error"] = "La reserva está anulada, no se puede cancelar.";
+            return RedirectToAction("Index");
+            }
+
+        int diasOriginales = (reserva.FechaHasta.Date - reserva.FechaDesde.Date).Days;
+        int diasCumplidos = (fechaCulminacion.Date - reserva.FechaDesde.Date).Days;
+
+        if (diasOriginales <= 0 ||
+            diasCumplidos <= 0 ||
+            diasCumplidos >= diasOriginales)
+        {
+            TempData["Error"] = "La fecha de terminación no es válida.";
+            return RedirectToAction("Index");
+        }
+
+        double porcentajeCumplido =(double)diasCumplidos / diasOriginales;
+
+        double alquilerRestante =reserva.Monto * (diasOriginales - diasCumplidos)/ diasOriginales;
+
+        int porcentajeMulta =porcentajeCumplido < 0.50 ? 50 : 25;
+
+        double multa = Math.Round(alquilerRestante * porcentajeMulta / 100, 2);
+
+        ViewBag.Reserva = reserva;
+        ViewBag.FechaCulminacion = fechaCulminacion;
+        ViewBag.DiasOriginales = diasOriginales;
+        ViewBag.DiasCumplidos = diasCumplidos;
+        ViewBag.AlquilerRestante = alquilerRestante;
+        ViewBag.PorcentajeMulta = porcentajeMulta;
+        ViewBag.TotalMulta = multa;
+        return View("PagarMulta");
+        }
+        catch (System.Exception ex)
+        {
+         _logger.LogError(ex, "Error al obtener las reservas que terminan en esa fecha");
+
+        TempData["Error"] = "Ocurrió un error al obtener las reservas.";
+
+        return View("Index");
+        }
+    }
 }
 
 

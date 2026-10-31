@@ -1,0 +1,206 @@
+
+@model agenciaReservas_soazo.Models.Pago
+
+@{
+    ViewData["Title"] = "Pago de multa";
+
+    var reserva = ViewBag.Reserva as Reserva;
+    double totalAPagar = ViewBag.TotalMulta;
+    var fechaTerminacion = (DateTime)ViewBag.FechaCulminacion;
+}
+
+<div class="container mt-4">
+
+    <h3>Pago de multa por cancelación anticipada</h3>
+
+    <hr />
+
+    <div class="card shadow">
+
+        <div class="card-header">
+            <h5>Datos de la reserva</h5>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-6">
+                    <p><strong>Código de reserva:</strong> @reserva.Id</p>
+
+                    <p><strong>Inquilino:</strong>
+                        @reserva.Arrendatario.Nombre
+                        @reserva.Arrendatario.Apellido
+                    </p>
+
+                    <p><strong>Inmueble:</strong>
+                        @reserva.DatoInmueble.Direccion
+                    </p>
+                </div>
+
+                <div class="col-md-6">
+                    <p><strong>Fecha de inicio:</strong>
+                        @reserva.FechaDesde.ToString("dd/MM/yyyy")
+                    </p>
+
+                    <p><strong>Fecha original de finalización:</strong>
+                        @reserva.FechaHasta.ToString("dd/MM/yyyy")
+                    </p>
+
+                    <p><strong>Fecha de terminación anticipada:</strong>
+                        @fechaTerminacion.ToString("dd/MM/yyyy")
+                    </p>
+                </div>
+
+            </div>
+
+            <hr />
+
+            <h5>Detalle del cálculo de la multa</h5>
+
+            <table class="table table-bordered">
+
+                <tr>
+                    <th>Días originales del alquiler</th>
+                    <td>@ViewBag.DiasOriginales</td>
+                </tr>
+
+                <tr>
+                    <th>Días cumplidos</th>
+                    <td>@ViewBag.DiasCumplidos</td>
+                </tr>
+
+                <tr>
+                    <th>Alquiler restante</th>
+                    <td>$@(((double)ViewBag.AlquilerRestante).ToString("N2"))</td>
+                </tr>
+
+                <tr>
+                    <th>Porcentaje de multa</th>
+                    <td>@ViewBag.PorcentajeMulta %</td>
+                </tr>
+
+                <tr>
+                    <th>IMPORTE TOTAL DE LA MULTA</th>
+                    <td class="text-danger fw-bold">
+                        $@totalAPagar.ToString("N2")
+                    </td>
+                </tr>
+
+            </table>
+
+            <hr />
+
+            <h5>Registrar pago de multa</h5>
+
+            <form asp-controller="Pago"
+                  asp-action="Guardar"
+                  method="post">
+
+                <div asp-validation-summary="ModelOnly"
+                     class="text-danger mb-3">
+                </div>
+
+                <input type="hidden"
+                       asp-for="IdReserva"
+                       value="@reserva.Id" />
+
+                <input type="hidden"
+                       asp-for="Anulado"
+                       value="false" />
+
+                <input type="hidden"
+                       asp-for="Concepto"
+                       value="MULTA POR CANCELACIÓN ANTICIPADA" />
+
+                <input type="hidden"
+                       asp-for="Importe"
+                       value="@totalAPagar" />
+
+                <input type="hidden"
+                       name="FechaTerminacion"
+                       value="@fechaTerminacion.ToString("yyyy-MM-dd")" />
+
+                <div class="mb-3">
+
+                    <label class="form-label">Concepto</label>
+
+                    <input class="form-control"
+                           value="MULTA POR CANCELACIÓN ANTICIPADA"
+                           readonly />
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label class="form-label">Importe a pagar</label>
+
+                    <input class="form-control"
+                           value="@totalAPagar.ToString("N2")"
+                           readonly />
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label asp-for="Fecha" class="form-label"></label>
+
+                    <input asp-for="Fecha"
+                           type="date"
+                           class="form-control"
+                           value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+
+                    <span asp-validation-for="Fecha"
+                          class="text-danger"></span>
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label asp-for="Modo" class="form-label"></label>
+
+                    <select asp-for="Modo" class="form-select" required>
+
+                        <option value="">-- Seleccione un modo de pago --</option>
+
+                        <option value="EFECTIVO">EFECTIVO</option>
+
+                        <option value="TRANSFERENCIA">TRANSFERENCIA</option>
+
+                        <option value="TARJETA">TARJETA</option>
+
+                    </select>
+
+                    <span asp-validation-for="Modo"
+                          class="text-danger"></span>
+
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+
+                    <a asp-controller="Reserva"
+                       asp-action="Index"
+                       class="btn btn-secondary">
+                        Volver
+                    </a>
+
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-cash"></i>
+                        Registrar pago de multa
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
