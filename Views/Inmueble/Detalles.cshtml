@@ -2,258 +2,146 @@
 
 @{
     ViewData["Title"] = "Detalles";
+
     var imagenes = ViewBag.Imagenes as IList<agenciaReservas_soazo.Models.ImagenInmueble>;
+
+    // PRIMERA IMAGEN: PRINCIPAL
+    var imagenPrincipal = imagenes?.OrderBy(i => i.Id).FirstOrDefault();
+
+    // RESTO DE IMÁGENES: SECUNDARIAS
+    var otrasImagenes = imagenes?.OrderBy(i => i.Id).Skip(1).ToList();
 }
 
-<div class="table-wrapper">
+<div class="container mt-4 mb-5">
 
-    <div class="container justify-content-center col-6" id="table">
+    <div class="row g-4 align-items-stretch">
 
-        <h4 class="text-center">Detalles del Inmueble</h4>
-        <hr />
+        <div class="col-md-6">
+            <div class="card shadow p-4 h-100">
+                <h4 class="text-center">Detalles del Inmueble</h4>
+                <hr />
 
-        <dl class="row">
+                <dl class="row mb-0">
+                    <dt class="col-6">@Html.DisplayNameFor(model => model.Id)</dt>
+                    <dd class="col-6">@Html.DisplayFor(model => model.Id)</dd>
 
-            <dt class="col-6">
-                @Html.DisplayNameFor(model => model.Id)
-            </dt>
-            <dd class="col-6">
-                @Html.DisplayFor(model => model.Id)
-            </dd>
+                    <dt class="col-6">@Html.DisplayNameFor(model => model.Direccion)</dt>
+                    <dd class="col-6">@Html.DisplayFor(model => model.Direccion)</dd>
 
-            <dt class="col-6">
-                @Html.DisplayNameFor(model => model.Direccion)
-            </dt>
-            <dd class="col-6">
-                @Html.DisplayFor(model => model.Direccion)
-            </dd>
+                    <dt class="col-6">@Html.DisplayNameFor(model => model.Tipo)</dt>
+                    <dd class="col-6">@Html.DisplayFor(model => model.Tipo)</dd>
 
-            <dt class="col-6">
-                @Html.DisplayNameFor(model => model.Tipo)
-            </dt>
-            <dd class="col-6">
-                @Html.DisplayFor(model => model.Tipo)
-            </dd>
+                    <dt class="col-6">@Html.DisplayNameFor(model => model.Uso)</dt>
+                    <dd class="col-6">@Html.DisplayFor(model => model.Uso)</dd>
 
-            <dt class="col-6">
-                @Html.DisplayNameFor(model => model.Uso)
-            </dt>
-            <dd class="col-6">
-                @Html.DisplayFor(model => model.Uso)
-            </dd>
+                    <dt class="col-6">@Html.DisplayNameFor(model => model.Cupo)</dt>
+                    <dd class="col-6">@Html.DisplayFor(model => model.Cupo)</dd>
 
-            <dt class="col-6">
-                @Html.DisplayNameFor(model => model.Cupo)
-            </dt>
-            <dd class="col-6">
-                @Html.DisplayFor(model => model.Cupo)
-            </dd>
+                    <dt class="col-6">@Html.DisplayNameFor(model => model.Precio)</dt>
+                    <dd class="col-6">$@Html.DisplayFor(model => model.Precio)</dd>
 
-            <dt class="col-6">
-                @Html.DisplayNameFor(model => model.Precio)
-            </dt>
-            <dd class="col-6">
-                $@Html.DisplayFor(model => model.Precio)
-            </dd>
+                    <dt class="col-6">@Html.DisplayNameFor(model => model.Latitud)</dt>
+                    <dd class="col-6">@Html.DisplayFor(model => model.Latitud)</dd>
 
-            <dt class="col-6">
-                @Html.DisplayNameFor(model => model.Latitud)
-            </dt>
-            <dd class="col-6">
-                @Html.DisplayFor(model => model.Latitud)
-            </dd>
+                    <dt class="col-6">@Html.DisplayNameFor(model => model.Longitud)</dt>
+                    <dd class="col-6">@Html.DisplayFor(model => model.Longitud)</dd>
 
-            <dt class="col-6">
-                @Html.DisplayNameFor(model => model.Longitud)
-            </dt>
-            <dd class="col-6">
-                @Html.DisplayFor(model => model.Longitud)
-            </dd>
+                    <dt class="col-6">@Html.DisplayNameFor(model => model.Disponible)</dt>
+                    <dd class="col-6">@Html.DisplayFor(model => model.Disponible)</dd>
 
-            <dt class="col-6">
-                @Html.DisplayNameFor(model => model.Disponible)
-            </dt>
-            <dd class="col-6">
-                @Html.DisplayFor(model => model.Disponible)
-            </dd>
-
-            <dt class="col-6">
-                @Html.DisplayNameFor(model => model.PropietarioId)
-            </dt>
-            <dd class="col-6">
-                (@Model.PropietarioId)
-                @Model.Duenio.Apellido
-                @Model.Duenio.Nombre
-            </dd>
-
-        </dl>
-
-        <!-- BOTÓN AGREGAR FOTOS -->
-        <div class="text-center mt-3">
-
-            <a href="#"
-               class="btn btn-primary"
-               data-bs-toggle="modal"
-               data-bs-target="#modalAgregarImagen">
-
-                <i class="fas fa-camera"></i>
-                Agregar fotos
-
-            </a>
-
+                    <dt class="col-6">@Html.DisplayNameFor(model => model.PropietarioId)</dt>
+                    <dd class="col-6">(@Model.PropietarioId) @Model.Duenio.Apellido @Model.Duenio.Nombre</dd>
+                </dl>
+            </div>
         </div>
 
-    </div>
+        <!-- IMAGEN PRINCIPAL -->
+        <div class="col-md-6">
+            <div class="card shadow p-4 h-100">
+                <h4 class="text-center">Imagen destacada</h4>
+                <hr />
 
-
-    <!-- ========================= -->
-    <!-- IMÁGENES DEL INMUEBLE -->
-    <!-- ========================= -->
-
-    @if (imagenes != null && imagenes.Count > 0)
-    {
-        <div class="container mt-4">
-
-            <h4 class="text-center">
-                Fotos del inmueble
-            </h4>
-
-            <div class="row justify-content-center">
-
-                @for (int i = 0; i < imagenes.Count; i++)
+                @if (imagenPrincipal != null && !string.IsNullOrEmpty(imagenPrincipal.ImgURL))
                 {
-                    var imagen = imagenes[i];
+                    <img src="@imagenPrincipal.ImgURL" class="img-fluid rounded mb-3" style="width:100%; height:300px; object-fit:contain;" alt="Imagen principal del inmueble" />
 
-                    @if (i == 0)
-                    {
-                        <!-- PRIMERA IMAGEN: PRINCIPAL -->
-                        <div class="col-md-8 mb-4 text-center">
-
-                            <div class="card shadow">
-
-                                <div class="card-header">
-                                    <strong>Imagen principal</strong>
-                                </div>
-
-                                <img src="@imagen.ImgURL"
-                                     class="card-img-top"
-                                     style="max-height:400px; object-fit:contain;"
-                                     alt="Imagen principal del inmueble" />
-
-                            </div>
-
+                }
+                else
+                {
+                    <div class="d-flex justify-content-center align-items-center bg-light rounded mb-3" style="height:300px;">
+                        <div class="text-center text-muted">
+                            <i class="fas fa-image fa-4x mb-3"></i>
+                            <p>No hay imagen principal</p>
                         </div>
-                    }
-                    else
-                    {
-                        <!-- RESTO DE LAS IMÁGENES -->
-                        <div class="col-md-4 mb-3">
-
-                            <div class="card shadow-sm">
-
-                                <img src="@imagen.ImgURL"
-                                     class="card-img-top"
-                                     style="height:180px; object-fit:cover;"
-                                     alt="Imagen del inmueble" />
-
-                            </div>
-
-                        </div>
-                    }
+                    </div>
                 }
 
+                <hr />
+
+                <!-- FORMULARIO SUBIR IMAGEN PRINCIPAL -->
+                <form asp-controller="ImagenInmueble" asp-action="AgregarFotoPrincipal" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="InmuebleId" value="@Model.Id" />
+                    <div class="mb-3">
+                        <label class="form-label">Seleccionar foto destacada</label>
+                        <input type="file" name="archivo" class="form-control" accept="image/*" required />
+                    </div>
+                    <button type="submit" class="btn btn-secondary w-100"><i class="fas fa-camera"></i> @(imagenPrincipal != null ? "Cambiar imagen destacada" : "Subir imagen destacada")</button>
+                </form>
             </div>
-
         </div>
-    }
-
-
-    <!-- VOLVER -->
-    <div class="container mt-3">
-
-        <a asp-action="Index">
-            Volver al listado
-        </a>
 
     </div>
 
-</div>
+    <!-- IMÁGENES SECUNDARIAS -->
+    <div class="card shadow p-4 mt-4">
+        <h4 class="text-center">Otras fotos</h4>
+        <hr />
 
-
-<!-- ========================= -->
-<!-- MODAL AGREGAR IMAGEN -->
-<!-- ========================= -->
-
-<div class="modal fade"
-     id="modalAgregarImagen"
-     tabindex="-1"
-     aria-labelledby="tituloAgregarImagen"
-     aria-hidden="true">
-
-    <div class="modal-dialog">
-
-        <div class="modal-content">
-
-            <div class="modal-header">
-
-                <h5 class="modal-title" id="tituloAgregarImagen">
-                    Agregar foto del inmueble
-                </h5>
-
-                <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Cerrar">
-                </button>
-
+        <!-- FORMULARIO SUBIR IMÁGENES SECUNDARIAS -->
+        <form asp-controller="ImagenInmueble" asp-action="OtrasImagenes" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="InmuebleId" value="@Model.Id" />
+            <div class="mb-3">
+                <label class="form-label">Selecciona foto</label>
+                <input type="file" name="archivos" class="form-control" accept="image/*" multiple required />
+                <small class="text-muted">Puedes seleccionar varias imágenes al mismo tiempo.</small>
             </div>
+            <button type="submit" class="btn btn-success"><i class="fas fa-images"></i> Subir imágenes secundarias</button>
+        </form>
 
-            <form asp-controller="ImagenInmueble"
-                  asp-action="AgregarImagen"
-                  method="post"
-                  enctype="multipart/form-data">
+        <hr />
 
-                <div class="modal-body">
+        <!-- MOSTRAR IMÁGENES SECUNDARIAS -->
+        <div class="row g-3">
+            @if (otrasImagenes != null && otrasImagenes.Count > 0)
+            {
+                @foreach (var imagen in otrasImagenes)
+                {
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div class="card shadow-sm h-100">
+                            <img src="@imagen.ImgURL" class="card-img-top" style="height:180px; object-fit:cover;" alt="Imagen secundaria del inmueble" />
 
-                    <input type="hidden"
-                           name="InmuebleId"
-                           value="@Model.Id" />
+                            <div class="card-body text-center">
+                                <span class="text-muted">Imagen secundaria</span>
+                            </div>
 
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            Seleccionar foto
-                        </label>
-
-                        <input type="file"
-                               name="archivo"
-                               class="form-control"
-                               accept="image/*"
-                               required />
-
+                            <!-- FORMULARIO ELIMINAR IMAGEN SECUNDARIA -->
+                            <div class="card-footer">
+                                <form asp-controller="ImagenInmueble" asp-action="EliminarImagen" method="post" onsubmit="return confirm('¿Eliminar esta imagen?');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@imagen.Id" />
+                                    <button type="submit" class="btn btn-danger btn-sm w-100"><i class="fas fa-trash"></i> Eliminar</button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
-
-                </div>
-
-                <div class="modal-footer">
-
-                    <button type="button"
-                            class="btn btn-secondary"
-                            data-bs-dismiss="modal">
-                        Cancelar
-                    </button>
-
-                    <button type="submit"
-                            class="btn btn-primary">
-                        Subir foto
-                    </button>
-
-                </div>
-
-            </form>
-
+                }
+            }
         </div>
+    </div>
 
+    <!-- VOLVER -->
+    <div class="mt-4">
+        <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver al listado</a>
     </div>
 
 </div>

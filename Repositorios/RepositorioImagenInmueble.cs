@@ -186,40 +186,40 @@ public class RepositorioImagenInmueble : RepositorioBase
     }
 
     public IList<ImagenInmueble> BuscarPorInmueble(int inmuebleId)
+{
+    List<ImagenInmueble> res = new List<ImagenInmueble>();
+
+    using (var connection = new MySqlConnection(connectionString))
     {
-        List<ImagenInmueble> res = new List<ImagenInmueble>();
+        string sql = @"SELECT
+                i.Id,
+                i.InmuebleId,
+                i.ImgURL
+                FROM ImagenInmueble i
+                WHERE i.InmuebleId = @inmuebleId
+                ORDER BY i.Id";
 
-        using (var connection = new MySqlConnection(connectionString))
+        using (var command = new MySqlCommand(sql, connection))
         {
-            string sql = @"SELECT
-                    i.Id,
-                    i.InmuebleId,
-                    i.ImgURL
-                    FROM ImagenInmueble i
-                    WHERE i.InmuebleId = @inmuebleId";
+            command.Parameters.AddWithValue("@inmuebleId", inmuebleId);
 
-            using (var command = new MySqlCommand(sql, connection))
+            connection.Open();
+
+            using (var reader = command.ExecuteReader())
             {
-                command.CommandType = CommandType.Text;
-                command.Parameters.AddWithValue("@inmuebleId", inmuebleId);
-
-                connection.Open();
-
-                using (var reader = command.ExecuteReader())
+                while (reader.Read())
                 {
-                    while (reader.Read())
+                    res.Add(new ImagenInmueble
                     {
-                        res.Add(new ImagenInmueble
-                        {
-                            Id = reader.GetInt32(nameof(ImagenInmueble.Id)),
-                            InmuebleId = reader.GetInt32(nameof(ImagenInmueble.InmuebleId)),
-                            ImgURL = reader.GetString(nameof(ImagenInmueble.ImgURL))
-                        });
-                    }
+                        Id = reader.GetInt32(nameof(ImagenInmueble.Id)),
+                        InmuebleId = reader.GetInt32(nameof(ImagenInmueble.InmuebleId)),
+                        ImgURL = reader.GetString(nameof(ImagenInmueble.ImgURL))
+                    });
                 }
             }
         }
-
-        return res;
     }
+
+    return res;
+}
 }

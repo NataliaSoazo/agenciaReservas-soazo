@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Logging;
 using agenciaReservas_soazo.Models;
 using agenciaReservas_soazo.Repositorios;
 using Microsoft.AspNetCore.Authorization;
@@ -7,202 +9,245 @@ namespace agenciaReservas_soazo.Controllers;
 
 public class ImagenInmuebleController : Controller
 {
-    private readonly ILogger<ImagenInmuebleController> _logger;
-    private readonly RepositorioImagenInmueble _repoImagen;
+    private readonly ILogger<ImagenInmuebleController> _logger;   
+    private readonly RepositorioImagenInmueble _repoImagen
+    private readonly IWebHostEnvironment environment;
+    private const string ImagenPorDefecto = "/AnonimoInmueble.png";
 
     public ImagenInmuebleController(
         ILogger<ImagenInmuebleController> logger,
-        RepositorioImagenInmueble repoImagen)
+        RepositorioImagenInmueble repoImagen,
+        IWebHostEnvironment environment)
     {
         _logger = logger;
         _repoImagen = repoImagen;
+        this.environment = environment;
     }
 
-    [Authorize]
-    public IActionResult Index(int pagina = 1)
-    {
-        var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
-        ViewBag.UserRole = userRole;
-
-        IList<ImagenInmueble> lista = new List<ImagenInmueble>();
-
-        try
-        {
-            int cantidadPorPagina = 10;
-
-            int totalImagenes = _repoImagen.ObtenerCantidad();
-
-            lista = _repoImagen.ObtenerLista(
-                pagina,
-                cantidadPorPagina
-            );
-
-            int totalPaginas = (int)Math.Ceiling(
-                (double)totalImagenes / cantidadPorPagina
-            );
-
-            ViewBag.PaginaActual = pagina;
-            ViewBag.TotalPaginas = totalPaginas;
-
-            if (TempData.ContainsKey("Mensaje"))
-            {
-                ViewBag.Mensaje = TempData["Mensaje"];
-            }
-
-            if (TempData.ContainsKey("Error"))
-            {
-                ViewBag.Error = TempData["Error"];
-            }
-
-            return View(lista);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(
-                ex,
-                "Error al obtener la lista de imágenes"
-            );
-
-            TempData["Error"] =
-                "Ocurrió un error al obtener la lista de imágenes";
-
-            return View(lista);
-        }
-    }
-
+    // AGREGAR O ACTUALIZAR IMAGEN PRINCIPAL
+    [Authorize]   
+    [HttpPost]
     [Authorize]
 [HttpPost]
-public IActionResult AgregarImagen(int InmuebleId, IFormFile archivo)
+public async Task<IActionResult> AgregarFotoPrincipal(int InmuebleId, IFormFile archivo)
 {
     try
     {
         if (archivo == null || archivo.Length == 0)
         {
             TempData["Error"] = "Debe seleccionar una imagen.";
-
-            return RedirectToAction(
-                "Detalles",
-                "Inmueble",
-                new { id = InmuebleId }
-            );
+            return RedirectToAction("Detalles", "Inmueble",
+                new { id = InmuebleId });
         }
-
-        string carpeta = Path.Combine(
-            Directory.GetCurrentDirectory(),
-            "wwwroot",
-            "img",
-            "inmuebles",
+        string wwwPath = environment.WebRootPath;
+        string carpetaInmueble = Path.Combine(
+            wwwPath,
             InmuebleId.ToString()
         );
-
-        if (!Directory.Exists(carpeta))
-            Directory.CreateDirectory(carpeta);
-
-        string extension = Path.GetExtension(archivo.FileName);
-        string nombreArchivo = Guid.NewGuid().ToString() + extension;
-
-        string rutaCompleta = Path.Combine(
-            carpeta,
-            nombreArchivo
-        );
-
-        using (var stream = new FileStream(rutaCompleta, FileMode.Create))
+        if (!Directory.Exists(carpetaInmueble))
         {
-            archivo.CopyTo(stream);
+            Directory.CreateDirectory(carpetaInmueble);
+        }
+        var imagenes = _repoImagen.BuscarPorInmueble(InmuebleId)
+            .OrderBy(i => i.Id)
+            .ToList();
+        var imagenPrincipal = imagenes.FirstOrDefault();
+        string extension = Path.GetExtension(archivo.FileName);
+        string fileName = "ImagenDestacada" + extension;
+        string fullPath = Path.Combine(carpetaInmueble, fileName);
+        // Eliminar portada anterior
+        if (imagenPrincipal != null &&
+            !string.IsNullOrEmpty(imagenPrincipal.ImgURL) &&
+            imagenPrincipal.ImgURL != ImagenPorDefecto)
+        {
+            string rutaAnterior = Path.Combine(
+                wwwPath,
+                imagenPrincipal.ImgURL.TrimStart('/')
+                    .Replace("/", Path.DirectorySeparatorChar.ToString())
+            );
+            if (System.IO.File.Exists(rutaAnterior))
+            {
+                System.IO.File.Delete(rutaAnterior);
+            }
+        }
+        // Guardar nueva portada
+        using (FileStream stream = new FileStream(
+            fullPath, FileMode.Create))
+        {
+            await archivo.CopyToAsync(stream);
         }
 
-        string rutaBD =
-            $"/img/inmuebles/{InmuebleId}/{nombreArchivo}";
+        string url = $"/{InmuebleId}/{fileName}";
 
-        var imagen = new ImagenInmueble
+        if (imagenPrincipal != null)
         {
-            InmuebleId = InmuebleId,
-            ImgURL = rutaBD
-        };
-
-        _repoImagen.Alta(imagen);
-
-        TempData["Mensaje"] = "La foto se agregó correctamente.";
-
-        return RedirectToAction(
-            "Detalles",
-            "Inmueble",
-            new { id = InmuebleId }
-        );
+            imagenPrincipal.ImgURL = url;
+            _repoImagen.Modificacion(imagenPrincipal);
+        }
+        else
+        {
+            imagenPrincipal = new ImagenInmueble
+            {
+                InmuebleId = InmuebleId,
+                ImgURL = url
+            };
+            _repoImagen.Alta(imagenPrincipal);
+        }
+        TempData["Mensaje"] =
+            "Imagen principal guardada correctamente.";
     }
     catch (Exception ex)
     {
-        _logger.LogError(ex, "Error al agregar la imagen");
-
-        TempData["Error"] = "No se pudo subir la foto.";
-
-        return RedirectToAction(
-            "Detalles",
-            "Inmueble",
-            new { id = InmuebleId }
-        );
+        _logger.LogError(ex,
+            "Error al guardar la imagen principal del inmueble {Id}",
+            InmuebleId);
+        TempData["Error"] =
+            "Ocurrió un error al guardar la imagen principal.";
     }
+
+    return RedirectToAction("Detalles", "Inmueble",
+        new { id = InmuebleId });
 }
-    [Authorize(Policy = "Administrador")]
-    public IActionResult Eliminar(int id)
-    {
-        try
-        {
-            _repoImagen.Baja(id);
-
-            TempData["Mensaje"] =
-                "La imagen ha sido eliminada correctamente.";
-
-            return RedirectToAction(nameof(Index));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error al eliminar la imagen");
-
-            TempData["Error"] =
-                "No se pudo completar la eliminación. " + ex.Message;
-
-            return RedirectToAction(nameof(Index));
-        }
-    }
-
+    
+    // AGREGAR OTRAS IMAGENES
+    [HttpPost]
     [Authorize]
-    public IActionResult Detalles(int id)
+[HttpPost]
+public async Task<IActionResult> OtrasImagenes(int InmuebleId, List<IFormFile> archivos)
 {
-    var inmueble = _repoImagen.ObtenerPorId(id);
-
-    if (inmueble == null)
+    try
     {
-        return NotFound();
-    }
-
-    var imagenes = _repoImagen.BuscarPorInmueble(id);
-
-    ViewBag.Imagenes = imagenes;
-
-    return View(inmueble);
-}
-
-    [Authorize]
-    public IActionResult BuscarPorInmueble(int inmuebleId)
-    {
-        try
+        if (archivos == null || archivos.Count == 0)
         {
-            var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
-            ViewBag.UserRole = userRole;
-
-            var imagenes = _repoImagen.BuscarPorInmueble(inmuebleId);
-
-            return View("Index", imagenes);
+            TempData["Error"] = "Debe seleccionar al menos una imagen.";
+            return RedirectToAction("Detalles", "Inmueble",
+                new { id = InmuebleId });
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error al buscar imágenes del inmueble");
 
+        string wwwPath = environment.WebRootPath;
+        string carpetaInmueble = Path.Combine(
+            wwwPath,
+            InmuebleId.ToString()
+        );
+        if (!Directory.Exists(carpetaInmueble))
+        {
+            Directory.CreateDirectory(carpetaInmueble);
+        }
+        int guardadas = 0;
+        int duplicadas = 0;
+        foreach (var archivo in archivos)
+        {
+            if (archivo == null || archivo.Length == 0)
+                continue;
+
+            string fileName = Path.GetFileName(archivo.FileName);
+            string url = $"/{InmuebleId}/{fileName}";
+            // Verificar si ya existe en la base de datos
+            var existe = _repoImagen.BuscarPorInmueble(InmuebleId)
+                .Any(x => x.ImgURL == url);
+            if (existe)
+            {
+                duplicadas++;
+                continue;
+            }
+            string fullPath = Path.Combine(carpetaInmueble, fileName);
+            // Evitar sobrescribir un archivo existente
+            if (System.IO.File.Exists(fullPath))
+            {
+                duplicadas++;
+                continue;
+            }
+            using (FileStream stream = new FileStream(
+                fullPath, FileMode.CreateNew))
+            {
+                await archivo.CopyToAsync(stream);
+            }
+            ImagenInmueble nuevaImagen = new ImagenInmueble
+            {
+                InmuebleId = InmuebleId,
+                ImgURL = url
+            };
+            _repoImagen.Alta(nuevaImagen);
+            guardadas++;
+        }
+        if (duplicadas > 0 && guardadas > 0)
+        {
+            TempData["Mensaje"] =
+                $"Se guardaron {guardadas} imágenes correctamente. " +
+                $"Se detectaron {duplicadas} imágenes duplicadas.";
+        }
+        else if (duplicadas > 0)
+        {
             TempData["Error"] =
-                "No se pudo completar la búsqueda. " + ex.Message;
-
-            return RedirectToAction(nameof(Index));
+                $"No se guardaron imágenes. Se detectaron {duplicadas} imágenes duplicadas.";
+        }
+        else
+        {
+            TempData["Mensaje"] =
+                $"Se guardaron {guardadas} imágenes correctamente.";
         }
     }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex,"Error al guardar las imágenes del inmueble {Id}", InmuebleId);
+        TempData["Error"] = "Ocurrió un error al guardar.";
+    }
+    return RedirectToAction("Detalles", "Inmueble",
+        new { id = InmuebleId });
+}
+    [Authorize]
+    [HttpPost]
+public IActionResult EliminarImagen(int id)
+{
+    try
+    {
+        // Buscar imagen por su ID
+        var imagen = _repoImagen.ObtenerPorId(id);
+        if (imagen != null)
+        {
+            int inmuebleId = imagen.InmuebleId;
+            // Obtener ruta física del archivo
+            if (!string.IsNullOrEmpty(imagen.ImgURL) &&
+                imagen.ImgURL != ImagenPorDefecto)
+            {
+                string wwwPath = environment.WebRootPath;
+                string rutaArchivo = Path.Combine(
+                    wwwPath,
+                    imagen.ImgURL.TrimStart('/')
+                        .Replace("/", Path.DirectorySeparatorChar.ToString())
+                );
+                // Eliminar archivo físico
+                if (System.IO.File.Exists(rutaArchivo))
+                {
+                    System.IO.File.Delete(rutaArchivo);
+                }
+            }
+            // Eliminar registro de la base de datos
+            _repoImagen.Baja(id);
+            // Si se eliminó la portada, registrar imagen por defecto
+            var imagenesRestantes = _repoImagen.BuscarPorInmueble(inmuebleId);
+            if (imagenesRestantes == null || !imagenesRestantes.Any())
+            {
+                ImagenInmueble imagenPorDefecto = new ImagenInmueble
+                {
+                    InmuebleId = inmuebleId,
+                    ImgURL = ImagenPorDefecto
+                };
+                _repoImagen.Alta(imagenPorDefecto);
+            }
+            TempData["Mensaje"] = "La imagen se eliminó correctamente.";
+            return RedirectToAction("Detalles", "Inmueble",
+                new { id = inmuebleId });
+        }
+
+        TempData["Error"] = "No se encontró la imagen.";
+        return RedirectToAction("Index", "Inmueble");
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error al eliminar la imagen {Id}", id);
+        TempData["Error"] = "Ocurrió un error al eliminar la imagen.";
+        return RedirectToAction("Index", "Inmueble");
+    }
+}
 }

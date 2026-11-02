@@ -14,6 +14,7 @@ public class InmuebleController : Controller
     private readonly RepositorioTipoInmueble _repoTipo;
     private readonly RepositorioUsoInmueble _repoUso;
     private readonly RepositorioReserva _reserva;
+    private readonly RepositorioImagenInmueble _ImagenInmueble;
 
 
     public InmuebleController(
@@ -22,7 +23,8 @@ public class InmuebleController : Controller
         RepositorioPropietario repoPropietario,
         RepositorioTipoInmueble repoTipo,
         RepositorioUsoInmueble repoUso,
-        RepositorioReserva reserva)
+        RepositorioReserva reserva,
+        RepositorioImagenInmueble imagenInmueble)
     {
         _logger = logger;
         _repoInmueble = repoInmueble;
@@ -30,6 +32,7 @@ public class InmuebleController : Controller
         _repoTipo = repoTipo;
         _repoUso = repoUso;
         _reserva = reserva;
+        _ImagenInmueble = imagenInmueble;
     }
 
     [Authorize]
@@ -171,9 +174,24 @@ public class InmuebleController : Controller
     [Authorize]
     public IActionResult Detalles(int id)
     {
-        var i = _repoInmueble.GetInmueble(id);
+        try
+        {
+            var i = _repoInmueble.GetInmueble(id);
+            ViewBag.Imagenes = _ImagenInmueble
+            .BuscarPorInmueble(id)
+            .OrderBy(i => i.Id)
+            .ToList();
+
 
         return View(i);
+        }
+        catch (System.Exception ex)
+        {
+            
+            _logger.LogError(ex, "Error al obtener los datos");
+            TempData["Error"] = "Ocurrió un error.";
+            return View(Index);
+        }
     }
 
     [Authorize]   
