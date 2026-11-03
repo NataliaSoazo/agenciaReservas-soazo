@@ -70,6 +70,15 @@
                     SI
                 </dd>                
             }
+             @if (Model.FechaCancelación != null)
+            {
+                <dt class="col-6">
+                    CANELADO EN FECHA
+                </dt>
+                <dd class="col-6">
+                    @Model.FechaCancelación.Value.ToString("dd/MM/yyyy")
+                </dd>                
+            }
         }
     </dl>
 </div>

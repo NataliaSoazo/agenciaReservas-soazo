@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 18-09-2026 a las 04:09:09
+-- Tiempo de generación: 03-11-2026 a las 04:43:08
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.0.30
 
@@ -24,6 +24,36 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `imageninmueble`
+--
+
+CREATE TABLE `imageninmueble` (
+  `Id` int(11) NOT NULL,
+  `InmuebleId` int(11) NOT NULL,
+  `ImgURL` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `imageninmueble`
+--
+
+INSERT INTO `imageninmueble` (`Id`, `InmuebleId`, `ImgURL`) VALUES
+(1, 1, '/1/ImagenDestacada.jpeg'),
+(3, 1, '/1/rl-135588635__1__720.jpg'),
+(5, 13, '/13/ImagenDestacada.jpeg'),
+(8, 12, '/12/ImagenDestacada.jpeg'),
+(10, 13, '/13/rl-135588635__1__720.jpg'),
+(11, 12, '/12/rl-135588635__1__720.jpg'),
+(12, 11, '/11/ImagenDestacada.jpg'),
+(13, 10, '/10/ImagenDestacada.jpeg'),
+(14, 10, '/10/rl-135588635__1__720.jpg'),
+(15, 10, '/10/OIP (4).jpeg'),
+(16, 10, '/10/OIP (5) - copia.jpeg'),
+(17, 6, '/6/ImagenDestacada.jpg');
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `inmuebles`
 --
 
@@ -38,7 +68,7 @@ CREATE TABLE `inmuebles` (
   `Longitud` varchar(20) NOT NULL,
   `Disponible` varchar(4) NOT NULL,
   `Propietarioid` int(11) NOT NULL,
-  `porcentual` int(3) NOT NULL
+  `porcentual` int(3) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -46,17 +76,18 @@ CREATE TABLE `inmuebles` (
 --
 
 INSERT INTO `inmuebles` (`Id`, `Direccion`, `Uso`, `Tipo`, `Cupo`, `Precio`, `Latitud`, `Longitud`, `Disponible`, `Propietarioid`, `porcentual`) VALUES
-(1, 'MAIPU 901', 'HABITACIONAL', 'LOCAL', 4, 325000, '1234567890', '0987654321', 'SI', 13, 20),
-(2, 'PEDERNERA 880', 'HABITACIONAL', 'LOCAL', 3, 125000, '1234567890', '0987654321', 'SI', 8, 20),
-(3, 'PEDERNERA 880', 'COMERCIAL', 'LOCAL', 3, 325000, '1234567890', '0987654321', 'SI', 15, 20),
-(4, 'SAN MARTIN 88', 'HABITACIONAL', 'DEPOSITO', 2, 325000, '1234567890', '0987654321', 'NO', 13, 20),
-(5, 'CHACO 34', 'HABITACIONAL', 'LOCAL', 2, 325000, '1234567890', '0987654321', 'SI', 13, 20),
-(6, 'CHACO 34', 'COMERCIAL', 'CASA', 3, 325000, '1234567890', '0987654321', 'SI', 13, 20),
+(1, 'MAIPU 901', 'HABITACIONAL', 'CASA', 4, 32000, '1234567890', '0987654321', 'SI', 13, 30),
+(2, 'PEDERNERA 880', 'HABITACIONAL', 'CASA', 3, 125000, '1234567890', '0987654321', 'SI', 8, 20),
+(3, 'PEDERNERA 880', 'HABITACIONAL', 'CASA', 3, 325000, '1234567890', '0987654321', 'SI', 15, 20),
+(4, 'SAN MARTIN 88', 'HABITACIONAL', 'CASA', 2, 325000, '1234567890', '0987654321', 'NO', 13, 20),
+(5, 'CHACO 34', 'HABITACIONAL', 'CASA', 2, 325000, '1234567890', '0987654321', 'SI', 13, 20),
+(6, 'CHACO 34', 'HABITACIONAL', 'CASA', 3, 325000, '1234567890', '0987654321', 'SI', 13, 20),
 (9, 'CASEROS 210', 'HABITACIONAL', 'CASA', 2, 50000, '1234567889', '123456789', 'SI', 15, 20),
 (10, 'MITRE 80', 'HABITACIONAL', 'CASA', 2, 50000, '1234567890', '0987654321', 'SI', 7, 20),
-(11, 'PEDERNERA 1201', 'HABITACIONAL', 'DEPARTAMENTO', 1, 50000, '1234567890', '0987654321', 'SI', 13, 20),
+(11, 'PEDERNERA 1201', 'HABITACIONAL', 'CASA', 1, 50000, '1234567890', '0987654321', 'SI', 13, 20),
 (12, 'LAFINUR 230', 'HABITACIONAL', 'CASA', 2, 50000, '1234567890', '0987654321', 'SI', 13, 20),
-(13, 'CHACO 06', 'COMERCIAL', 'CASA', 2, 325000, '1234567890', '0987654321', 'SI', 14, 20);
+(13, 'CHACO 06', 'HABITACIONAL', 'CASA', 2, 325000, '1234567890', '0987654321', 'SI', 14, 20),
+(14, 'RIVADAVIA 301', 'COMERCIAL', 'LOCAL', 10, 50000, '12345667233', '123456789900\'', 'SI', 15, 20);
 
 -- --------------------------------------------------------
 
@@ -88,20 +119,20 @@ INSERT INTO `inquilinos` (`Id`, `Nombre`, `Apellido`, `Dni`, `Email`, `Telefono`
 (16, 'XXXXXX', 'XXXXX', '5487298', 'XXXX@GMAIL.COM', '3446544321', 'OLASCOAGA 18', 'MENDOZA'),
 (18, 'JOAQUIN', 'VERA', '34652187', 'VJOAQUIN@GMAIL.COM', '2664536873', 'LAS VEGAS 18', 'SAN LUIS'),
 (19, 'DANIEL', 'SOSA', '47787567', 'DSOSA@GMAIL.COM', '2665345768', 'MAIPU 19', 'SAN LUIS'),
-(21, 'NATALIA', 'SOAZO', '31542891', 'NATALIA.S.LABORAL@GMAIL.COM', '2664344567', 'FLORIDA 50', 'LA PUNTA'),
 (23, 'ANAHI', 'CESPEDES', '24567765', 'ncespedes@gmail.com', '2664547689', 'Centenario 879', 'Sa'),
 (27, 'CELESTE', 'AUMADA', '49288549', 'CAUMADA@GMAIL.COM', '1324365432', 'SAN MARTIN 80', 'SAN LUIS'),
 (28, 'LORENZO', 'BENITEZ', '46876387', 'BLORENZ@GMAIL.COM', '2664536884', 'MITRE 223', 'SAN LUIS'),
 (29, 'ALBERTO', 'SOSA', '44444444', 'GHDHHG@GMAIL.COM', '265435366', 'SANTA FE 877', 'SAN LUIS'),
 (32, 'ALEJO', 'PEREZ', '2346519835', 'ALEJO@MAIL', '2664329754', 'SERRANA 76', 'SAN LUIS'),
-(33, 'LISANDRO', 'AGUILER', '45637892', 'AHGFKHLIA@MAIL', '2664873452', 'SAN MARTÍN 3405', 'SAN LUIS'),
+(33, 'LISANDRO', 'AGUILERA', '45637892', 'AHGFKHLIA@MAIL', '2664873452', 'SAN MARTÍN 3405', 'SAN LUIS'),
 (34, 'ANDRES', 'VEGA', '678776567', 'SA@GMAIL.COM', '2665654567', 'MITRE  82', 'SAN LUIS'),
 (35, 'TEODORO', 'BLANCO', '26675438', 'TEO@MAIL', '5367823145', 'CORDOBA', 'SAN LUIS'),
 (37, 'PRUDENCIO', 'ANDRADE', '42563417', 'JANDRADE@GMAIL.COM', '2554346578', 'LAVALLE 90', 'SAN LUIS'),
 (42, 'DAI', 'SAA', '47876567', '@GMAIL.COM', '26644547698', 'LAS HERAS 89', 'SAN LUIS'),
 (53, 'ANDRES', 'VEGA', '3987678', 'VE@GMAIL.COM', '2664567890', 'LOS HALCONES 23', 'SAN LUIS'),
 (54, 'ABEL', 'CASTILLO', '12345543', 'ABELITO@MAIL', '2664231768', 'MENDOZA', 'SAN LUIS'),
-(411, 'ANTONIO', 'CALDERÓN', '25635765', 'ANTO@IMAIL', '5482314985', 'BELGRANO', 'SAN LUIS');
+(411, 'ANTONIO', 'CALDERÓN', '25635765', 'ANTO@IMAIL', '5482314985', 'BELGRANO', 'SAN LUIS'),
+(413, 'ANTONIO', 'FERNANDEZ', '76543234', 'JACINTODONNADIE@GMAIL.COM', '5482314985', 'LAS HERAS 98', 'SAN LUIS');
 
 -- --------------------------------------------------------
 
@@ -117,7 +148,7 @@ CREATE TABLE `pagos` (
   `Concepto` varchar(255) NOT NULL,
   `Importe` decimal(10,2) NOT NULL,
   `Anulado` tinyint(1) NOT NULL DEFAULT 0,
-  `IdAlta` int(11) NOT NULL,
+  `IdAlta` int(11) DEFAULT NULL,
   `IdBaja` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -129,7 +160,17 @@ INSERT INTO `pagos` (`Id`, `Fecha`, `IdReserva`, `Modo`, `Concepto`, `Importe`, 
 (1, '2026-09-17', 5, 'EFECTIVO', 'PAGO TOTAL', 1125000.00, 0, 1, 0),
 (2, '2026-09-17', 6, 'TRANSFERENCIA', 'PAGO TOTAL', 2925000.00, 0, 3, 0),
 (3, '2026-09-17', 3, 'TARJETA', 'PAGO TOTAL', 650000.00, 0, 3, 0),
-(4, '2026-09-17', 7, 'TARJETA', 'PAGO TOTAL', 100000.00, 0, 3, 0);
+(4, '2026-09-17', 7, 'TARJETA', 'PAGO TOTAL', 100000.00, 0, 3, 0),
+(5, '2026-10-28', 12, 'EFECTIVO', 'PAGO TOTAL', 20000.00, 1, 3, 3),
+(6, '2026-10-28', 12, 'EFECTIVO', 'PAGO TOTAL', 80000.00, 0, 3, 0),
+(7, '2026-10-28', 10, 'TRANSFERENCIA', 'PAGO TOTAL', 150000.00, 1, 3, 3),
+(8, '2026-10-28', 11, 'TARJETA', 'PAGO TOTAL', 50000.00, 0, 3, 0),
+(9, '2026-10-28', 9, 'TARJETA', 'PAGO TOTAL', 100000.00, 0, 3, 0),
+(10, '2026-10-29', 13, 'EFECTIVO', 'RESERVA INICIAL', 80000.00, 0, 3, 0),
+(11, '2026-10-30', 15, 'TRANSFERENCIA', 'RESERVA INICIAL', 80000.00, 0, 3, 0),
+(12, '2026-10-30', 15, 'TRANSFERENCIA', 'MULTA POR CANCELACIÓN ANTICIPADA', 25000.00, 0, 3, 0),
+(13, '2026-11-02', 17, 'TARJETA', 'PAGO TOTAL', 100000.00, 0, 3, 0),
+(14, '2026-11-03', 10, 'TARJETA', 'PAGO TOTAL', 100000.00, 0, 3, 0);
 
 -- --------------------------------------------------------
 
@@ -185,21 +226,32 @@ CREATE TABLE `reservas` (
   `IdInmueble` int(11) NOT NULL,
   `Anulado` tinyint(1) NOT NULL DEFAULT 0,
   `IdBaja` int(11) DEFAULT NULL,
-  `IdAlta` int(11) NOT NULL
+  `IdAlta` int(11) NOT NULL,
+  `fechaCancelación` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `reservas`
 --
 
-INSERT INTO `reservas` (`Id`, `Fecha`, `FechaDesde`, `FechaHasta`, `Monto`, `IdInquilino`, `IdInmueble`, `Anulado`, `IdBaja`, `IdAlta`) VALUES
-(1, '2026-09-03', '2026-09-04', '2026-09-05', 130000, 7, 0, 0, 0, 3),
-(2, '2026-09-04', '2026-09-11', '2026-09-12', 50000, 6, 0, 0, 0, 3),
-(3, '2026-09-04', '2026-09-10', '2026-09-12', 55001, 14, 1, 0, 0, 3),
-(4, '2026-09-06', '2026-09-06', '2026-09-11', 350000, 14, 2, 1, 0, 3),
-(5, '2026-09-16', '2026-09-16', '2026-09-25', 450000, 14, 2, 0, 0, 3),
-(6, '2026-09-16', '2026-09-16', '2026-09-25', 150000, 7, 1, 0, 0, 3),
-(7, '2026-09-17', '2026-09-18', '2026-09-20', 250000, 23, 10, 0, 0, 3);
+INSERT INTO `reservas` (`Id`, `Fecha`, `FechaDesde`, `FechaHasta`, `Monto`, `IdInquilino`, `IdInmueble`, `Anulado`, `IdBaja`, `IdAlta`, `fechaCancelación`) VALUES
+(1, '2026-09-03', '2026-09-04', '2026-09-05', 130000, 7, 0, 0, 0, 3, NULL),
+(2, '2026-09-04', '2026-09-11', '2026-09-12', 50000, 6, 0, 0, 0, 3, NULL),
+(3, '2026-09-04', '2026-09-10', '2026-09-12', 55001, 14, 1, 0, 0, 3, NULL),
+(4, '2026-09-06', '2026-09-06', '2026-09-11', 350000, 14, 2, 0, 0, 3, NULL),
+(5, '2026-09-16', '2026-09-16', '2026-09-25', 450000, 14, 2, 0, 0, 3, NULL),
+(6, '2026-09-16', '2026-09-16', '2026-09-25', 150000, 7, 1, 0, 0, 3, NULL),
+(7, '2026-09-17', '2026-09-18', '2026-09-20', 250000, 23, 10, 0, 0, 3, NULL),
+(8, '2026-10-26', '2026-10-27', '2026-10-30', 975000, 33, 13, 0, 0, 3, NULL),
+(9, '2026-10-27', '2026-10-27', '2026-10-29', 100000, 37, 14, 0, 0, 3, NULL),
+(10, '2026-10-29', '2026-11-28', '2026-11-30', 100000, 23, 12, 0, 0, 3, NULL),
+(11, '2026-10-28', '2026-10-28', '2026-10-29', 50000, 28, 12, 0, 0, 3, NULL),
+(12, '2026-10-28', '2026-10-29', '2026-10-31', 100000, 411, 11, 0, 0, 3, NULL),
+(13, '2026-10-29', '2026-11-10', '2026-11-11', 50000, 37, 14, 0, 0, 3, NULL),
+(14, '2026-10-29', '2026-11-30', '2026-12-01', 50000, 23, 12, 1, 3, 3, NULL),
+(15, '2026-10-30', '2026-10-30', '2026-11-07', 400000, 413, 14, 0, 0, 3, '2026-11-01'),
+(16, '2026-10-30', '2026-11-07', '2026-11-08', 50000, 33, 14, 0, 0, 3, NULL),
+(17, '2026-11-02', '2026-11-04', '2026-11-06', 100000, 37, 9, 0, 0, 3, NULL);
 
 -- --------------------------------------------------------
 
@@ -236,10 +288,10 @@ CREATE TABLE `tipoinmuebles` (
 --
 
 INSERT INTO `tipoinmuebles` (`Tipo`, `Id`) VALUES
-('LOCAL', 1),
-('DEPOSITO', 2),
 ('CASA', 3),
-('DEPARTAMENTO', 4);
+('DEPARTAMENTO', 4),
+('DEPOSITO', 2),
+('LOCAL', 1);
 
 -- --------------------------------------------------------
 
@@ -257,8 +309,8 @@ CREATE TABLE `usoinmuebles` (
 --
 
 INSERT INTO `usoinmuebles` (`Uso`, `Id`) VALUES
-('HABITACIONAL', 1),
-('COMERCIAL', 2);
+('COMERCIAL', 2),
+('HABITACIONAL', 1);
 
 -- --------------------------------------------------------
 
@@ -281,7 +333,7 @@ CREATE TABLE `usuarios` (
 --
 
 INSERT INTO `usuarios` (`Id`, `Nombre`, `Apellido`, `Correo`, `Clave`, `Rol`, `AvatarURL`) VALUES
-(1, 'ADRIAN ', 'LOPEZ', 'adrian@gmail.com', 'acZaSPRv70HvJDWwjGs/+MowxfUra9L3T4oMkjSPG/E=', 1, '/ImgSubidas\\anonimo.jpg'),
+(1, 'ADRIAN ', 'LOPEZ', 'adrian@gmail.com', 'acZaSPRv70HvJDWwjGs/+MowxfUra9L3T4oMkjSPG/E=', 1, '/ImgSubidas\\8av_1.jpg'),
 (3, 'NATALIA', 'SOAZO', 'natalia.s.laboral@gmail.com', 'acZaSPRv70HvJDWwjGs/+MowxfUra9L3T4oMkjSPG/E=', 2, '/ImgSubidas\\2av_3.jpeg');
 
 --
@@ -289,11 +341,20 @@ INSERT INTO `usuarios` (`Id`, `Nombre`, `Apellido`, `Correo`, `Clave`, `Rol`, `A
 --
 
 --
+-- Indices de la tabla `imageninmueble`
+--
+ALTER TABLE `imageninmueble`
+  ADD PRIMARY KEY (`Id`),
+  ADD KEY `IX_ImagenInmueble_InmuebleId` (`InmuebleId`);
+
+--
 -- Indices de la tabla `inmuebles`
 --
 ALTER TABLE `inmuebles`
   ADD PRIMARY KEY (`Id`),
-  ADD KEY `Propietarioid` (`Propietarioid`);
+  ADD KEY `Propietarioid` (`Propietarioid`),
+  ADD KEY `Tipo` (`Tipo`),
+  ADD KEY `Uso` (`Uso`);
 
 --
 -- Indices de la tabla `inquilinos`
@@ -306,7 +367,9 @@ ALTER TABLE `inquilinos`
 -- Indices de la tabla `pagos`
 --
 ALTER TABLE `pagos`
-  ADD PRIMARY KEY (`Id`);
+  ADD PRIMARY KEY (`Id`),
+  ADD KEY `IdAlta` (`IdAlta`),
+  ADD KEY `IdBaja` (`IdBaja`);
 
 --
 -- Indices de la tabla `propietarios`
@@ -321,19 +384,23 @@ ALTER TABLE `propietarios`
 ALTER TABLE `reservas`
   ADD PRIMARY KEY (`Id`),
   ADD KEY `IdInmueble` (`IdInmueble`),
-  ADD KEY `IdInquilino` (`IdInquilino`);
+  ADD KEY `IdInquilino` (`IdInquilino`),
+  ADD KEY `IdBaja` (`IdBaja`),
+  ADD KEY `IdAlta` (`IdAlta`);
 
 --
 -- Indices de la tabla `tipoinmuebles`
 --
 ALTER TABLE `tipoinmuebles`
-  ADD PRIMARY KEY (`Id`);
+  ADD PRIMARY KEY (`Id`),
+  ADD UNIQUE KEY `Tipo` (`Tipo`);
 
 --
 -- Indices de la tabla `usoinmuebles`
 --
 ALTER TABLE `usoinmuebles`
-  ADD PRIMARY KEY (`Id`);
+  ADD PRIMARY KEY (`Id`),
+  ADD UNIQUE KEY `Uso` (`Uso`);
 
 --
 -- Indices de la tabla `usuarios`
@@ -347,34 +414,40 @@ ALTER TABLE `usuarios`
 --
 
 --
+-- AUTO_INCREMENT de la tabla `imageninmueble`
+--
+ALTER TABLE `imageninmueble`
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+
+--
 -- AUTO_INCREMENT de la tabla `inmuebles`
 --
 ALTER TABLE `inmuebles`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT de la tabla `inquilinos`
 --
 ALTER TABLE `inquilinos`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=412;
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=414;
 
 --
 -- AUTO_INCREMENT de la tabla `pagos`
 --
 ALTER TABLE `pagos`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT de la tabla `propietarios`
 --
 ALTER TABLE `propietarios`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT de la tabla `reservas`
 --
 ALTER TABLE `reservas`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT de la tabla `tipoinmuebles`
@@ -397,6 +470,12 @@ ALTER TABLE `usuarios`
 --
 -- Restricciones para tablas volcadas
 --
+
+--
+-- Filtros para la tabla `imageninmueble`
+--
+ALTER TABLE `imageninmueble`
+  ADD CONSTRAINT `fk_imageninmueble_inmueble` FOREIGN KEY (`InmuebleId`) REFERENCES `inmuebles` (`Id`) ON DELETE CASCADE;
 
 --
 -- Filtros para la tabla `inmuebles`

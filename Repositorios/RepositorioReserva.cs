@@ -135,7 +135,7 @@ public class RepositorioReserva:RepositorioBase
 
     return reservas;
 }
-public int GetCantidadReservas()
+    public int GetCantidadReservas()
 {    int cantidad = 0;
 
     using (var connection = new MySqlConnection(connectionString))
@@ -238,6 +238,7 @@ public int GetCantidadReservas()
                 r.{nameof(Reserva.IdAlta)},
                 r.{nameof(Reserva.IdBaja)},
                 r.{nameof(Reserva.Anulado)},
+                r.{nameof(Reserva.FechaCancelación)},
                 p.{nameof(Inquilino.Nombre)},
                 p.{nameof(Inquilino.Apellido)},
                 m.{nameof(Inmueble.Direccion)},
@@ -272,6 +273,7 @@ public int GetCantidadReservas()
                         Anulado = reader.GetBoolean(nameof(Reserva.Anulado)),
                         IdAlta = reader.GetInt32(reader.GetOrdinal(nameof(Pago.IdAlta))),
                         IdBaja = reader.GetInt32(reader.GetOrdinal(nameof(Pago.IdBaja))),
+                        FechaCancelación= reader.GetDateTime(nameof(Reserva.FechaCancelación)),
                         Arrendatario = new Inquilino
                         {
                             Nombre = reader.GetString(nameof(Inquilino.Nombre)),
@@ -324,21 +326,21 @@ public int GetCantidadReservas()
         }
     }
 }
-
-    public int AnularReserva(int id ,int idUsuario)
+    // ANULAR NO EQUIVALE A CANCELAR, LA ANULACION REQUIERE ID DEL USUARIO
+    public int AnularReserva(int id, int idUsuario)
     {
         using (var connection = new MySqlConnection(connectionString))
         {
             string sql = $@"
                 UPDATE reservas
-                SET {nameof(Reserva.Anulado)} = true
-                {nameof(Reserva.IdBaja)} = @idUsuario;
+                SET {nameof(Reserva.Anulado)} = 1,
+                {nameof(Reserva.IdBaja)} = @idUsuario
                 WHERE {nameof(Reserva.Id)} = @id;";
 
             using (var command = new MySqlCommand(sql, connection))
             {
                 command.Parameters.AddWithValue("@id", id);
-                command.Parameters.AddWithValue($"@IdBaja", idUsuario); 
+                command.Parameters.AddWithValue($"@idUsuario", idUsuario); 
                 connection.Open();
 
                 int filasAfectadas = command.ExecuteNonQuery();
@@ -349,8 +351,6 @@ public int GetCantidadReservas()
             }
         }
     }
-
-
     public bool ValidarReserva(Reserva reserva)
     {
         if (reserva.FechaDesde < reserva.FechaHasta)
@@ -362,41 +362,41 @@ public int GetCantidadReservas()
             return false;
         }
     }
-        public bool InmuebleDisponible(
+    public bool InmuebleDisponible(
          int idInmueble,
          DateTime fechaDesde,
          DateTime fechaHasta,
          int idReserva = 0)
-{
-    using (var connection = new MySqlConnection(connectionString))
     {
-        string sql = @"
-            SELECT COUNT(*)
-            FROM reservas
-            WHERE IdInmueble = @idInmueble
-              AND Anulado = false
-              AND FechaDesde < @fechaHasta
-              AND FechaHasta > @fechaDesde
-              AND Id <> @idReserva;";
-
-        using (var command = new MySqlCommand(sql, connection))
+        using (var connection = new MySqlConnection(connectionString))
         {
-            command.Parameters.AddWithValue("@idInmueble", idInmueble);
-            command.Parameters.AddWithValue("@fechaDesde", fechaDesde);
-            command.Parameters.AddWithValue("@fechaHasta", fechaHasta);
-            command.Parameters.AddWithValue("@idReserva", idReserva);
+            string sql = @"
+                SELECT COUNT(*)
+                FROM reservas
+                WHERE IdInmueble = @idInmueble
+                  AND Anulado = false
+                  AND FechaDesde < @fechaHasta
+                  AND FechaHasta > @fechaDesde
+                  AND Id <> @idReserva;";
 
-            connection.Open();
+            using (var command = new MySqlCommand(sql, connection))
+            {
+                command.Parameters.AddWithValue("@idInmueble", idInmueble);
+                command.Parameters.AddWithValue("@fechaDesde", fechaDesde);
+                command.Parameters.AddWithValue("@fechaHasta", fechaHasta);
+                command.Parameters.AddWithValue("@idReserva", idReserva);
 
-            int cantidad = Convert.ToInt32(command.ExecuteScalar());
+                connection.Open();
 
-            return cantidad == 0;
+                int cantidad = Convert.ToInt32(command.ExecuteScalar());
+
+                return cantidad == 0;
+            }
         }
     }
-}
     // esta consulta se asegura que las reservas entre esas fechas se encuentre vigentes
     // no es una consulta de comienzo y fin de  la reserva
-    public IList<Reserva> GetReservasVigentes(DateTime fechaDesde, DateTime fechaHasta)
+public IList<Reserva> GetReservasVigentes(DateTime fechaDesde, DateTime fechaHasta)
 {
     var reservas = new List<Reserva>();
 
@@ -478,7 +478,7 @@ public int GetCantidadReservas()
 
     return reservas;
 }
-
+// VERIFICA LAS RESERVAS QUE TERMINAN EN X DIAS
 public IList<Reserva> TerminanEnXdias(DateTime fecha)
 {
     var reservas = new List<Reserva>();
@@ -555,4 +555,29 @@ public IList<Reserva> TerminanEnXdias(DateTime fecha)
 
     return reservas;
 }
+
+public int CancelarReserva(int id)
+    {
+        using (var connection = new MySqlConnection(connectionString))
+        {
+            string sql = $@"
+                UPDATE reservas
+                SET {nameof(Reserva.FechaCancelación)} =  CURDATE()
+                WHERE {nameof(Reserva.Id)} = @id; UPDATE reservas
+                AND {nameof(Reserva.FechaCancelación)} IS NULL;";
+
+            using (var command = new MySqlCommand(sql, connection))
+            {
+                command.Parameters.AddWithValue("@id", id);
+
+                connection.Open();
+
+                int filasAfectadas = command.ExecuteNonQuery();
+
+                connection.Close();
+
+                return filasAfectadas;
+            }
+        }
+    }
 }

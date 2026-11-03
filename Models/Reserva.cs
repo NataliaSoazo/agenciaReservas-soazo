@@ -48,5 +48,5 @@ public class Reserva
         public int? IdBaja { get; set; } 
         [DataType(DataType.Date)]
         [Display(Name = " FECHA CULMINACIÓN")]
-        public DateTime FechaCancelación { get; set; }
+        public DateTime? FechaCancelación { get; set; }
     }

@@ -87,7 +87,7 @@ public class PagoController : Controller
         var dias =( reserva.FechaHasta- reserva.FechaDesde).Days;
         var APagar = reserva.DatoInmueble.Precio *dias;
         var porcentual = (APagar * reserva.DatoInmueble.Porcentual)/100;
-        List<string> concepto = new List<string>{"RESERVA INICIAL","PAGO TOTAL", "MULTA"};
+        List<string> concepto = new List<string>{"RESERVA INICIAL","PAGO TOTAL"};
         IList<Pago> lista = new List<Pago>();
         lista = _repositorio.GetPagos();
             lista = lista.Where(x => x.IdReserva == id).ToList();
@@ -215,6 +215,30 @@ public class PagoController : Controller
                return RedirectToAction(nameof(Index));
         }
     }
+// UNA VEZ PAGADA LA MULTA SE CONCRETA LA CANCELACION DE LA RESERVA
+public IActionResult ConcretarCancelacion(Pago pago, int IdReserva)
+    {
+        var usuario = _usuario.ObtenerPorEmail(User.Identity.Name);
+        try
+        {
+            if(pago == null)
+            {
+                TempData["Error"] = "No se puede cancelar por pago inexistente.";
+                return View();
+            }
+                pago.IdAlta = usuario.Id;
+                pago.IdBaja = 0;
+                _repositorio.AltaPago(pago);
+                _reserva.CancelarReserva(IdReserva);
+                TempData["Mensaje"] = "Se ha concretado la cancelación de reserva y su multa.";
+                return RedirectToAction(nameof(AgregarPago),new { id = pago.IdReserva });
+        }
+        catch (System.Exception ex)
+        {
+            _logger.LogError(ex, "Errores en la operación");
+            TempData["Error"] = "No se pudo completar la operación.";
+            return RedirectToAction(nameof(Index));
 
-
+        }
+    }
 }

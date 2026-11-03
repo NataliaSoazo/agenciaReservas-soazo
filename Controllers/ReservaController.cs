@@ -314,7 +314,8 @@ public class ReservaController : Controller
     }
     }
 
-
+    // SOLO HACE UNA SOLICITUD DE CANCELACIÓN, PERO NO SE EJECUTARÁ 
+    //HASTA QUE SE PAGUE LA MULTA (VER PAGOS, CONCRETAR CANCELACION)
     [HttpPost]
     public IActionResult SolicitarCancelacion(int id, DateTime fechaCulminacion)
         {

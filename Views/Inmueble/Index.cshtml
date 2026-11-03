@@ -1,5 +1,7 @@
 @model IEnumerable<Inmueble>
-
+@{
+    var rolUsuario = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
+}
 
 @{
     ViewData["Title"] = "Index";
@@ -117,9 +119,11 @@
                                 style="font-size:25px;" id="detalles"></i></a>
                             <a asp-action="Editar" asp-route-id=@item.Id title="Editar item"><i class="fa fa-pencil "
                                 style="font-size:25px;" id="edi"></i></a>
+                            @if (User.HasClaim("Rol", "ADMINISTRADOR"))
+{
                             <a href="#" onclick="eliminar('@item.Id', '@item.Direccion')" title="Eliminar">                                
                             <i class="fa fa-trash" style="font-size:25px;" id="eli"></i></a>
-
+                            }
                         </td>
                 </tr>
              }

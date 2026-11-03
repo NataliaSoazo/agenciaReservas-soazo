@@ -12,7 +12,7 @@
         <input type="submit" value="buscar" class="btn btn-secondary">
     </p>
 </form>
-<div class="col-8 container table-wrapper">
+<div class="col-10 container table-wrapper">
 <table class="table" id="table">
     <thead>
         <tr>
@@ -63,11 +63,11 @@
                     <a href="#" onclick="editarPago('@item.Id','@item.Concepto')" title="Editar el concepto de pago"><i class="fa fa-pencil " style="font-size:25px;"
                             id="edi"></i></a>
                     @if (ViewBag.UserRole == "ADMINISTRADOR")
-                    {
+                        {
                         <a href="#" onclick="eliminar('@item.Id')" title="Anular">
                             <i class="fa fa-trash" style="font-size:25px;" id="eli"></i>
                         </a>
-                    }
+                        }
                 </td>
             </tr>
         }
@@ -219,7 +219,6 @@
 
                                 <option value="RESERVA INICIAL">RESERVA INICIAL</option>
                                 <option value="PAGO TOTAL">PAGO TOTAL</option>
-                                <option value="MULTA">MULTA</option>
                             </select>
                         </div>
 

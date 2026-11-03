@@ -10,7 +10,7 @@ namespace agenciaReservas_soazo.Controllers;
 public class ImagenInmuebleController : Controller
 {
     private readonly ILogger<ImagenInmuebleController> _logger;   
-    private readonly RepositorioImagenInmueble _repoImagen
+    private readonly RepositorioImagenInmueble _repoImagen;
     private readonly IWebHostEnvironment environment;
     private const string ImagenPorDefecto = "/AnonimoInmueble.png";
 

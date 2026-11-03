@@ -72,7 +72,7 @@ var pagos = ViewBag.Pagos as List<agenciaReservas_soazo.Models.Pago>
                                             id="detalles"></i></a>
                                     <a href="#" onclick="editarPago('@item.Id','@item.Concepto')" title="Editar el concepto de pago"><i class="fa fa-pencil " style="font-size:25px;"
                                         id="edi"></i></a>
-                                    @if (ViewBag.UserRole == "ADMINISTRADOR")
+                                    @if (User.HasClaim("Rol", "ADMINISTRADOR"))
                                         {
                                             <a href="#" onclick="eliminar('@item.Id')" title="Anular">
                                                 <i class="fa fa-trash" style="font-size:25px;" id="eli"></i>
@@ -326,7 +326,6 @@ var pagos = ViewBag.Pagos as List<agenciaReservas_soazo.Models.Pago>
 
                                 <option value="RESERVA INICIAL">RESERVA INICIAL</option>
                                 <option value="PAGO TOTAL">PAGO TOTAL</option>
-                                <option value="MULTA">MULTA</option>
                             </select>
                         </div>
 
@@ -352,11 +351,59 @@ var pagos = ViewBag.Pagos as List<agenciaReservas_soazo.Models.Pago>
     </form>
 
 </div>
+
+<div class="modal fade"
+     id="modal_eliminar_Pago"
+     tabindex="-1"
+     aria-labelledby="tituloEliminarPago"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <form asp-action="Eliminar" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="tituloEliminarPago">
+                        Confirmar anulación
+                    </h5>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Cerrar">
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden"
+                           name="id"
+                           id="Pago_eliminar_id" />
+
+                    <p>
+                        ¿Estás seguro de que deseas anular el pago
+                        <strong id="Pago_eliminar_texto"></strong>?
+                    </p>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-danger">
+                        Confirmar anulación
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
 @section Scripts {
-    
-@{
-await Html.RenderPartialAsync("_ValidationScriptsPartial");
-}
 <script>
         function editarPago(id, concepto) {
             document.getElementById("Pago_editar_id").value = id;
@@ -365,5 +412,15 @@ await Html.RenderPartialAsync("_ValidationScriptsPartial");
             const modal = bootstrap.Modal.getOrCreateInstance(modalElemento);
             modal.show();
     }
+</script>
+<script>
+        function eliminar(id) {
+
+            document.getElementById("Pago_eliminar_id").value = id;
+            document.getElementById("Pago_eliminar_texto").innerText = id;
+            const modalElemento = document.getElementById("modal_eliminar_Pago");
+            const modal = bootstrap.Modal.getOrCreateInstance(modalElemento);
+            modal.show();
+}
 </script>
 }
